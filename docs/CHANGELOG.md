@@ -3,6 +3,17 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.12.0 —— 2026-09-08
+
+### 前端技术栈切换立项（ADR-012 / CHANGE-002 / Task-003）
+
+- **用户技术方案变更**：前端采用 Vue3 生态 → PM 可行性评估（REST 契约零影响、M001 前端规模小（app.js 431 行/6 视图）、Task-002 前端 UI 未实现 = 唯一零浪费窗口、FastAPI 静态挂载点与框架解耦）→ 三决策点逐项确认：**Q1 组件库 = Vant 4 纯移动库**（用户原点名 Element Plus，PM 提示桌面密度与 ADR-004「移动优先」冲突后改选）/ **Q2 = TypeScript**（DTO 契约对齐）/ **Q3 = 独立前置任务 + Task-002 后段接轨**
+- **ADR-012 Accepted（PD-025）**：Vue3 + Vite + TypeScript + Vant 4 + Vue Router(hash) + Pinia + axios 错误语义映射（400/401/403/404/409/413/415/422）；`frontend/src` 工程化，FastAPI 托管构建产物 `dist/`（单进程形态/ASM-010 不变）；零构建三文件退役；工作量基线 3.5~5.5 人日（含 TS +0.5~1 缓冲）
+- **CHANGE-002 立项（Executing）+ Task-003 签发（AGENT-M001，任务书 `docs/agents/Task-003.md`）**：Vue 工程搭建 + M001 6 视图功能等价迁移 + 托管切换 + 退役清理 + 冒烟/pytest 89 回归 + M001 DESIGN/FILES/SUMMARY 与 ARCHITECTURE 回填；`frontend/**` 任务期 AGENT-M001 独占写权
+- **Task-002 接轨注**：M002 前端基础 UI 段后移——Task-003 验收后按新栈（Vue 组件）实现；AGENT-M002 后端编码并行不受阻
+- 同步：`PROJECT_STATUS.md` → **v0.12.0**（PD-025、O-6 关闭、下一步行动）、`AGENT_REGISTRY.md`（AGENT-M001 Task-003 Active）、`ROADMAP.md`（前端统一栈注）、`INDEX.md`
+- 下一步：Task-003（前端切换）与 Task-002 后端并行执行 → Task-002 前端段新栈接轨 → M002 模块级 DoD 复核 → M-A 随 M003 全量验收
+
 ## v0.11.0 —— 2026-09-08
 
 ### CHANGE-001 完成（M001 定稿 v0.1.2）+ Task-002 正式签发（M002 编码启动）

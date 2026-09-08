@@ -3,7 +3,8 @@
 - **Task ID**：Task-002 ｜ **Agent**：AGENT-M002 ｜ **Module**：M002（作业图片采集与归属）
 - **签发**：Project Master，2026-09-08 ｜ **状态**：**Active（编码中）**
 - **前置**：CHANGE-001 **已完成/Applied**（M001 v0.1.2 Stable，2026-09-08 PM 复核 APPROVED）；M001 依赖侧接口已就绪
-- **任务书登记**：`docs/AGENT_REGISTRY.md`（AGENT-M002 行）｜ 验收里程碑：ROADMAP **M-A（学生自主采集闭环）**
+- **任务书登记**：`docs/AGENT_REGISTRY.md`（AGENT-M002 行）｜ 验收：**M002 模块级 DoD（本任务自含）**；域 **M-A 全量验收随 M003（布置单识别 + 真实三方）到位后统一执行**（ROADMAP 顺序不变，2026-09-08 PM 审计 grill 定稿）
+- **前端技术栈接轨注（2026-09-08，ADR-012/CHANGE-002/Task-003）**：本任务前端基础 UI 改为按**新前端栈**（Vue3 + Vite + TypeScript + Vant 4，`frontend/src`）实现；依赖 **Task-003（AGENT-M001）** 验收后接轨——Task-003 Active 期间 AGENT-M002 **不触碰 `frontend/`**，后端模块编码并行不受阻
 
 ## 1. Objective（目标）
 
@@ -26,7 +27,7 @@
 | REST API | `API-M002-001~006`（Frozen 契约断言实现；双主体：student 仅本人、family 可代传本家任一生） |
 | 内部接口 | M002 服务接口供 M003/M007 后续调用（照片证据供给、待处理队列、suggestion 写入口——**M003 未编码，本任务只交付写侧与状态机，AI 建议触发留 M003 契约轮**） |
 | 测试 | 新增 M002 用例（质检规则矩阵/状态机迁移/越权矩阵/存储与撤销/事务）+ 既有 **89 项 M001 测试不回归**，全部通过 |
-| 前端基础 UI | `frontend/`：照片上传（任务学科作业段选择 or 不预选混合上传）、逐图质检结果、照片列表与归属确认/驳回/撤销的最小可用页面（复用 M001 双主体登录与会话）；O-2/O-6 完整体验打磨可留后续前端任务 |
+| 前端基础 UI | `frontend/src`（**新栈：Vue3 + Vite + TS + Vant 4，Task-003 验收后接轨实现**）：照片上传（任务学科作业段选择 or 不预选混合上传）、逐图质检结果、照片列表与归属确认/驳回/撤销的最小可用页面（复用 M001 双主体登录与会话）；O-2/O-6 完整体验打磨可留后续前端任务 |
 | 文档 | M002 九件套按落盘实况回填 + `MODULE_CHANGELOG.md` 记录 + `DATA_MODEL.md`（DATA-003 字段级）同步 |
 
 ### 3.2 Allowed-Files（可写）
@@ -54,8 +55,9 @@
 - 代码按 §3.1 落地，lint 无错误；`.venv` 下 `pytest` 全绿（既有 89 + M002 新增）
 - API-M002-001~006 契约断言（成功/失败/越权语义 400/401/403/404/409/413/415/422）
 - 手工冒烟记录（含伪造不合格图 → 质检拒绝原因逐图、归属流转 assigned 后任务 in_progress）
+- 前端基础 UI 冒烟记录（新栈实现，Task-003 验收后接轨）：复用 M001 双主体会话完成「上传 → 逐图质检报告 → 兜底归属（assign/reject）」的最小可用页面演示（Mock 模式；O-2/O-6 完整体验打磨留后续 UI 任务）
 - M002 九件套回填 + MODULE_CHANGELOG + DATA_MODEL(DATA-003) 同步
-- 完成后：PM 按 ROADMAP **M-A 里程碑 DoD 验收**（涉及 M001 变更 + M002 采集闭环）
+- 完成后：提交 PM 按 **M002 模块 DoD 复核**（域 M-A 全量验收——布置登记拍照识别 + 真实三方 AI 模式——随 M003 到位后统一执行，ROADMAP 顺序不变）
 
 ## 6. Acceptance Criteria（DoD，AGENT_GUIDE §6）
 
@@ -66,6 +68,9 @@
 - [ ] M003 建议写入口（`suggestion_json`/`consumed_at`）与消费后不可变保障已实现（AI 建议触发留 M003 契约轮）
 - [ ] 既有 89 项测试全绿 + M002 新增用例通过（backend/.venv 跑 pytest）
 - [ ] M002 九件套回填（含 MODULE_CHANGELOG）并同步 DATA_MODEL/Registry 状态
-- [ ] PM 按 ROADMAP M-A 里程碑复核后 Task-002 APPROVED → M002 转 Testing
+- [ ] 前端基础 UI（新栈实现，Task-003 验收后接轨）最小可用页面演示通过（上传 → 逐图质检报告 → 兜底归属；完整体验 O-2/O-6 留后续，不属本 DoD）
+- [ ] PM 按 **M002 模块 DoD** 复核 APPROVED → Task-002 关闭 → **M002 定稿 v0.3.0 Stable（维护态，循 M001 前例；复核发现缺陷 → 修复回路后再 APPROVED）**；域 **M-A 全量验收随 M003 到位后执行**（ROADMAP 顺序不变）
 
 > 注：M002 契约已 Frozen，DoD 不存在冻结面变更；编码中出现契约未覆盖问题 → 先记 TD/以 Request 提交 PM，禁止自行扩大契约。
+
+> **PM 审计批注（2026-09-08 grill 定稿，用户逐项确认）**：原 DoD「按 M-A 验收 → M002 转 Testing」修订为 **M002 模块级复核 → 直定稿 v0.3.0 Stable**——因域 M-A 全量（场景 1/2 布置单拍照识别 + 真实三方 AI 模式）依赖 M003（未契约），Task-002 以 M002 模块 DoD + 前端基础 UI 冒烟独立收口；M002 依赖侧接口（`get_task_group`/`can_accept_photo`/`mark_in_progress`/`AuthContext`）经 PM 核查**全部已落地**。

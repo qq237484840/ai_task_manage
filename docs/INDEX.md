@@ -34,8 +34,8 @@ Contract → API → Data → 必要 Code
 | `AGENT_GUIDE.md` | Agent | 模块 Agent 操作规范/交付物 | 已启用 |
 | `DEVELOPMENT_GUIDE.md` | 治理 | 开发流程/变更治理/评审 | 已启用 |
 | `ID_GOVERNANCE.md` | 治理 | ID 分配规则与唯一性约束 | 已启用 |
-| `PROJECT_STATUS.md` | 状态 | 当前阶段/风险/待决 | **v0.11.0**（CHANGE-001 Applied，M001 v0.1.2；M002 Task-002 编码中） |
-| `CHANGELOG.md` | 记录 | 变更历史 | **v0.11.0** |
+| `PROJECT_STATUS.md` | 状态 | 当前阶段/风险/待决 | **v0.12.0**（ADR-012 前端栈切换 + Task-003 签发；M002 Task-002 编码并行） |
+| `CHANGELOG.md` | 记录 | 变更历史 | **v0.12.0** |
 | `ASSUMPTIONS.md` | 记录 | 假设登记 | ASM-001~011 |
 | `RISK_REGISTER.md` | 记录 | 风险登记 | 已启用（RISK-001~009） |
 | `requirements/REQ-001~009.md` | 需求 | 单条需求详情 | Approved（2026-09-08） |
@@ -50,13 +50,15 @@ Contract → API → Data → 必要 Code
 | `adr/ADR-009.md` | ADR | 两级主体身份：家庭账号家长 + 学生子账号（PD-016） | Accepted（落地随 ACR-001） |
 | `adr/ADR-010.md` | ADR | 内容级主客观全判 + 端到端直判（PD-018/021/022，取代 ADR-006） | **Accepted**（2026-09-08 随 ACR-002） |
 | `adr/ADR-011.md` | ADR | AI Provider 真实三方默认，Mock 降级（PD-019，取代 ADR-007） | **Accepted**（2026-09-08 随 ACR-002） |
-| `modules/M001/` | 模块九件套 | M001 作业任务管理 | **Stable v0.1.2**（CHANGE-001 Applied，2026-09-08；API-M001-013~017 Active） |
-| `modules/M002/` | 模块九件套 | M002 作业图片采集 | **Developing**（契约 **v0.3.0 Frozen**，2026-09-08 用户批准；Task-002 编码中） |
+| `adr/ADR-012.md` | ADR | 前端技术栈统一：Vue3+Vite+TS+Vant 4，FastAPI 托管 dist（PD-025） | **Accepted**（2026-09-08） |
+| `modules/M001/` | 模块九件套 | M001 作业任务管理 | **Stable v0.1.2**（CHANGE-001 Applied，2026-09-08；API-M001-013~017 Active；前端迁移随 Task-003） |
+| `modules/M002/` | 模块九件套 | M002 作业图片采集 | **Developing**（契约 **v0.3.0 Frozen**，2026-09-08 用户批准；Task-002 编码中，前端段待 Task-003 后接轨） |
 | `changes/CR-001.md` | 变更 | 任务=多学科作业登记单容器 + `group_no`（PD-014/015） | **Approved**（2026-09-08） |
 | `changes/ACR-001.md` | 变更 | 两级主体认证（家长 + 学生子账号，ADR-009/PD-016） | **Approved**（2026-09-08） |
 | `changes/CR-002.md` | 变更 | 内容级判定链数据面重构（布置登记识别/逐题判定/报告复核定稿） | **Approved**（2026-09-08，v0.9.0） |
 | `changes/ACR-002.md` | 变更 | 判定与 Provider 架构重构（ADR-006/007 Superseded） | **Approved**（2026-09-08，v0.9.0） |
 | `changes/CHANGE-001.md` | 变更执行 | CR-001/CR-002/ACR-001/ACR-002 合并执行（M001） | **已完成/Applied**（2026-09-08 PM 复核 APPROVED） |
+| `changes/CHANGE-002.md` | 变更执行 | 前端技术栈切换（ADR-012：零构建 H5 → Vue3+Vite+TS+Vant 4） | **执行中（Executing）**（Task-003，2026-09-08） |
 
 ## ID 命名空间速查
 
@@ -84,9 +86,9 @@ Contract → API → Data → 必要 Code
 | --- | --- | --- |
 | `docs/requirements/REQ-*.md` | 单个需求详情 | 已启用（REQ-001~008，新增需求时继续建） |
 | `docs/domains/D0xx/` | 领域文档 | 系统规模扩大需要 Domain 层时 |
-| `docs/modules/Mxxx/` | 模块九件套 | 已启用（M001 **Stable v0.1.2**；M002 Developing/Frozen v0.3.0，Task-002 编码中；M003 起按顺序创建，前序验收后） |
-| `docs/changes/` | CR/ACR/CHANGE/BUG 记录 | 已启用（CR-001/002、ACR-001/002 Approved → **CHANGE-001 已完成/Applied**） |
-| `docs/agents/` | Agent 任务单/过程记录 | 已启用（**Task-002 已签发**，AGENT-M002） |
+| `docs/modules/Mxxx/` | 模块九件套 | 已启用（M001 **Stable v0.1.2**；M002 Developing/Frozen v0.3.0，Task-002 编码中（前端段待 Task-003 后接轨）；M003 起按顺序创建，前序验收后） |
+| `docs/changes/` | CR/ACR/CHANGE/BUG 记录 | 已启用（CR-001/002、ACR-001/002 Approved → **CHANGE-001 已完成/Applied**、**CHANGE-002 执行中**） |
+| `docs/agents/` | Agent 任务单/过程记录 | 已启用（**Task-002 Active**：AGENT-M002；**Task-003 Active**：AGENT-M001 前端技术栈切换） |
 | `docs/TECH_DEBT.md` | 技术债务 | 首个债务记录 |
 | `docs/CONFIGURATION.md` | 配置项登记 | 首个配置项（含评分权重、Provider 配置） |
 | `docs/EXTERNAL_SYSTEMS.md` | 外部系统登记 | AI Provider 接入确认后 |
