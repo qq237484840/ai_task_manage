@@ -12,7 +12,7 @@
 
 | Module ID | 名称 | Domain | Purpose | 状态 | Owner Agent | 依赖 | 消费者 | Public APIs | 数据所有权 | 文档路径 | 版本 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M001 | 作业任务管理 | 作业评定 | 创建/维护作业任务，评分对照基准来源 | Developing（Task-001：实现，契约 v0.1.1 Frozen） | AGENT-M001 | 无（基座） | M002, M004, M005, M007 | `MODULE_API.md`（API-M001-001~012） | DATA-001、DATA-002（随 M001 落地）+ DATA-011（学校字典，公共只读） | `docs/modules/M001/` | v0.1.1 |
+| M001 | 作业任务管理 | 作业评定 | 创建/维护作业任务，评分对照基准来源 | Testing（Task-001 完成：实现 + 54 项测试通过，待 PM DoD 验收） | AGENT-M001 | 无（基座） | M002, M004, M005, M007 | `MODULE_API.md`（API-M001-001~012） | DATA-001、DATA-002（随 M001 落地）+ DATA-011（学校字典，公共只读） | `docs/modules/M001/` | v0.1.1 |
 | M002 | 作业图片采集 | 作业评定 | 上传/拍摄作业照片、质量检测、预处理与存储 | Planned | AGENT-M002 | M001 | M003, M007 | 待模块契约 | DATA-003 | `docs/modules/M002/` | 待定 |
 | M003 | AI 作业识别 | 作业评定 | OCR/Vision 识别图片为结构化内容（含置信度） | Planned | AGENT-M003 | M002(数据) | M004, M005 | 待模块契约 | DATA-004 | `docs/modules/M003/` | 待定 |
 | M004 | 作业任务匹配 | 作业评定 | 识别结果与任务题目对齐（可观察依据） | Planned | AGENT-M004 | M001, M003 | M005 | 待模块契约 | DATA-005 | `docs/modules/M004/` | 待定 |

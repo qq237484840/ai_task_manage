@@ -7,15 +7,16 @@
 
 ## 当前版本
 
-`v0.5.0`（M001 契约基线 v0.1.1 批准冻结（用户 2026-09-08 批准）；进入 M001 模块开发，Task-001 已签发）
+`v0.6.0`（Task-001 完成：M001 实现落地 + 54 项测试通过 + 九件套实现版回填；待 PM DoD 验收 → M002）
 
 ## 当前阶段
 
-**Phase 2 —— M001 模块开发（Developing）**；需求基线（Phase 1）与 M001 契约设计已收口
+**Phase 2 —— M001 模块开发（Testing）**；需求基线（Phase 1）与 M001 契约设计（Phase 2a）已收口，Task-001 实现完成
 
 - V1 需求基线：REQ-001~009 全部 **Approved**（2026-09-08，含增补 REQ-009 学校基础资料，ADR-008）
-- M001 九件套契约 **v0.1.1 Frozen**（2026-09-08 用户批准，签署区见 `MODULE_CONTRACT.md`）：Contract/API/Data 基线冻结（API-M001-001~012）
-- 进行中：AGENT-M001 执行 **Task-001**（backend/frontend 工程骨架 + M001 实现 + 测试 + 回填九件套实现版）；实现细节在不违背契约前提下由模块 Agent 细化
+- M001 九件套契约 **v0.1.1 Frozen**（2026-09-08 用户批准）：Contract/API/Data 基线冻结，实现全程未越契约（API-M001-001~012 状态不变）
+- **Task-001 完成（AGENT-M001）**：backend（FastAPI 单体，`backend/app/`）+ frontend（零构建原生 H5，`frontend/`）+ 测试（54 passed：unit/API/集成/安全）全部落地；九件套实现版已回填（`MODULE_FILES.md`/`MODULE_TEST.md`/`MODULE_DESIGN.md`）
+- 待办：PM 按 DoD 验收 M001（AGENT_GUIDE §6）→ 通过后转 Stable 并进入 M002 契约设计
 
 ## 已完成模块
 
@@ -25,7 +26,7 @@
 
 | Module ID | 名称 | 状态 |
 | --- | --- | --- |
-| M001 | 作业任务管理 | Developing（Task-001：实现，契约 v0.1.1 Frozen） |
+| M001 | 作业任务管理 | Testing（Task-001 完成：实现 + 54 项测试通过，待 PM DoD 验收） |
 
 ## 规划模块
 

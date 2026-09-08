@@ -1,6 +1,6 @@
 # M001 模块设计 —— 作业任务管理
 
-- **状态**：实现中（契约基线 v0.1.1 已批准；由 AGENT-M001 在 Task-001 编码中细化并保持同步）
+- **状态**：已实现（Task-001 交付，`54 passed`；实现期决策记录见文末，待 PM DoD 验收）
 - **技术上下文**：ADR-004（FastAPI + SQLite 单体）；ADR-005（家庭级数据隔离）；ADR-006（题目三要素建模）；ADR-008（学校字典全局共享只读 + 档案必填关联）
 
 ## 分层架构
@@ -22,14 +22,14 @@ REST Router (api/v1) ── schemas(Pydantic 校验) ── Service(业务/状�
 | Schema | Pydantic v2（FastAPI 内置） | 契约请求/响应即 schema，天然契合 | 
 | 密码哈希 | 标准库 `hashlib.scrypt`（每账号随机盐） | 免第三方依赖即满足单向哈希；强度参数集中配置 |
 | 会话令牌 | `secrets.token_urlsafe(32)`，库存 `sha256(token)` | 不透明令牌、库内不可反解原文；过期 30 天 |
-| 前端 | 移动优先响应式 H5，建议 Vue3 + Vite 构建后由 FastAPI 托管 `frontend/dist`（编码开始时最终确定，不影响 API 契约） | ADR-004 H5 形态；构建产物静态托管最简单 |
+| 前端 | 移动优先响应式 H5，**已落地为"零构建原生 H5 + FastAPI 静态托管"**（决策记录见文末；不影响 API 契约，后续可平滑换 Vue3+Vite 壳） | ADR-004 H5 形态；决策时点本机无 Node 构建链，原生实现即可交付契约全量 UI；换壳成本低（REST 契约不变） |
 | ID 生成 | UUID4（TEXT 存储） | 全局唯一、无自增枚举泄露 |
 | 事务 | 任务+题目集单事务写 | 部分失败整体回滚 |
 | 学校字典 | 全局共享表 + seed 预置；只读查询，无写路径（ADR-008） | 公共基础数据最小实现；维护后台 V1 不做 |
 
-## 目录结构（规划目标，编码时校准）
+## 目录结构
 
-见 `MODULE_FILES.md`。要点：`backend/app/modules/m001/` 内聚 M001 业务；`backend/app/shared/` 放认证注入、异常、审计工具（公共代码治理见 `DEVELOPMENT_GUIDE.md` §13）。
+实现实况与逐文件职责见 `MODULE_FILES.md`。要点：`backend/app/modules/m001/` 内聚 M001 业务；`backend/app/shared/` 放认证注入、异常、审计工具（公共代码治理见 `DEVELOPMENT_GUIDE.md` §13）。
 
 ## 学校字典（公共只读，ADR-008/REQ-009）
 
@@ -104,3 +104,21 @@ closed     --reopen-------------------------------> published
 ## 测试指引
 
 见 `MODULE_TEST.md`（含"为何需要/为何不需要"说明）。
+
+## 实现期决策记录（Task-001 追加，与基线契约一致）
+
+| # | 决策点 | 落地方式 | 说明 |
+| --- | --- | --- | --- |
+| 1 | 前端形态 | **零构建原生 H5**（`frontend/index.html`+`styles.css`+`app.js`），由 FastAPI 静态托管 | 决策时点本机无 Node/npm 构建链；REST 契约不受影响，后续可平滑换 Vue3+Vite 壳（前端决策同步更新） |
+| 2 | 提交模型 | Repository 不自行 commit；**请求级统一 commit/rollback**（lifespan 之外由异常处理器兜底） | 任务+题目集天然单事务（`test_internal_services` 断言中途失败整单回滚） |
+| 3 | PATCH 字段语义 | `_UNSET` 哨兵区分"字段未提供"与"显式清空（None）" | 支持把 content/deadline 清为 null；`model_fields_set` 只处理出现在请求体中的字段 |
+| 4 | SQLite FK | engine event 钩子开启 `PRAGMA foreign_keys=ON` | schools→students DB 层外键约束真生效（应用层 school_repo 查询双保险） |
+| 5 | 时间规约 | 未标注时区视为 UTC；契约时间一律 ISO8601 UTC | `_deadline_iso` 归一化 + schema 层校验 |
+| 6 | 学校写路径防御 | ORM/Repository 仅提供只读查询方法；路由层无 POST/PATCH/DELETE | ADR-008 公共只读的代码级强制 |
+| 7 | 种子与生效解耦 | `seed_schools` 幂等并返回新增数；测试用独立空库验证 | 主 app lifespan 建表+seed；seed 单测不依赖预置库 |
+| 8 | 状态机实现 | `_TRANSITIONS: dict[action, dict[from→to]]` 表驱动 + `mark_in_progress` 幂等 | 非法 action/非法边统一 `InvalidTransitionError`→409；in_progress 重复 mark 幂等 |
+| 9 | 测试隔离 | conftest 每用例独立 SQLite(tmp)+双家庭 fixture；scrypt 降参加速登录用例 | 无用例间污染，越权矩阵可独立断言 |
+| 10 | 静态托管 | FastAPI `StaticFiles` 挂载 frontend（HTML+CSS+JS），`GET /` 直出 index.html | 单机/局域网单进程部署（ASM-010），前端零构建即可用 |
+
+> 决策 1 是 Task-001 中唯一相对规划的自适应调整；其余决策均为对既定设计（MODULE_DESIGN 正文 + 契约 v0.1.1）的实现确认。规划版"前端 Vue3+Vite"建议不再作为实现基线。
+

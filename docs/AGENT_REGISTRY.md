@@ -9,8 +9,8 @@
 
 | Agent ID | 名称 | 职责 | 关联模块 | Read Scope | Write Scope | 状态 | 当前任务 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `AGENT-001` | Project Master（总控） | 需求/架构/模块/接口/数据治理、Agent 分工、变更治理、知识体系、最终审核 | 全部 | 全部文档 | 治理层文档（docs 根、Registry、ADR、变更记录）；不直接代写模块业务代码 | Active | Phase 2：监督 M001 开发（Task-001）与 DoD 验收 |
-| `AGENT-M001` | 作业任务管理 Agent | 模块内设计/编码/测试/文档；创建任务域 | M001 | PROJECT/ARCHITECTURE/M001/上游与依赖方 API | M001 | Active | Task-001：实现 M001（契约 v0.1.1 Frozen，按 `AGENT_GUIDE.md` §4/§6） |
+| `AGENT-001` | Project Master（总控） | 需求/架构/模块/接口/数据治理、Agent 分工、变更治理、知识体系、最终审核 | 全部 | 全部文档 | 治理层文档（docs 根、Registry、ADR、变更记录）；不直接代写模块业务代码 | Active | 按 DoD 验收 M001（Task-001 完成，54 测试通过）→ 通过后签发 M002 任务单 |
+| `AGENT-M001` | 作业任务管理 Agent | 模块内设计/编码/测试/文档；创建任务域 | M001 | PROJECT/ARCHITECTURE/M001/上游与依赖方 API | M001 | Active | Task-001 已完成：M001 实现 + 54 测试通过 + 九件套回填（v0.6.0）；配合 PM DoD 验收 |
 | `AGENT-M002` | 作业图片采集 Agent | 上传/质检/预处理 | M002 | +M001 API | M002 | Planned | 同上 |
 | `AGENT-M003` | AI 作业识别 Agent | OCR/Vision 识别与置信度 | M003 | +M002 API、AI Provider 契约 | M003 | Planned | 同上 |
 | `AGENT-M004` | 作业任务匹配 Agent | 识别↔任务匹配 | M004 | +M001/M003 API | M004 | Planned | 同上 |

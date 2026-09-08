@@ -3,6 +3,20 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.6.0 —— 2026-09-08
+
+### 变更 / 决策
+
+- **Task-001 完成（AGENT-M001）**：M001 全量实现落地，契约 v0.1.1（Frozen）无越契约实现
+  - backend：FastAPI + SQLAlchemy 2.0 + SQLite 单体（`backend/app/`）；家庭认证（scrypt + 会话哈希 + 登录爆破退避）、学生档案、任务+题目集事务、任务状态机唯一出口、schools 只读字典（seed 幂等 + DB FK 双保险）；统一 ErrorResponse/request_id 贯穿/审计日志脱敏
+  - frontend：移动优先 H5 零构建实现（`frontend/index.html` + `styles.css` + `app.js`），FastAPI 静态托管（**模块内实现决策**：本机无 Node 构建链，Vue3+Vite 为可替换壳；决策已记 `MODULE_DESIGN.md`）
+  - tests：**54 项全部通过**（unit/API/集成/安全，覆盖 MODULE_TEST 清单与 DoD）
+- M001 模块状态 Developing → Testing（待 PM DoD 验收）；API-M001-001~012 保持 Frozen（实现未触发契约变更，无需 CR）
+
+### 更新
+
+- `docs/modules/M001/` 九件套回填实现版（`MODULE_FILES.md`/`MODULE_TEST.md`/`MODULE_DESIGN.md` 状态与内容）；`MODULE_REGISTRY.md`、`AGENT_REGISTRY.md`、`PROJECT_STATUS.md`（→ v0.6.0）；新增 `.gitignore`、`backend/requirements.txt`
+
 ## v0.5.0 —— 2026-09-08
 
 ### 变更 / 决策
