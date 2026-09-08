@@ -29,9 +29,18 @@ class TaskStateService:
     """任务状态机（REST 推进 + M002 首传 mark_in_progress 的唯一出口）。"""
 
     @staticmethod
-    def transition(session: Session, family_id: str, task_id: str, action: str) -> tuple[str, str]:
+    def transition(
+        session: Session,
+        family_id: str,
+        task_id: str,
+        action: str,
+        *,
+        scope_student_id: str | None = None,
+    ) -> tuple[str, str]:
         task = TaskRepo.get_by_id(session, family_id, task_id)
         if task is None:
+            raise NotFoundError("任务不存在")
+        if scope_student_id is not None and task.student_id != scope_student_id:
             raise NotFoundError("任务不存在")
         allowed = _TRANSITIONS.get(action)
         if allowed is None:

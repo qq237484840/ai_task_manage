@@ -1,13 +1,14 @@
 # M001 模块契约（黑盒）—— 作业任务管理
 
-- **Module ID**：M001 ｜ **版本**：v0.1.1（契约基线，Frozen） ｜ **日期**：2026-09-08
-- **状态**：Frozen —— 契约基线已由用户批准（签署区，2026-09-08）；任何修改走 CR/ACR（`ID_GOVERNANCE.md`）
+- **Module ID**：M001 ｜ **版本**：v0.1.1（契约基线，Frozen）→ **v0.1.2（CHANGE-001 回填，待 PM 复核）** ｜ **日期**：2026-09-08
+- **状态**：Frozen（v0.1.1）→ CHANGE-001 修订执行中（CR-001/CR-002/ACR-001/ACR-002 已批准；编码+测试完成，文档随实况回填，**待 Project Master 复核后关闭/定稿**）
 - **适用**：黑盒约定。内部实现（类/库/表结构细节）见 `MODULE_DESIGN.md` 与 `MODULE_DATA.md`
 - **v0.1.1 变更摘要**：用户 M001 开发输入增补"学校基础资料"（REQ-009/ADR-008/DATA-011）：新增全局共享只读 `schools` 字典（seed 预置，无运行期维护 API）；`students.school` 自由文本 → `school_id` 必填（FK→schools）；新增 API-M001-012（`GET /schools`）；学生档案必填关联学校（名称+学段）
+- **v0.1.2 变更摘要（CHANGE-001）**：① **CR-001 容器化**：任务=多学科作业登记单容器，`subject` 放宽为可空/'mixed'，学科粒度下放到题目 `(subject, group_no)` 学科作业段（段结构校验 + M002 归属用段级查询）；② **ACR-001 两级主体**：新增 `student_accounts` 子账号（家长开通/停用/改密）、`auth_sessions` 增加 `subject_type`/`student_id`（family/student 双型会话）、学生独立登录（命名空间隔离防爆破）且仅本人数据（越权对外 404、家长专属操作 403）；③ **CR-002/ACR-002 判定语义**：`reference_answer` 明确为**非判定基准辅助字段**（端到端直判 ADR-010），主观题拒绝录入防误导
 
 ## Purpose
 
-V1 入口基座：提供纯家庭模式下的家庭空间（家庭账号认证、学生档案，档案必填关联全局学校字典）与作业任务生命周期管理，题目逐题建模（学科/题型/客观题参考答案），支撑 M002~M007 的闭环输入与评分对照基准。
+V1 入口基座：提供纯家庭模式下的家庭空间（家庭账号 + 学生子账号两级主体认证、学生档案，档案必填关联全局学校字典）与作业任务生命周期管理（多学科登记单容器，学科粒度 (subject, group_no)；题目逐题建模，参考答案为非判定基准辅助字段），支撑 M002~M007 的闭环输入与评定对照。
 
 ## Responsibilities / Non-Responsibilities
 
@@ -17,13 +18,13 @@ V1 入口基座：提供纯家庭模式下的家庭空间（家庭账号认证�
 
 | 类型 | 说明 |
 | --- | --- |
-| Inputs | 注册/登录凭据；学生档案信息（含必填 `school_id`，选自预置学校字典）；任务与题目集（含可选参考答案）；状态推进指令 |
-| Outputs | 会话 token；档案/任务/题目数据；学校字典只读列表（建档下拉）；状态迁移结果与校验错误 |
+| Inputs | 家长注册 / 家长登录 / **学生登录凭据**；学生档案信息（含必填 `school_id`，选自预置学校字典）；子账号开通/停用/改密；任务与题目集（学科作业段 subject+group_no，辅助参考答案）；状态推进指令 |
+| Outputs | family/student 双型会话 token；档案/子账号状态/任务与题目段数据；学校字典只读列表（建档下拉）；状态迁移结果与校验错误 |
 
 ## Exposed APIs
 
-- REST：`API-M001-001~012`（前缀 `/api/v1`；完整契约 `MODULE_API.md`；登记 `API_REGISTRY.md`）
-- 内部服务接口（进程内，供 M002/M004/M005/M007）：`FamilySpaceService`、`TaskQueryService`、`TaskStateService`
+- REST：`API-M001-001~012`（前缀 `/api/v1`；完整契约 `MODULE_API.md`；登记 `API_REGISTRY.md`）+ **ACR-001 新增**（子账号开通/更新、学生 login/logout/me，ID 待 PM 收口分配）
+- 内部服务接口（进程内，供 M002/M004/M005/M007）：`FamilySpaceService`、`StudentAccountService`、`TaskQueryService`（含学科作业段查询）、`TaskStateService`
 
 ## Events
 
@@ -32,7 +33,7 @@ V1 入口基座：提供纯家庭模式下的家庭空间（家庭账号认证�
 
 ## Data Ownership
 
-- DATA-001（`tasks`/`task_items`）、DATA-002（`family_accounts`/`students`/`auth_sessions`）Owner = M001；唯一写入口，其他模块只读消费
+- DATA-001（`tasks`/`task_items`，含学科作业段 group_no）、DATA-002（`family_accounts`/`students`/`student_accounts`/`auth_sessions`）Owner = M001；唯一写入口，其他模块只读消费
 - DATA-011（`schools`，全局共享只读）由 M001 承载：仅初始化 seed 写入，运行期无写路径；任何模块/用户均不得运行期增删改（ADR-008）
 - 详见 `MODULE_DATA.md` / `DATA_MODEL.md`
 
@@ -41,8 +42,9 @@ V1 入口基座：提供纯家庭模式下的家庭空间（家庭账号认证�
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `task.status_flow` | `draft→published→in_progress→closed` | 任务状态机（非法迁移拒绝） |
-| `subject.recommended` | `chinese/math/english` | V1 建议学科值（ASM-011）；字段存文本，不写死可扩展 |
-| `item_type.enum` | `objective/subjective` | 题型枚举（ADR-006 判定依据） |
+| `subject.recommended` | `chinese/math/english` | V1 建议学科值（ASM-011）；`tasks.subject` 可空/'mixed'（多学科登记单 CR-001），学科粒度见题目 `subject`+`group_no` |
+| `group_no.default` | `0` | 学科作业段默认单段（旧数据兼容）；显式分组从 1 起连续（结构校验见 `MODULE_API.md` API-M001-007） |
+| `item_type.enum` | `objective/subjective` | 题型**标注**（不驱动判定；ADR-010 端到端直判），`reference_answer` 为非基准辅助字段 |
 | `school.stage.recommended` | `primary/junior/senior` | 学校学段建议值（ADR-008）；V1 seed 起步 `primary` |
 | `pagination.default` | `page_size=20, max=100` | 列表分页 |
 | `auth.session_ttl` | 30 天 | 会话有效期（家庭自用场景） |

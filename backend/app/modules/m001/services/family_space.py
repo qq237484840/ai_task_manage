@@ -60,11 +60,24 @@ class StudentService:
         return student_dto(student, school)
 
     @staticmethod
-    def list(session: Session, family_id: str) -> list[StudentDTO]:
+    def list(session: Session, family_id: str, *, scope_student_id: str | None = None) -> list[StudentDTO]:
+        """档案列表：family 主体=本家全部；student 主体（scope_student_id）=仅本人。"""
+        if scope_student_id is not None:
+            result = StudentRepo.get_with_school(session, family_id, scope_student_id)
+            return [student_dto(s, sc) for s, sc in [result]] if result else []
         return [student_dto(s, sc) for s, sc in StudentRepo.list_with_school(session, family_id)]
 
     @staticmethod
-    def update(session: Session, family_id: str, student_id: str, data: StudentUpdate) -> StudentDTO:
+    def update(
+        session: Session,
+        family_id: str,
+        student_id: str,
+        data: StudentUpdate,
+        *,
+        scope_student_id: str | None = None,
+    ) -> StudentDTO:
+        if scope_student_id is not None and student_id != scope_student_id:
+            raise NotFoundError("学生档案不存在")  # student 主体改他人 = 不可见（404 防探测）
         result = StudentRepo.get_with_school(session, family_id, student_id)
         if result is None:
             raise NotFoundError("学生档案不存在")  # 跨家庭/不存在统一 404（不泄露存在性）

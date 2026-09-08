@@ -53,10 +53,11 @@ def create_app(settings: Settings | None = None, *, mount_frontend: bool = True)
         allow_headers=["*"],
     )
 
-    from app.api.v1 import family, schools, students, tasks
+    from app.api.v1 import family, schools, student_auth, students, tasks
 
     api_prefix = "/api/v1"
     app.include_router(family.router, prefix=api_prefix)
+    app.include_router(student_auth.router, prefix=api_prefix)
     app.include_router(students.router, prefix=api_prefix)
     app.include_router(tasks.router, prefix=api_prefix)
     app.include_router(schools.router, prefix=api_prefix)

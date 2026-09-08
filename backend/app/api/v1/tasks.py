@@ -29,13 +29,18 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 _TASK_STATUS = Literal["draft", "published", "in_progress", "closed"]
 
 
+def _scope(ctx: AuthContext) -> str | None:
+    """student 主体限定本人（越权由 Service 层 404）；family 主体 None（本家任意）。"""
+    return ctx.student_id if ctx.is_student else None
+
+
 @router.post("", status_code=201, response_model=TaskDetailDTO)
 def create_task(
     payload: TaskCreate,
     ctx: AuthContext = Depends(current_context),
     session: Session = Depends(get_session),
 ):
-    return TaskService.create(session, ctx.family_id, payload)
+    return TaskService.create(session, ctx.family_id, payload, scope_student_id=_scope(ctx))
 
 
 @router.get("", response_model=TaskListResponse)
@@ -54,6 +59,7 @@ def list_tasks(
         student_id=student_id,
         page=page,
         page_size=page_size,
+        scope_student_id=_scope(ctx),
     )
     return TaskListResponse(items=items, page=page, page_size=page_size, total=total)
 
@@ -65,7 +71,13 @@ def task_detail(
     ctx: AuthContext = Depends(current_context),
     session: Session = Depends(get_session),
 ):
-    return TaskService.detail(session, ctx.family_id, task_id, include_answers=include_answers)
+    return TaskService.detail(
+        session,
+        ctx.family_id,
+        task_id,
+        include_answers=include_answers,
+        scope_student_id=_scope(ctx),
+    )
 
 
 @router.patch("/{task_id}", response_model=TaskDetailDTO)
@@ -75,7 +87,7 @@ def update_task(
     ctx: AuthContext = Depends(current_context),
     session: Session = Depends(get_session),
 ):
-    return TaskService.update(session, ctx.family_id, task_id, payload)
+    return TaskService.update(session, ctx.family_id, task_id, payload, scope_student_id=_scope(ctx))
 
 
 @router.post("/{task_id}/status", response_model=TaskStatusResult)
@@ -85,5 +97,7 @@ def advance_task_status(
     ctx: AuthContext = Depends(current_context),
     session: Session = Depends(get_session),
 ):
-    _, status = TaskStateService.transition(session, ctx.family_id, task_id, payload.action)
+    _, status = TaskStateService.transition(
+        session, ctx.family_id, task_id, payload.action, scope_student_id=_scope(ctx)
+    )
     return TaskStatusResult(task_id=UUID(task_id), status=status)  # type: ignore[arg-type]

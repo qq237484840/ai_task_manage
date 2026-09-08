@@ -1,8 +1,11 @@
-"""家庭会话认证与越权语义（契约 Security / MODULE_DESIGN）。
+"""会话认证与越权语义（两级主体 ACR-001；契约 Security / MODULE_DESIGN）。
 
 - Bearer token → sha256 查 auth_sessions（库中仅存哈希）→ 过期/无效 = 401。
-- 家庭数据隔离：AuthContext.family_id 注入后，Repository/Service 强制按其过滤（schools 公共只读例外）。
-- 登录防爆破：失败计数 + 渐进退避（单进程内存实现，V1 本地单机场景），超限锁定返回 403。
+- 主体 = AuthContext.subject_type（family|student）+ family_id：
+  family 主体可操作本家任意学生；student 主体强制本人（student_id 过滤底线之外的二级校验）。
+  family_id 过滤保留为底线（student 会话同样携带其所属 family_id）。
+- 登录防爆破：失败计数 + 渐进退避（单进程内存实现，V1 本地单机场景），超限锁定返回 403；
+  以命名空间隔离键（family:/student:），两类账号 login_name 可同名不互扰。
 """
 from __future__ import annotations
 
@@ -10,23 +13,35 @@ from dataclasses import dataclass
 
 from app.core.logging import audit_event
 from app.core.times import iso_plus, now_iso
-from app.shared.exceptions import ConflictError, PermissionDeniedError, UnauthorizedError
+from app.shared.exceptions import PermissionDeniedError, UnauthorizedError
 from app.shared.security import hash_token
 
 # 登录防爆破（进程内）。单进程部署（ASM-010）下语义充分；多进程需外移。
-_LOCKED: dict[str, dict] = {}  # login_name -> {count, locked_until}
+_LOCKED: dict[str, dict] = {}  # "ns:login" -> {count, locked_until}
 
 
 @dataclass(frozen=True)
 class AuthContext:
+    """当前主体上下文：family_id 恒有（数据隔离底线）；student_id 仅 student 主体非空。"""
+
     family_id: str
     session_id: str
+    subject_type: str = "family"  # family | student
+    student_id: str | None = None
     login_name: str | None = None
     display_name: str | None = None
 
+    @property
+    def is_student(self) -> bool:
+        return self.subject_type == "student"
+
+
+def _lock_key(namespace: str, login_name: str) -> str:
+    return f"{namespace}:{login_name}"
+
 
 def resolve_auth(session_factory, credentials: str | None, *, lock_minutes: int = 5) -> AuthContext:
-    """从 Bearer 原文解析当前家庭会话（无效 → 401）。"""
+    """从 Bearer 原文解析当前会话主体（无效 → 401）。"""
     from app.modules.m001.repositories.account_repo import AccountRepo
 
     if not credentials:
@@ -43,41 +58,31 @@ def resolve_auth(session_factory, credentials: str | None, *, lock_minutes: int 
         return AuthContext(
             family_id=row.family_id,
             session_id=row.session_id,
-            login_name=row.family_login_name,
-            display_name=row.family_display_name,
+            subject_type=row.subject_type,
+            student_id=row.student_id,
+            login_name=row.login_name,
+            display_name=row.display_name,
         )
 
 
-def consume_login_failure(login_name: str, *, max_failures: int = 5, lock_minutes: int = 5) -> None:
-    """记录一次失败；达到阈值后按秒退避（渐进），调用方对锁定账号返回 403。"""
-    rec = _LOCKED.setdefault(login_name, {"count": 0, "locked_until": None})
+def consume_login_failure(
+    login_name: str, *, namespace: str = "family", max_failures: int = 5, lock_minutes: int = 5
+) -> None:
+    """记录一次失败；达到阈值后锁定，调用方对锁定账号返回 403。"""
+    key = _lock_key(namespace, login_name)
+    rec = _LOCKED.setdefault(key, {"count": 0, "locked_until": None})
     rec["count"] = rec.get("count", 0) + 1
     if rec["count"] >= max_failures:
         rec["locked_until"] = iso_plus(minutes=lock_minutes)
-        audit_event("login_locked", detail=f"login locked after failures; login={login_name!r}")
+        audit_event("login_locked", detail=f"login locked after failures; ns={namespace}; login={login_name!r}")
         raise PermissionDeniedError("失败次数过多，账号已临时锁定，请稍后再试")
 
 
-def check_login_blocked(login_name: str) -> None:
-    rec = _LOCKED.get(login_name)
+def check_login_blocked(login_name: str, *, namespace: str = "family") -> None:
+    rec = _LOCKED.get(_lock_key(namespace, login_name))
     if rec and rec.get("locked_until") and now_iso() < rec["locked_until"]:
         raise PermissionDeniedError("账号已临时锁定，请稍后再试")
 
 
-def clear_login_failures(login_name: str) -> None:
-    _LOCKED.pop(login_name, None)
-
-
-def register_session(
-    session_factory, family_id: str, *, session_ttl_days: int = 30, login_name: str | None = None
-) -> tuple[str, str]:
-    """签发会话：token 原文仅此一次返回；库中只存哈希。返回 (token, expires_at)。"""
-    from app.modules.m001.repositories.account_repo import AccountRepo
-    from app.shared.security import new_session_token
-
-    token = new_session_token()
-    expires_at = iso_plus(days=session_ttl_days)
-    with session_factory() as session:
-        AccountRepo.create_session(session, family_id=family_id, token_hash=hash_token(token), expires_at=expires_at)
-        session.commit()
-    return token, expires_at
+def clear_login_failures(login_name: str, *, namespace: str = "family") -> None:
+    _LOCKED.pop(_lock_key(namespace, login_name), None)

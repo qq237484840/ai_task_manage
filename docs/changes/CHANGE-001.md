@@ -36,4 +36,13 @@
 
 ## 处理路径
 
-Executing（AGENT-M001）→ 代码落地 + 测试 + 回填 → PM 复核 → 变更记录关闭（状态 Applied/Closed，随 M001 变更后版本 v0.1.2 或经 CR 审定的契约版）→ M002 Task-002 编码联调。
+Executing（AGENT-M001）→ 代码落地 + 测试 + 回填 → **PM 复核（当前待复核）** → 变更记录关闭（状态 Applied/Closed，随 M001 变更后版本 v0.1.2 或经 CR 审定的契约版）→ M002 Task-002 编码联调。
+
+## 执行进度（2026-09-08，AGENT-M001 自证，待 PM 复核）
+
+- [x] 数据面（清单 2）：`task_items.group_no` + `tasks.subject` 可空/'mixed' 容器语义 + 分组结构校验（`_validate_group_structure`）+ 段级查询（`get_task_groups`/`get_task_group`/`can_accept_photo`）+ 冻结语义保持；开发库 schema 直接演进（未上线）
+- [x] 认证面（清单 3）：`student_accounts`（家长开通/停用/改密）+ 双型会话（`subject_type`/`student_id`）+ 学生登录/登出/me（`/student/*`）+ `AuthContext` 双主体 + REST scope 接线（tasks/students 传 `scope_student_id`；家长专属操作 403）；登录爆破 family/student 命名空间隔离
+- [x] 语义面（清单 4）：`reference_answer` 注释/契约口径 = **非判定基准辅助字段**（ADR-010）；`item_type`=题型标注不驱动判定
+- [x] 测试（清单 5）：既有 54 项全绿 + 新增 35 项（student 子账号 23、容器化 API 4、group_no 分组校验 8）→ **89 passed**（backend/.venv）
+- [x] 回填（清单 6）：M001 九件套按实况修订（MODULE.md/SUMMARY/CONTRACT/API/DATA/DESIGN/FILES/TEST/CHANGELOG）；`DATA_MODEL.md` DATA-001/002 字段级同步；`REQUIREMENTS.md` REQ-001 措辞精校；开放项见 PROJECT_STATUS（O-1/O-3/O-4 相关后续模块沿用）
+- [ ] **PM 复核**：DoD 勾选、CHANGE 关闭、API ID 收口登记（ACR-001 新增端点）、顶层状态推进 v0.11.0、MODULE_REGISTRY M001 行定稿 v0.1.2

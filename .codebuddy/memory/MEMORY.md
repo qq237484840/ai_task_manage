@@ -2,6 +2,8 @@
 
 > 就地更新说明：2026-09-08（执行批 2）：**M002 契约草案 v0.3.0 用户批准 → Frozen**（MODULE.md Developing；CONTRACT/API/DATA Frozen；Task-002 签发，AGENT-M002 Active）→ **顶层同步 v0.10.0** → **CHANGE-001 立项**（合并 CR-001/CR-002/ACR-001/ACR-002 的 M001 变更执行，AGENT-M001 Task-CHG，Executing）——下一开发段=CHANGE-001 编码（group_no 数据面 + 学生子账号认证面 + reference_answer 非基准 + 测试回归 + M001 九件套回填）→ Task-002（M002 v0.3.0 实现）→ ROADMAP M-A 验收。前情（同日前两条）：批准包四项批准+ADR-010/011 Accepted → M002 v0.3.0 起草。
 
+> 就地更新说明：2026-09-08（执行批 3，后续将批 2 覆盖）：**CHANGE-001 编码+测试+M001 九件套回填完成**（AGENT-M001）——CR-001 容器化数据面、ACR-001 两级主体认证面（student_accounts/双型会话/AuthContext/命名空间隔离爆破）、CR-002/ACR-002 语义面（reference_answer 非基准）；测试 **54→89 全绿**；新增 ACR-001 端点（子账号管理/学生 login/logout/me）代码已交付、**API ID 待 PM 收口分配**；文档按实况回填（九件套/DATA_MODEL/REQ-001/API·MODULE REGISTRY 状态注）——**当前待办=PM 复核 CHANGE-001（DoD 勾选/收口 v0.1.2/状态推进）→ Task-002（M002 v0.3.0 实现）→ ROADMAP M-A 验收**。前情：执行批 2（M002 v0.3.0 Frozen/顶层 v0.10.0/CHANGE-001 立项）。
+
 ## 项目概览
 - 仓库：`c:\DevProject\AI.TaskManage`，git 分支 main。
 - **业务（V1，2026-09-08 由用户提供）**：中小学生 AI 作业与学习成长综合评定系统 —— V1 MVP =「AI 每日作业智能评定系统」，闭环：创建任务→上传照片→AI识别→任务匹配→质量评价→AI教师评价→今日报告。仅 M001~M007 七模块（需求原文 M01~M07），禁止知识图谱/画像/组卷/班级管理/多租户等（ADR-002）。
@@ -12,7 +14,7 @@
 - **主线功能域重排（2026-09-08，v0.9.0，PD-020/g4）**：主线计划与验收里程碑按 **4 功能域**组织（新建 `docs/ROADMAP.md` v0.9.0），**保留 M001~M007 模块组织与契约治理、开发顺序 M001→M007 不变**：A 学生自主采集闭环（布置登记拍照识别草稿→确认补正→生效；完成作业拍照，PD-017/g1）→ B 家长复核确认闭环（照片归属确认/纠错）→ C 大模型内容级匹配+家长兜底（逐题对齐判完成/对错，主客观全判，低置信/无法判断入复核）→ D 综合评判+每日报告定稿（草稿→复核定稿→归档）。里程碑 M-A~M-D + M-END 全链路回归。
 - **变更/风险登记（2026-09-08）**：`CR-001`/`ACR-001`/`CR-002`/`ACR-002` 均 **Approved** 并**合并为 `docs/changes/CHANGE-001.md`（Executing，AGENT-M001）**；ADR-010/011 → **Accepted**（ADR-006/007 Superseded 正式生效）；**M002 契约 v0.3.0 Frozen（2026-09-08 用户批准，Task-002/AGENT-M002 Active）**；`RISK_REGISTER` RISK-006~007 + RISK-008（三方依赖）、RISK-009（照片出域合规）。
 - 采用「文档驱动 + 总控 Agent 治理 + 模块 Agent 实现」多 Agent 工程模式。用户提供的 #0~#107 方法论已落实为 docs/ 体系。
-- 状态 **v0.10.0**：Phase 3 功能域主线 + 内容级重构 —— **M001 Stable**（合并 **CHANGE-001** 执行中：CR-001/CR-002/ACR-001/ACR-002）；**M002 Developing（契约 v0.3.0 Frozen，2026-09-08 批准，Task-002/AGENT-M002 Active）**；主线计划=`ROADMAP.md`。REQ-001~009 Approved；PD-001~024 全部确认；跨模块开放项 O-1~O-9 见 PROJECT_STATUS。
+- 状态 **v0.10.0（CHANGE-001 编码/回填完成，待 PM 复核收口）**：Phase 3 功能域主线 + 内容级重构 —— **M001 Stable + CHANGE-001（CR-001/CR-002/ACR-001/ACR-002）执行完成待复核（89 测试全绿，见批 3）**；**M002 Developing（契约 v0.3.0 Frozen，2026-09-08 批准，Task-002/AGENT-M002 Active，等待 CHANGE-001 收口后签发）**；主线计划=`ROADMAP.md`。REQ-001~009 Approved；PD-001~024 全部确认；跨模块开放项 O-1~O-9 见 PROJECT_STATUS。
 
 ## 用户偏好与决策（稳定事实）
 - 文档语言：**中文为主**，代码/API 标识符英文。
@@ -28,5 +30,5 @@
 - 知识地图入口：`docs/INDEX.md`
 - 状态：`docs/PROJECT_STATUS.md`（**v0.9.0** / Phase 3 功能域主线+内容级重构 / PD-001~024）；**主线计划：`docs/ROADMAP.md`（v0.9.0，功能域 A~D 里程碑）**；假设：`docs/ASSUMPTIONS.md`（ASM-001~011）；决策：`docs/adr/ADR-001~011.md`（ADR-006/007 **Superseded**，ADR-010/011 Proposed）
 - 需求：`docs/REQUIREMENTS.md` + `docs/requirements/REQ-001~009.md`（Approved，REQ-001~007 随 CR-002 精校预告）；模块：`docs/MODULE_REGISTRY.md`（M001 **Stable**，M002 Designing/Draft v0.2.0，M003~M007 Planned）；API：`docs/API_REGISTRY.md`（API-M001-001~012 **Frozen**，API-M002-001~006 **Draft**，改须 CR）；数据：`docs/DATA_MODEL.md`（DATA-001~011，DATA-001 判定基准语义随 CR-002）；Agent：`docs/AGENT_REGISTRY.md`（AGENT-M001 Active/Task-001 APPROVED，AGENT-M002 待 Task-002 签发）；风险：`docs/RISK_REGISTER.md`（RISK-001~009）；变更：`docs/changes/`（CR-001/002、ACR-001/002 均 Open）
-- 当前阶段：Phase 3 —— **M001 Stable + CHANGE-001 执行中**：工程与 54 测试细节见 `docs/modules/M001/`；**M002（作业图片采集与归属）契约 v0.3.0 Frozen 落库 `docs/modules/M002/`**：先采后认归属保留 + 完成程度改由内容级判定链回写（R4~R6），API-M002-001~006（Frozen）；图片存 `<backend>/data/images` 分层、鉴权读取+访问审计；**主线按功能域重排见 `docs/ROADMAP.md`**；**待办（下一开发段）**：CHANGE-001 编码（CR-001 group_no 数据面 + ACR-001 学生子账号认证面 + CR-002/ACR-002 语义与 Provider 配置 + 测试回归 + M001 九件套回填，任务单 `docs/changes/CHANGE-001.md`）→ Task-002（AGENT-M002 实现 M002 v0.3.0）→ 按 ROADMAP M-A~M-D 验收推进 → 全系统回归（真实三方+Mock 双跑）。细节见 `docs/modules/M002/MODULE_*.md`、`docs/changes/CHANGE-001.md`、`docs/ROADMAP.md` 与 `.codebuddy/memory/2026-09-08.md`。
+- 当前阶段：Phase 3 —— **M001 Stable + CHANGE-001 编码/回填完成待 PM 复核**：工程与 **89** 测试细节见 `docs/modules/M001/`（student_accounts/student_auth 等新文件已登记）；**M002（作业图片采集与归属）契约 v0.3.0 Frozen 落库 `docs/modules/M002/`**：先采后认归属保留 + 完成程度改由内容级判定链回写（R4~R6），API-M002-001~006（Frozen）；图片存 `<backend>/data/images` 分层、鉴权读取+访问审计；**主线按功能域重排见 `docs/ROADMAP.md`**；**待办（下一开发段）**：PM 复核 CHANGE-001（DoD 勾选/API ID 收口/顶层状态推进/M001 行定稿 v0.1.2，任务单 `docs/changes/CHANGE-001.md` §执行进度）→ Task-002（AGENT-M002 实现 M002 v0.3.0，M001 段级查询 get_task_group/can_accept_photo 已就绪）→ 按 ROADMAP M-A~M-D 验收推进 → 全系统回归（真实三方+Mock 双跑）。细节见 `docs/modules/M002/MODULE_*.md`、`docs/changes/CHANGE-001.md`、`docs/ROADMAP.md` 与 `.codebuddy/memory/2026-09-08.md`。
 - 治理模板包：`ai-governance-template/`（README v1.0.0 / INSTALL.md）。

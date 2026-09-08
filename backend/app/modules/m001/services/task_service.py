@@ -18,29 +18,75 @@ from app.core.times import iso_from
 from app.modules.m001.models.orm import Task, TaskItem
 from app.modules.m001.repositories.student_repo import StudentRepo
 from app.modules.m001.repositories.task_repo import TaskRepo
-from app.modules.m001.schemas.task import TaskCreate, TaskDetailDTO, TaskItemOut, TaskItemIn, TaskSummaryDTO, TaskUpdate
+from app.modules.m001.schemas.task import (
+    TaskCreate,
+    TaskDetailDTO,
+    TaskGroupSegmentDTO,
+    TaskItemOut,
+    TaskItemIn,
+    TaskSummaryDTO,
+    TaskUpdate,
+)
 from app.shared.exceptions import ConflictError, NotFoundError, ValidationAppError
 
 _EDITABLE_STATUSES = ("draft", "published")
 
 
 def validate_items(items: list[TaskItemIn]) -> list[dict]:
-    """题目集业务校验：非空、seq 从 1 连续唯一、主客观参考答案规则。返回规范化 dict 列表。"""
+    """题目集业务校验（CR-001 容器化）：非空、seq 从 1 连续唯一、主客观参考答案规则、
+    学科作业段结构（group_no 收敛语义）。返回规范化 dict 列表（含 group_no）。"""
     if not items:
         raise ValidationAppError("任务至少需要包含 1 道题目")
     ordered = sorted(items, key=lambda i: i.seq)
     if ordered[0].seq != 1 or any(a.seq + 1 != b.seq for a, b in zip(ordered, ordered[1:])):
         raise ValidationAppError("题号 seq 必须为从 1 开始的连续整数")
-    return [
+    norm = [
         {
             "seq": it.seq,
             "item_type": it.item_type,
             "subject": it.subject,
+            "group_no": it.group_no,
             "stem": it.stem,
             "reference_answer": it.reference_answer,  # subjective 已由 schema 置空
         }
         for it in ordered
     ]
+    _validate_group_structure(norm)
+    return norm
+
+
+def _validate_group_structure(rows: list[dict]) -> None:
+    """学科作业段结构约束（CR-001 收敛语义，按 seq 升序输入）：
+    - 显式分组：存在 group_no>0 时，组号必须为从 1 起的连续整数（无空洞），禁止混入 0；
+    - 全部 0 = 默认单段（旧数据兼容），允许跨科目同段（无 group 区分时不做强制分组）；
+    - 同一组号内 subject 必须一致（段=subject+group_no）；
+    - 同组题目必须连续录入（组内题号 seq 连续，不允许跨组交错）。"""
+    groups: dict[int, list[dict]] = {}
+    for r in rows:
+        groups.setdefault(r["group_no"], []).append(r)
+
+    numbers = sorted(groups)
+    explicit = [n for n in numbers if n > 0]
+    if explicit:
+        if 0 in numbers:
+            raise ValidationAppError("group_no=0（未分组）不能与显式分组混用")
+        if explicit != list(range(1, explicit[-1] + 1)):
+            raise ValidationAppError("学科作业段号 group_no 必须为从 1 开始的连续整数")
+
+    for gno, items_g in groups.items():
+        # 段内科目一致仅约束显式分组；group 0 为默认单段（收敛语义），允许跨科目
+        if gno > 0 and len({r["subject"] for r in items_g}) > 1:
+            raise ValidationAppError(f"学科作业段 {gno} 内科目不一致，请拆分到不同 group_no")
+
+    # 组块连续性：按 seq 升序扫描，同一组再次出现且中间隔了其它组 → 交错
+    seen: set[int] = set()
+    last: int | None = None
+    for r in rows:
+        if r["group_no"] != last:
+            if r["group_no"] in seen:
+                raise ValidationAppError("同一学科作业段必须连续录入（组内题号 seq 连续，不允许跨组交错）")
+            seen.add(r["group_no"])
+            last = r["group_no"]
 
 
 def _deadline_iso(dt: datetime | None) -> str | None:
@@ -59,6 +105,7 @@ def build_item_out(item: TaskItem, include_answers: bool) -> TaskItemOut:
         seq=item.seq,
         item_type=item.item_type,  # type: ignore[arg-type]
         subject=item.subject,
+        group_no=item.group_no,
         stem=item.stem,
         reference_answer=answer,
     )
@@ -82,12 +129,21 @@ def build_detail(session: Session, task: Task, *, include_answers: bool = False)
 
 
 class TaskService:
-    """REST 任务业务：创建/列表/详情/更新。"""
+    """REST 任务业务：创建/列表/详情/更新。
+
+    ACR-001 双主体：scope_student_id=None（family 主体，可操作本家任意学生）；
+    student 主体必须传 scope_student_id=本人，越权/不存在统一 NotFoundError(404)。
+    """
 
     @staticmethod
-    def create(session: Session, family_id: str, data: TaskCreate) -> TaskDetailDTO:
-        # 1) 学生档案归属校验（404 防探测）
-        if StudentRepo.get_with_school(session, family_id, str(data.student_id)) is None:
+    def create(
+        session: Session, family_id: str, data: TaskCreate, *, scope_student_id: str | None = None
+    ) -> TaskDetailDTO:
+        target_student_id = str(data.student_id)
+        # 1) 学生档案归属校验 + 学生主体仅本人（404 防探测）
+        if StudentRepo.get_with_school(session, family_id, target_student_id) is None:
+            raise NotFoundError("学生档案不存在")
+        if scope_student_id is not None and scope_student_id != target_student_id:
             raise NotFoundError("学生档案不存在")
         # 2) 题目集校验
         norm_items = validate_items(data.items)
@@ -95,7 +151,7 @@ class TaskService:
         task = TaskRepo.create(
             session,
             family_id=family_id,
-            student_id=str(data.student_id),
+            student_id=target_student_id,
             title=data.title,
             subject=data.subject,
             grade_level=data.grade_level,
@@ -115,7 +171,13 @@ class TaskService:
         student_id: str | None = None,
         page: int = 1,
         page_size: int = 20,
+        scope_student_id: str | None = None,
     ) -> tuple[list[TaskSummaryDTO], int]:
+        # 学生主体：显式查询他人 → 404；否则强制仅本人
+        if scope_student_id is not None:
+            if student_id is not None and student_id != scope_student_id:
+                raise NotFoundError("任务不存在")
+            student_id = scope_student_id
         rows, total = TaskRepo.list_tasks(
             session,
             family_id,
@@ -147,17 +209,33 @@ class TaskService:
 
     @staticmethod
     def detail(
-        session: Session, family_id: str, task_id: str, *, include_answers: bool = False
+        session: Session,
+        family_id: str,
+        task_id: str,
+        *,
+        include_answers: bool = False,
+        scope_student_id: str | None = None,
     ) -> TaskDetailDTO:
         task = TaskRepo.get_by_id(session, family_id, task_id)
         if task is None:
             raise NotFoundError("任务不存在")
+        if scope_student_id is not None and task.student_id != scope_student_id:
+            raise NotFoundError("任务不存在")
         return build_detail(session, task, include_answers=include_answers)
 
     @staticmethod
-    def update(session: Session, family_id: str, task_id: str, data: TaskUpdate) -> TaskDetailDTO:
+    def update(
+        session: Session,
+        family_id: str,
+        task_id: str,
+        data: TaskUpdate,
+        *,
+        scope_student_id: str | None = None,
+    ) -> TaskDetailDTO:
         task = TaskRepo.get_by_id(session, family_id, task_id)
         if task is None:
+            raise NotFoundError("任务不存在")
+        if scope_student_id is not None and task.student_id != scope_student_id:
             raise NotFoundError("任务不存在")
         if task.status not in _EDITABLE_STATUSES:
             raise ConflictError("任务已开始，题目/内容已冻结，仅支持关闭或重新发布")
@@ -211,3 +289,54 @@ class TaskQueryService:
         if task is None or task.student_id != student_id:
             return False
         return task.status in ("published", "in_progress")
+
+    # —— CR-001 容器化新增（M002 即用接口）——
+
+    @staticmethod
+    def get_task_groups(
+        session: Session, family_id: str, task_id: str
+    ) -> list[tuple[str, int]]:
+        """任务内学科作业段清单 [(subject, group_no)]（按科目、组号排序）。"""
+        from app.shared.exceptions import PermissionDeniedError
+
+        task = TaskRepo.get_by_id(session, family_id, task_id)
+        if task is None:
+            raise PermissionDeniedError("任务不存在或无权访问")
+        stats = TaskRepo.group_stats(session, task_id)
+        return sorted(stats.keys())
+
+    @staticmethod
+    def get_task_group(
+        session: Session,
+        family_id: str,
+        task_id: str,
+        subject: str,
+        group_no: int,
+        *,
+        include_answers: bool = False,
+    ) -> TaskGroupSegmentDTO:
+        """校验并读取任务内某学科作业段（subject+group_no）题目（CR-001 归属目标）。
+        段不存在或越权 → PermissionDeniedError（不泄露存在性）。"""
+        from app.shared.exceptions import PermissionDeniedError
+
+        task = TaskRepo.get_by_id(session, family_id, task_id)
+        if task is None:
+            raise PermissionDeniedError("任务不存在或无权访问")
+        rows = TaskRepo.list_items_in_group(session, task_id, subject, group_no)
+        if not rows:
+            raise PermissionDeniedError("该学科作业段不存在")
+        return TaskGroupSegmentDTO(
+            task_id=UUID(task.task_id),
+            student_id=UUID(task.student_id),
+            title=task.title,
+            subject=subject,
+            group_no=group_no,
+            item_count=len(rows),
+            items=[build_item_out(i, include_answers) for i in rows],
+        )
+
+    @staticmethod
+    def can_accept_photo(session: Session, family_id: str, task_id: str, student_id: str) -> bool:
+        """CR-001/M002 归属语义：任务对该学生当前可接受归属照片。
+        与 can_accept_submission 等价（published 首采；in_progress 续采；draft/closed 不可）。"""
+        return TaskQueryService.can_accept_submission(session, family_id, task_id, student_id)

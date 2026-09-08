@@ -54,3 +54,65 @@ def test_objective_item_without_answer_allowed():
     it = TaskItemIn(seq=1, item_type="objective", subject="math", stem="1+1=?", reference_answer=None)
     out = validate_items([it])[0]
     assert out["reference_answer"] is None
+
+
+# —— CR-001 容器化：学科作业段 group_no 结构约束 ——
+
+
+def gitem(
+    seq: int,
+    *,
+    group_no: int = 0,
+    subject: str = "math",
+    item_type: str = "objective",
+    answer: str | None = "答案",
+) -> TaskItemIn:
+    return TaskItemIn(
+        seq=seq,
+        item_type=item_type,
+        subject=subject,
+        group_no=group_no,
+        stem=f"第{seq}题",
+        reference_answer=answer,
+    )
+
+
+def test_default_single_segment_mixed_subject_ok():
+    """全 0 = 默认单段（旧数据兼容），允许跨科目同段。"""
+    out = validate_items([gitem(1, subject="math"), gitem(2, subject="chinese")])
+    assert [o["group_no"] for o in out] == [0, 0]
+
+
+def test_explicit_groups_ok():
+    out = validate_items([gitem(1, group_no=1), gitem(2, group_no=1), gitem(3, group_no=2)])
+    assert [o["group_no"] for o in out] == [1, 1, 2]
+
+
+def test_explicit_groups_must_start_at_one():
+    with pytest.raises(ValidationAppError):
+        validate_items([gitem(1, group_no=2), gitem(2, group_no=2)])
+
+
+def test_explicit_groups_must_be_contiguous():
+    with pytest.raises(ValidationAppError):
+        validate_items([gitem(1, group_no=1), gitem(2, group_no=3)])
+
+
+def test_mixing_group_zero_with_explicit_rejected():
+    with pytest.raises(ValidationAppError):
+        validate_items([gitem(1, group_no=0), gitem(2, group_no=1)])
+
+
+def test_group_internal_subject_must_be_uniform():
+    with pytest.raises(ValidationAppError):
+        validate_items([gitem(1, group_no=1, subject="math"), gitem(2, group_no=1, subject="english")])
+
+
+def test_group_blocks_must_be_contiguous_no_interleave():
+    with pytest.raises(ValidationAppError):
+        validate_items([gitem(1, group_no=1), gitem(2, group_no=2), gitem(3, group_no=1)])
+
+
+def test_group_no_preserved_in_output():
+    out = validate_items([gitem(1, group_no=1, subject="math"), gitem(2, group_no=2, subject="chinese")])
+    assert out[1]["group_no"] == 2 and out[1]["subject"] == "chinese"

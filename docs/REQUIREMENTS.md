@@ -12,7 +12,7 @@
 
 | REQ ID | 标题 | 来源 | 优先级 | 状态 | 关联模块 | 关联 API | 测试 | 需求详情 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| REQ-001 | 作业任务管理 | V1 指令 §二/§五/§十五 | P0 | Done（M001 Stable；任务语义变更随 CR-001 复开） | M001 | API-M001-001~012（Frozen；变更见 CR-001） | 54（backend/tests） | `requirements/REQ-001.md` |
+| REQ-001 | 作业任务管理 | V1 指令 §二/§五/§十五 | P0 | Done（M001 Stable；**CHANGE-001 执行回填完成**——CR-001 容器化/ACR-001 两级主体/ACR-002 参考答案非基准，2026-09-08 待 PM 复核） | M001 | API-M001-001~012（随 CHANGE-001 修订）+ ACR-001 新增端点 | 89（backend/tests） | `requirements/REQ-001.md` |
 | REQ-002 | 作业图片采集与质量检测 | V1 指令 §二/§五/§十五 | P0 | Approved（CR-001 关联，随 M001 变更执行精校） | M002 | API-M002-001~006（Draft v0.3.0） | 待设计 | `requirements/REQ-002.md` |
 | REQ-003 | AI 作业识别 | V1 指令 §二/§九/§十 | P0 | Approved（+照片归属建议职责，契约轮定稿） | M003 | 待模块契约 | 待设计 | `requirements/REQ-003.md` |
 | REQ-004 | 作业任务匹配 | V1 指令 §二/§十 | P0 | Approved | M004 | 待模块契约 | 待设计 | `requirements/REQ-004.md` |

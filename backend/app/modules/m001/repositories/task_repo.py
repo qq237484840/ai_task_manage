@@ -22,7 +22,7 @@ class TaskRepo:
         family_id: str,
         student_id: str,
         title: str,
-        subject: str,
+        subject: str | None,
         grade_level: str | None,
         content: str | None,
         deadline: str | None,
@@ -43,7 +43,7 @@ class TaskRepo:
 
     @staticmethod
     def replace_items(session: Session, task_id: str, items: list[dict]) -> None:
-        """整体替换题目集（同事务 delete+insert）。items 元素已通过业务校验。"""
+        """整体替换题目集（同事务 delete+insert）。items 元素已通过业务校验（含 group_no）。"""
         session.execute(delete(TaskItem).where(TaskItem.task_id == task_id))
         for it in items:
             session.add(
@@ -52,6 +52,7 @@ class TaskRepo:
                     seq=it["seq"],
                     item_type=it["item_type"],
                     subject=it["subject"],
+                    group_no=it.get("group_no", 0),
                     stem=it["stem"],
                     reference_answer=it.get("reference_answer"),
                 )
@@ -62,6 +63,32 @@ class TaskRepo:
     def list_items(session: Session, task_id: str) -> list[TaskItem]:
         stmt = select(TaskItem).where(TaskItem.task_id == task_id).order_by(TaskItem.seq.asc())
         return list(session.scalars(stmt))
+
+    @staticmethod
+    def list_items_in_group(
+        session: Session, task_id: str, subject: str, group_no: int
+    ) -> list[TaskItem]:
+        """某学科作业段（subject+group_no）内题目（CR-001 段归属目标）。"""
+        stmt = (
+            select(TaskItem)
+            .where(
+                TaskItem.task_id == task_id,
+                TaskItem.subject == subject,
+                TaskItem.group_no == group_no,
+            )
+            .order_by(TaskItem.seq.asc())
+        )
+        return list(session.scalars(stmt))
+
+    @staticmethod
+    def group_stats(session: Session, task_id: str) -> dict[tuple[str, int], int]:
+        """任务内 (subject, group_no) → 题数（CR-001 段结构）。"""
+        rows = session.execute(
+            select(TaskItem.subject, TaskItem.group_no, func.count())
+            .where(TaskItem.task_id == task_id)
+            .group_by(TaskItem.subject, TaskItem.group_no)
+        ).all()
+        return {(subj, grp): cnt for subj, grp, cnt in rows}
 
     @staticmethod
     def get_by_id(session: Session, family_id: str, task_id: str) -> Task | None:
