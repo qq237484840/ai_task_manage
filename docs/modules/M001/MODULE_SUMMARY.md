@@ -1,6 +1,6 @@
 # M001 模块摘要 —— 作业任务管理（30 秒速览）
 
-- **状态**：Testing（Task-001 完成：实现 + 54 项测试通过，待 PM DoD 验收）
+- **状态**：Stable（2026-09-08 PM DoD 验收 APPROVED；实现与 54 测试通过于 v0.6.0）
 - **入口文档**：`MODULE.md`（总览）→ `MODULE_CONTRACT.md`（黑盒契约）→ `MODULE_API.md` → `MODULE_DATA.md`
 
 | 维度 | 摘要 |
@@ -14,7 +14,7 @@
 | Data | `schools`（全局只读公共）、`family_accounts`、`students`、`auth_sessions`、`tasks`、`task_items`（映射 DATA-001/DATA-002/DATA-011） |
 | 核心规则 | 家庭数据带 `family_id` 强制过滤（例外：`schools` 公共只读，ADR-008）；学校字典仅 seed 写入、无运行期维护 API；密码/令牌哈希存储；任务状态机 `draft→published→in_progress→closed`；发布后/开始上传后题目不可改 |
 | Main Risks | 题目录入负担（RISK-002 缓解中，需轻量录入）；账号数据属未成年人个人信息（RISK-004）；seed 学校覆盖不足（REQ-009 风险，按变更流程补录） |
-| Status | Testing（Task-001 完成：实现 + 54 项测试通过，待 PM DoD 验收） |
+| Status | Stable（2026-09-08 PM DoD 验收 APPROVED；历史见 `MODULE_CHANGELOG.md`） |
 
 ## 进入本模块前建议阅读
 

@@ -2,6 +2,8 @@
 
 > 维护：Project Master。需求是工程链的源头（需求 → 模块 → 代码 → 测试）。
 > 状态：**V1 已批准（Approved，需求基线冻结）**。2026-09-08 依据用户提供的「V1 MVP 总控 Agent 指令」录入；PD-001~008 全部确认（ADR-002~007、ASM-001~011），REQ-001~008 于 2026-09-08 冻结为 V1 需求基线；同日按 M001 开发输入增补 **REQ-009（学校基础资料）→ Approved**（决策见 ADR-008）。单内"待确认点"为历史决策记录，已确认者以 ADR/ASM 为准，残留条目在后续变更审批时精校。
+> **2026-09-08（M002 契约完整性审查）触发两项重构，登记于 changes/：`CR-001`（任务=多学科作业登记单容器 + 学科作业段，PD-014/015）与 `ACR-001`（两级主体身份，ADR-009/PD-016）——Approved（2026-09-08）；REQ-001/002/003 单页"待确认点"已随本批精校，语义字段变更随 M001 变更执行精校 Requirement 措辞。
+> **2026-09-08（v0.9.0 用户 grill 定稿）再触发内容级重构**：`CR-002`（内容级判定链数据面：布置登记拍照识别 + 逐题判定 + 报告复核定稿）与 `ACR-002`（判定与 Provider 架构重构：ADR-010/011）——Approved（2026-09-08）；**REQ-001~007 措辞将随 CR-002 精校**（布置登记识别为主、主客观全判、端到端直判、六维 AI 评判为核、报告草稿→家长复核定稿），语义字段变更随 M001 变更执行同步。
 > **禁止任何 Agent 自行创建 REQ ID**（规则见 `ID_GOVERNANCE.md`）。
 >
 > 模块 ID 别名说明：需求原文使用 `M01~M07`，本项目正式 Module ID 为 `M001~M007`（对应关系见 `MODULE_REGISTRY.md`，本表使用正式 ID）。
@@ -10,15 +12,15 @@
 
 | REQ ID | 标题 | 来源 | 优先级 | 状态 | 关联模块 | 关联 API | 测试 | 需求详情 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| REQ-001 | 作业任务管理 | V1 指令 §二/§五/§十五 | P0 | Approved | M001 | 待模块契约 | 待设计 | `requirements/REQ-001.md` |
-| REQ-002 | 作业图片采集与质量检测 | V1 指令 §二/§五/§十五 | P0 | Approved | M002 | 待模块契约 | 待设计 | `requirements/REQ-002.md` |
-| REQ-003 | AI 作业识别 | V1 指令 §二/§九/§十 | P0 | Approved | M003 | 待模块契约 | 待设计 | `requirements/REQ-003.md` |
+| REQ-001 | 作业任务管理 | V1 指令 §二/§五/§十五 | P0 | Done（M001 Stable；任务语义变更随 CR-001 复开） | M001 | API-M001-001~012（Frozen；变更见 CR-001） | 54（backend/tests） | `requirements/REQ-001.md` |
+| REQ-002 | 作业图片采集与质量检测 | V1 指令 §二/§五/§十五 | P0 | Approved（CR-001 关联，随 M001 变更执行精校） | M002 | API-M002-001~006（Draft v0.3.0） | 待设计 | `requirements/REQ-002.md` |
+| REQ-003 | AI 作业识别 | V1 指令 §二/§九/§十 | P0 | Approved（+照片归属建议职责，契约轮定稿） | M003 | 待模块契约 | 待设计 | `requirements/REQ-003.md` |
 | REQ-004 | 作业任务匹配 | V1 指令 §二/§十 | P0 | Approved | M004 | 待模块契约 | 待设计 | `requirements/REQ-004.md` |
 | REQ-005 | AI 作业质量评价（六维度） | V1 指令 §二/§八/§十 | P0 | Approved | M005 | 待模块契约 | 待设计 | `requirements/REQ-005.md` |
 | REQ-006 | AI 教师评价与改进建议 | V1 指令 §二/§六/§七 | P0 | Approved | M006 | 待模块契约 | 待设计 | `requirements/REQ-006.md` |
 | REQ-007 | 今日作业综合报告 | V1 指令 §二/§八/§十五 | P0 | Approved | M007 | 待模块契约 | 待设计 | `requirements/REQ-007.md` |
 | REQ-008 | V1 横切工程与 AI 治理约束 | V1 指令 §九~§十二/§十六 | P0 | Approved | 全局（M003/M005/M006 等） | 待模块契约 | 待设计 | `requirements/REQ-008.md` |
-| REQ-009 | 学校基础资料（全局共享字典 + 档案必填关联） | 用户 M001 开发输入增补（2026-09-08） | P0 | Approved | M001（承载，不设独立模块） | API-M001-012（草案） | 待设计 | `requirements/REQ-009.md` |
+| REQ-009 | 学校基础资料（全局共享字典 + 档案必填关联） | 用户 M001 开发输入增补（2026-09-08） | P0 | Done（M001 seed 落地） | M001（承载，不设独立模块） | API-M001-012（Frozen） | 随 M001 | `requirements/REQ-009.md` |
 
 状态机：`Draft → Approved → In Progress → Done → Deprecated`
 优先级：`P0 必须 / P1 重要 / P2 一般 / P3 可选`

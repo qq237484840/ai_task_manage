@@ -42,13 +42,13 @@ AI Provider 抽象层（基础设施）   Vision Provider / OCR Provider / LLM P
 - 业务逻辑不得绑定某单一模型；至少抽象：Vision / OCR / LLM 三类 Provider
 - 每次 AI 调用记录：model / prompt_version / request_id / latency / token_usage / result / confidence / error
 - Prompt 版本化管理（用于可追溯，见 ADR-003）
-- 接入策略：**抽象 + Mock 先行**（已确认，ADR-007）——内置确定性 Mock/演示实现，本地无 key 跑通全链路；真实三方按统一接口后补实现类，业务代码不感知
+- 接入策略：**真实三方默认**（v0.9.0 定稿 ADR-011，取代原 Mock 先行 ADR-007）——OCR/Vision/LLM 默认对接真实第三方 Provider，Mock 降级为测试桩与离线降级（`mock-*` 标注）；统一接口 + Provider 实现类可替换，业务代码不感知；**ACR-002 已批准（2026-09-08），ADR-011 正式生效**
 
 ## 部署架构
 
-- V1 默认：**单机 / 局域网部署**（开发、演示、家庭自用），单进程（uvicorn）承载 API + H5 + 图片静态目录
+- V1 默认：**联网访问第三方 AI + 单进程部署**（开发、演示、家庭自用；ASM-010 已修订 v0.9.0：真实三方默认需联网，离线显式切 Mock），单进程（uvicorn）承载 API + H5 + 图片静态目录
 - 存储：SQLite 单文件 + 本地图片目录；备份 = 数据库 dump + 图片目录整体备份（ASM-010，PD-007 默认待用户复核）
-- AI 外部依赖经 Provider 抽象隔离（Mock 先行），本地运行无需外网
+- AI 外部依赖经 Provider 抽象隔离（真实三方默认，离线/无密钥时降级 Mock 并标注，本地可无外网演示但不作为默认）
 - 演进（上云/反代/对象存储/PostgreSQL）在存储与服务抽象内替换，不改变业务代码
 
 ## 数据架构
@@ -78,7 +78,7 @@ M007 ─► M001, M002, M005, M006
 
 ## 外部系统
 
-- AI Provider（OCR/Vision/LLM）为 V1 最主要外部依赖；接入策略为 Mock 先行（ADR-007），首个真实三方接入后登记 `EXTERNAL_SYSTEMS.md`
+- AI Provider（OCR/Vision/LLM）为 V1 最主要外部依赖；接入策略 = 真实三方默认（ADR-011，取代 ADR-007 Mock 先行），首个真实三方接入后登记 `EXTERNAL_SYSTEMS.md`；照片/作答出域至三方须满足 RISK-009 合规口径（隐私声明/最小化传输）
 - 其余待识别
 
 ## 核心数据流

@@ -1,14 +1,18 @@
 # MEMORY —— 长期项目记忆
 
-> 就地更新说明：v0.5.0 → v0.6.0（2026-09-08）：Task-001 完成 —— M001 实现 + 54 测试通过 + 九件套实现版回填；M001 Testing，待 PM DoD 验收。
+> 就地更新说明：2026-09-08（执行批 2）：**M002 契约草案 v0.3.0 用户批准 → Frozen**（MODULE.md Developing；CONTRACT/API/DATA Frozen；Task-002 签发，AGENT-M002 Active）→ **顶层同步 v0.10.0** → **CHANGE-001 立项**（合并 CR-001/CR-002/ACR-001/ACR-002 的 M001 变更执行，AGENT-M001 Task-CHG，Executing）——下一开发段=CHANGE-001 编码（group_no 数据面 + 学生子账号认证面 + reference_answer 非基准 + 测试回归 + M001 九件套回填）→ Task-002（M002 v0.3.0 实现）→ ROADMAP M-A 验收。前情（同日前两条）：批准包四项批准+ADR-010/011 Accepted → M002 v0.3.0 起草。
 
 ## 项目概览
 - 仓库：`c:\DevProject\AI.TaskManage`，git 分支 main。
 - **业务（V1，2026-09-08 由用户提供）**：中小学生 AI 作业与学习成长综合评定系统 —— V1 MVP =「AI 每日作业智能评定系统」，闭环：创建任务→上传照片→AI识别→任务匹配→质量评价→AI教师评价→今日报告。仅 M001~M007 七模块（需求原文 M01~M07），禁止知识图谱/画像/组卷/班级管理/多租户等（ADR-002）。
-- **已确认技术决策（用户 2026-09-08 答复，全部落库）**：技术栈=移动优先 H5 + FastAPI + SQLite 单体（ADR-004）；身份=纯家庭模式，家庭账号家长=布置者+学生档案=评定对象、家庭级数据隔离（ADR-005）；正确度判定=分科混合，客观题对照参考答案/主观题不判对错并注明（ADR-006）；AI Provider=抽象+Mock 先行（ADR-007）；部署=单机/局域网 + SQLite + 本地图片目录（ASM-010）；学科=小学语数英书面作业起步、无法判断→标记+家长复核/重拍（ASM-011）。
+- **已确认技术决策（用户 2026-09-08 答复，全部落库）**：技术栈=移动优先 H5 + FastAPI + SQLite 单体（ADR-004）；身份=纯家庭模式，家庭账号家长=布置者+学生档案=评定对象、家庭级数据隔离（ADR-005），扩展为**两级主体**（ADR-009：家长+学生子账号）；正确度判定=**内容级主客观全判 + 端到端直判，不维护参考答案字段**（ADR-006 **Superseded→ADR-010**，PD-021/022）；AI Provider=抽象 + **真实三方默认，Mock 降级测试桩/离线**（ADR-007 **Superseded→ADR-011**，PD-019/需求⑤）；部署=需联网访问三方 API + SQLite + 本地图片目录（ASM-010，2026-09-08 修订）；学科=小学语数英书面作业起步、无法判断→标记+家长复核/重拍（ASM-011）；匹配/评判=**内容级**（布置精确到题，逐题对齐判完成/对错，PD-018）；M005=六维保留但 **AI 评判为核**（PD-023）；报告=**草稿→家长复核定稿归档**（PD-024）。
 - **学校基础资料（2026-09-08，M001 开发输入）**：学校字典=全局共享只读（seed 预置、后台维护暂缓），学生档案 `school_id` 必填关联，字段=名称+学段（ADR-008/REQ-009/DATA-011）；ADR-005 家庭隔离的唯一限定例外，学校管理域仍禁止。
+- **M002 作业图片采集决策（2026-09-08，D1~D4 = PD-010~013，用户确认推荐项）**：① 质量检测=**本地规则先行**（模糊/过暗/过亮/倾斜/遮挡/缺页启发式可解释判定、阈值配置化、规则版本 v1.0，无外部 AI；`QualityChecker` 协议预留 Vision 接入位）；② 预处理=**仅轻量归一**（EXIF 方向归一 + 统一 JPEG 编码 + 长边 ≤2000px；透视矫正/增强归 M003 识别前链路）；③ 提交建模=懒创建/自动归属 open 提交 + 显式 complete，**任务首张质检通过入库即触发 mark_in_progress**（published→in_progress，幂等，可继续上传至 close）；④ 不合格=**不入库 + 逐图报告**（失败不留文件/行/状态；422 `image_quality_rejected` 引导重拍）。
+- **M002 完整性审查重构决策（2026-09-08，PD-014~016 + D5~D8，用户逐项确认；M002 契约 v0.1.0→v0.2.0）**：① **任务粒度**：task=多学科作业登记单容器（subject 语义放宽待 CR-001）+ `task_items.group_no` 学科作业段，学科卡=`(subject,group_no)`，照片最终单归属到作业段；② **先采后认**：上传按批次不预选任务/学科→`unassigned`→AI(M003)建议`suggested`→家长/学生确认`assigned`/`rejected`；首次 assigned 触发任务 `mark_in_progress`（幂等，取代 D3 旧触发）；完成程度=作业段照片覆盖二值化；③ **两级主体**：家庭账号家长（全家+兜底）+学生子账号（完整登录、仅本人；学生自主登记/拍照、家长兜底）→ ADR-009/ACR-001；④ **补全 D5~D8**：批次≤50/任务 assigned≤200；页序服务端自增；未消费(`consumed_at IS NULL`)照片可撤销（物理删+审计）；`(family_id,batch_id)` 串行化+409。
+- **主线功能域重排（2026-09-08，v0.9.0，PD-020/g4）**：主线计划与验收里程碑按 **4 功能域**组织（新建 `docs/ROADMAP.md` v0.9.0），**保留 M001~M007 模块组织与契约治理、开发顺序 M001→M007 不变**：A 学生自主采集闭环（布置登记拍照识别草稿→确认补正→生效；完成作业拍照，PD-017/g1）→ B 家长复核确认闭环（照片归属确认/纠错）→ C 大模型内容级匹配+家长兜底（逐题对齐判完成/对错，主客观全判，低置信/无法判断入复核）→ D 综合评判+每日报告定稿（草稿→复核定稿→归档）。里程碑 M-A~M-D + M-END 全链路回归。
+- **变更/风险登记（2026-09-08）**：`CR-001`/`ACR-001`/`CR-002`/`ACR-002` 均 **Approved** 并**合并为 `docs/changes/CHANGE-001.md`（Executing，AGENT-M001）**；ADR-010/011 → **Accepted**（ADR-006/007 Superseded 正式生效）；**M002 契约 v0.3.0 Frozen（2026-09-08 用户批准，Task-002/AGENT-M002 Active）**；`RISK_REGISTER` RISK-006~007 + RISK-008（三方依赖）、RISK-009（照片出域合规）。
 - 采用「文档驱动 + 总控 Agent 治理 + 模块 Agent 实现」多 Agent 工程模式。用户提供的 #0~#107 方法论已落实为 docs/ 体系。
-- 状态 **v0.6.0**：Phase 2 M001 模块开发（Testing）；**Task-001 完成**：backend（FastAPI 单体）+ frontend（零构建原生 H5）+ tests（54 passed）落地，M001 九件套实现版已回填；待 PM 按 DoD 验收 → 通过转 Stable → M002 契约。REQ-001~009 Approved；PD-001~009 全部确认。
+- 状态 **v0.10.0**：Phase 3 功能域主线 + 内容级重构 —— **M001 Stable**（合并 **CHANGE-001** 执行中：CR-001/CR-002/ACR-001/ACR-002）；**M002 Developing（契约 v0.3.0 Frozen，2026-09-08 批准，Task-002/AGENT-M002 Active）**；主线计划=`ROADMAP.md`。REQ-001~009 Approved；PD-001~024 全部确认；跨模块开放项 O-1~O-9 见 PROJECT_STATUS。
 
 ## 用户偏好与决策（稳定事实）
 - 文档语言：**中文为主**，代码/API 标识符英文。
@@ -22,7 +26,7 @@
 
 ## 关键索引
 - 知识地图入口：`docs/INDEX.md`
-- 状态：`docs/PROJECT_STATUS.md`（v0.6.0 / Phase 2 M001 Testing / PD-001~009）；假设：`docs/ASSUMPTIONS.md`（ASM-001~011）；决策：`docs/adr/ADR-001~008.md`
-- 需求：`docs/REQUIREMENTS.md` + `docs/requirements/REQ-001~009.md`（Approved）；模块：`docs/MODULE_REGISTRY.md`（M001 Testing，M002~M007 Planned）；API：`docs/API_REGISTRY.md`（API-M001-001~012 **Frozen**，改须 CR）；数据：`docs/DATA_MODEL.md`（DATA-001~011）；Agent：`docs/AGENT_REGISTRY.md`（AGENT-M001 Active / Task-001 已完成）；风险：`docs/RISK_REGISTER.md`（RISK-001~005）
-- 当前阶段：Phase 2 M001 模块开发（Testing）—— 工程落地：`backend/app/`（core/shared/api/v1/modules/m001）+ `frontend/`（**零构建原生 H5**，FastAPI 静态托管；Vue3+Vite 仅为可替换壳）+ `backend/tests/`（54 passed，venv 于 `backend/.venv`）。核心实现事实：请求级统一 commit/rollback；`_UNSET` 哨兵 PATCH 清空语义；SQLite FK 开启；schools seed 幂等；`_TRANSITIONS` 表驱动状态机 + mark_in_progress 幂等；越权 REST 对外 404 / 内部接口 403。文档九件套实现版已回填（FILES/TEST/DESIGN 含实现期决策记录 10 条）。**待办：PM 按 DoD（AGENT_GUIDE §6）验收 M001 → 通过转 Stable → 进入 M002 契约设计**。实现/编码细节见 `docs/modules/M001/MODULE_*.md` 与 `.codebuddy/memory/2026-09-08.md`。
+- 状态：`docs/PROJECT_STATUS.md`（**v0.9.0** / Phase 3 功能域主线+内容级重构 / PD-001~024）；**主线计划：`docs/ROADMAP.md`（v0.9.0，功能域 A~D 里程碑）**；假设：`docs/ASSUMPTIONS.md`（ASM-001~011）；决策：`docs/adr/ADR-001~011.md`（ADR-006/007 **Superseded**，ADR-010/011 Proposed）
+- 需求：`docs/REQUIREMENTS.md` + `docs/requirements/REQ-001~009.md`（Approved，REQ-001~007 随 CR-002 精校预告）；模块：`docs/MODULE_REGISTRY.md`（M001 **Stable**，M002 Designing/Draft v0.2.0，M003~M007 Planned）；API：`docs/API_REGISTRY.md`（API-M001-001~012 **Frozen**，API-M002-001~006 **Draft**，改须 CR）；数据：`docs/DATA_MODEL.md`（DATA-001~011，DATA-001 判定基准语义随 CR-002）；Agent：`docs/AGENT_REGISTRY.md`（AGENT-M001 Active/Task-001 APPROVED，AGENT-M002 待 Task-002 签发）；风险：`docs/RISK_REGISTER.md`（RISK-001~009）；变更：`docs/changes/`（CR-001/002、ACR-001/002 均 Open）
+- 当前阶段：Phase 3 —— **M001 Stable + CHANGE-001 执行中**：工程与 54 测试细节见 `docs/modules/M001/`；**M002（作业图片采集与归属）契约 v0.3.0 Frozen 落库 `docs/modules/M002/`**：先采后认归属保留 + 完成程度改由内容级判定链回写（R4~R6），API-M002-001~006（Frozen）；图片存 `<backend>/data/images` 分层、鉴权读取+访问审计；**主线按功能域重排见 `docs/ROADMAP.md`**；**待办（下一开发段）**：CHANGE-001 编码（CR-001 group_no 数据面 + ACR-001 学生子账号认证面 + CR-002/ACR-002 语义与 Provider 配置 + 测试回归 + M001 九件套回填，任务单 `docs/changes/CHANGE-001.md`）→ Task-002（AGENT-M002 实现 M002 v0.3.0）→ 按 ROADMAP M-A~M-D 验收推进 → 全系统回归（真实三方+Mock 双跑）。细节见 `docs/modules/M002/MODULE_*.md`、`docs/changes/CHANGE-001.md`、`docs/ROADMAP.md` 与 `.codebuddy/memory/2026-09-08.md`。
 - 治理模板包：`ai-governance-template/`（README v1.0.0 / INSTALL.md）。

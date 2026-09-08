@@ -3,6 +3,91 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.10.0 —— 2026-09-08
+
+### M002 契约批准冻结 + Task-002 签发 + M001 变更执行启动
+
+- **M002 契约草案 v0.3.0 用户批准（签署区）→ Frozen**：先采后认归属保留；完成程度以内容级判定为准（M002 收敛为采集/质检/归一/归属/证据供给）；九件套状态头与 MODULE_CHANGELOG +批准冻结行
+- **Task-002 签发（AGENT-M002 → Active）**：实现 M002 v0.3.0（backend `modules/m002` + tests + 回填九件套），依赖 M001 CHANGE 落地后联调
+- **M001 合并 CHANGE 执行启动（AGENT-M001，Task-CHG）**：`CR-001`（登记单容器化 + `task_items.group_no`，reference_answer 降为非基准辅助字段）/`ACR-001`（两级主体：学生子账号 + 认证）/`CR-002` + `ACR-002`（内容级判定链数据面与 Provider 配置，ADR-010/011 口径）——代码落地 + 54 测试回归 + 新用例 + 回填 M001 契约
+- 同步：`PROJECT_STATUS.md` → **v0.10.0**（M002 Developing、M001 变更执行中、下一步行动更新）、`MODULE_REGISTRY.md`（M002 Developing/Frozen v0.3.0、M001 变更执行中）、`API_REGISTRY.md`（API-M002-001~006 Draft → **Frozen**）、`AGENT_REGISTRY.md`（AGENT-M002 Active、AGENT-M001 Task-CHG）、`INDEX.md`
+- 下一步：M001 合并 CHANGE 完成 → 回填 M001 九件套 → M002 编码（Task-002）→ ROADMAP M-A 里程碑验收（学生自主采集闭环）
+
+## v0.9.0 —— 2026-09-08
+
+### 主线重排 + 内容级判定重构（用户 grill 定稿 g1~g4 + 内容级四问 q2-1~q2-4，共 8 项决策 PD-017~024）
+
+- **主线按功能域重排（PD-020/g4 → `ROADMAP.md` v0.9.0）**：保留 M001~M007 模块组织与契约治理、开发顺序不变；**主线计划与验收里程碑 = 4 功能域** A 学生自主采集闭环 → B 家长复核确认闭环 → C 大模型内容级匹配+家长兜底 → D 综合评判+每日报告定稿；每条对应用户核心需求逐条可演示验收（里程碑 M-A~M-D + M-END 回归）；横切能力=真实三方 AI/MVC/两级主体/学校字典
+- **布置登记录入拍照识别为主（PD-017/g1）**：拍黑板/记事本/布置页 → 大模型识别"今日作业清单（学科+条目）"草稿 → 学生/家长确认补正后生效为登记单；**M003 增加"布置单识别"AI 环节**
+- **内容级匹配与评判（PD-018/g2 + PD-021/q2-1 + PD-022/q2-2 → ADR-010）**：布置精确到题；匹配=照片内容↔布置题逐题对齐判完成/对错；**主客观全判**；判定基准=**模型端到端直接判（不维护参考答案字段）**，输出可观察依据+置信度，低置信/无法判断入家长复核；ADR-006（分科混合/参考答案对照）→ **Superseded**，ADR-003 不武断底线保留
+- **真实三方 AI 为默认运行（PD-019/g3/需求⑤ → ADR-011）**：Provider 抽象保留，OCR/Vision/LLM 真实三方为默认实现，Mock 降级测试桩/离线降级（`mock-*` 标注）；ASM-010 修订=部署需联网前提；ADR-007 → **Superseded**；RISK-008（三方依赖）、RISK-009（照片出域合规）新增
+- **M005 六维保留但 AI 评判为核（PD-023/q2-3）**：逐题完成/对错 + 大模型综合评判（六维质量+综合分）基于识别/匹配证据出具，权重仍配置化
+- **报告草稿→家长复核定稿（PD-024/q2-4）**：大模型生草稿 → 家长复核（低置信/无法判断/对错异议逐项过）→ 确认定稿归档（保留草稿与复核记录）
+
+### 更新 / 变更登记
+
+- 新增：`docs/ROADMAP.md`（v0.9.0 功能域主线）、`docs/changes/CR-002.md`（内容级判定链数据面）、`docs/changes/ACR-002.md`（判定与 Provider 架构重构）、`docs/adr/ADR-010.md`（内容级主客观全判，取代 ADR-006）、`docs/adr/ADR-011.md`（真实三方默认，取代 ADR-007）——CR-002/ACR-002 均 **Open 待批准**，ADR-010/011 **Proposed**（同日已批准，见下方"批准包"）
+- `ADR-006.md`/`ADR-007.md` → 状态 Superseded（附取代说明）；`ASSUMPTIONS.md`（ASM-008/010/011 修订，ASM-010 联网前提）；`RISK_REGISTER.md`（RISK-002~004/006 口径升级 + RISK-008/009）
+- `DATA_MODEL.md`（DATA-001 判定基准语义 + DATA-004/005/006 内容级口径 + v0.9.0 变更预告）；`MODULE_REGISTRY.md`（M001~M007 行口径 + 状态注）
+- `SYSTEM_SUMMARY.md` / `ARCHITECTURE.md`：关键技术决策/接入策略/部署架构/外部系统段加 v0.9.0 变更注记（ADR-006/007 Superseded、真实三方默认、联网前提、出域合规）
+- `PROJECT_STATUS.md` → **v0.9.0**：阶段更新、PD-017~024 登记、开放项 O-1~O-4 精校 + O-9 新增、下一步行动更新
+- `INDEX.md`（+ROADMAP/ADR-010/011 登记，状态同步）；`MODULE_REGISTRY.md` 状态注 v0.9.0
+
+### 批准包（2026-09-08 用户审阅批准，四项全部批准）
+
+- `CR-001`（登记单容器化 + `group_no` 学科作业段）→ **Approved**：批准附带条件落实——条款冲突按 ADR-010 定稿口径修订（`reference_answer` 保留为**非基准**辅助字段、"逐题对照能力"措辞作废）、组号默认语义实施时收敛回填
+- `ACR-001`（两级主体认证）→ **Approved**：按验收标准纳入 M001 变更执行（54 测试回归 + 双主体越权矩阵 + family 向后兼容）
+- `CR-002`（内容级判定链数据面）→ **Approved**：批准后立即起草 **M002 契约草案 v0.3.x**（下一批准点）
+- `ACR-002`（判定 + Provider 架构重构）→ **Approved**：ADR-010/011 生效（**Accepted**，ADR-006/007 → Superseded 正式生效）；ADR-010 §Decision 评分消费引用勘误（依 q2-3/CR-002 语义）
+- 同步：`PROJECT_STATUS.md`/`MODULE_REGISTRY.md`/`INDEX.md`/`REQUIREMENTS.md`/`AGENT_REGISTRY.md` 状态 → Approved/Accepted；开放项 O-8/O-9 转入执行前状态
+- 下一步：**M002 契约草案 v0.3.x 起草 → 用户批准 → M001 合并 CHANGE 执行**（CR-001/CR-002/ACR-001/ACR-002）
+
+## v0.8.0 —— 2026-09-08
+
+### 变更 / 决策（M002 契约完整性审查 → 两项架构重构 + 采集补全）
+
+- **重构一（任务语义，PD-014 → `CR-001` Open）**：task = **多学科作业登记单容器**；`task_items` 保留题目级并新增 `group_no`（学科作业段，同科多份可区隔）；学科卡 = `(subject, group_no)` 聚合；客观题参考答案逐题对照能力（ADR-006）保留；任务创建主体扩展（家长/学生本人）
+- **重构二（采集与归属，PD-015 → M002 v0.2.0）**：**先采后认** —— 上传按"上传批次"不预选任务/学科；照片入库 `unassigned` → AI（M003）建议 `suggested` → 家长/学生确认 `assigned`（归属到登记单内学科作业段）或 `rejected`；首次 assigned 触发任务 `mark_in_progress`（幂等，取代 v0.1.0 D3"首张入库即触发"）；完成程度 = 学科作业段照片覆盖二值化（不猜原则）
+- **重构三（身份主体，PD-016 → `ADR-009` Accepted + `ACR-001` Open）**：两级主体 = 家庭账号（家长：全家 + 兜底）+ **学生子账号**（可登录、仅本人）；学生自主登记/拍照、家长兜底；ADR-005 语义扩展（家庭级隔离不变）
+- **采集补全（D5~D8）**：D5 数量上限（单批次 ≤50 / 单任务 assigned ≤200，配置化）；D6 页序服务端自增（前端不传页码）；D7 未消费（`consumed_at IS NULL`）照片可撤销（物理删 + 审计），已消费不可变；D8 服务层按 `(family_id, batch_id)` 串行化 + `409 concurrent_conflict`
+- 数据：DATA-003 重构 = `upload_batches` + `photos`（归属状态机 + 归属三元组 + suggestion/quality 快照）；M001 冻结面受影响（CR-001/ACR-001 批准后执行变更）
+
+### 更新
+
+- 新增：`docs/adr/ADR-009.md`（Accepted）、`docs/changes/CR-001.md`、`docs/changes/ACR-001.md`（Open）；`RISK_REGISTER.md`（+RISK-006/007）
+- `docs/modules/M002/` 九件套 **v0.1.0 → v0.2.0 全量重构**（总览/摘要/契约/API/数据/设计/测试/文件/变更日志；API-M002-001~006）
+- `API_REGISTRY.md`（M002 v0.2.0 六接口）、`MODULE_REGISTRY.md`（M002 v0.2.0 + M001 变更预告）、`PROJECT_STATUS.md`（→ v0.8.0，+PD-014~016 与跨模块开放项）、`REQUIREMENTS.md` + REQ-001/002/003 精校、`ADR-005.md`（+ADR-009 扩展注）
+- 说明：`INDEX.md`/`DATA_MODEL.md` 的字段级同步随 CR-001/ACR-001 批准后统一执行（避免二次漂移）
+
+## v0.7.1 —— 2026-09-08
+
+### 变更 / 决策
+
+- **M002 四关键决策确认（用户采纳推荐项，PD-010~013）**：
+  - D1/PD-010 质量检测策略 = **本地规则先行**（可解释启发式 + 阈值配置化 + 规则版本化，无外部 AI；`QualityChecker` 协议预留 Vision 接入位）
+  - D2/PD-011 预处理边界 = **仅轻量归一**（EXIF 归一 + 统一 JPEG + 长边上限缩放；矫正/增强归 M003）
+  - D3/PD-012 提交建模与状态触发 = **单图通过即触发**（懒创建/自动归属 open 提交 + 显式 complete；任务首张入库即 `mark_in_progress`，可继续上传至 close）
+  - D4/PD-013 不合格处理 = **不入库 + 逐图报告**（失败不留文件/行/状态；`422 image_quality_rejected` 引导重拍）
+- **M002 九件套契约草案 v0.1.0（Draft）产出**（`docs/modules/M002/`）：契约/API/数据/设计/文件/测试六件细化 + 总览/摘要/变更日志；API-M002-001~004（上传/提交列表/结束本组/受控取图）登记 **Draft**；DATA-003 字段级细化（submissions/submission_images + 图片存储布局）；**待用户批准（签署区）→ Frozen → 签发 Task-002**
+
+### 更新
+
+- 新增：`docs/modules/M002/`（九件套草案 v0.1.0）
+- `MODULE_REGISTRY.md`（M002 Designing/Draft v0.1.0）、`API_REGISTRY.md`（+API-M002-001~004 Draft）、`AGENT_REGISTRY.md`、`PROJECT_STATUS.md`（→ v0.7.1，+PD-010~013）、`INDEX.md`、`MODULE_CHANGELOG.md`（M002 +v0.1.0 行）
+
+## v0.7.0 —— 2026-09-08
+
+### 变更 / 决策
+
+- **M001 DoD 验收通过（用户：验收通过）**：PM 按 `AGENT_GUIDE.md` §6 对 Task-001 交付物逐项验收 → **APPROVED**；M001 Testing → **Stable**（契约 v0.1.1 Frozen 保持不变，API-M001-001~012 全程未越契约）
+- 进入 **M002（作业图片采集）契约设计**（M002 → Designing）：关键决策点待用户确认，九件套草案 v0.1.0（Draft）产出后提交批准
+
+### 更新
+
+- `docs/modules/M001/` 九件套状态 → Stable（MODULE.md / MODULE_SUMMARY.md）
+- `MODULE_REGISTRY.md`（M001 Stable、M002 Designing）、`AGENT_REGISTRY.md`（AGENT-M001 Task-001 APPROVED；AGENT-001 转入 M002 契约治理）、`PROJECT_STATUS.md`（→ v0.7.0）
+- `INDEX.md`（状态同步，修复 v0.4.1~v0.6.0 期间的索引漂移）、`MODULE_CHANGELOG.md`（+验收行）
+
 ## v0.6.0 —— 2026-09-08
 
 ### 变更 / 决策
