@@ -1,8 +1,8 @@
 # M001 模块总览 —— 作业任务管理
 
 - **Module ID**：M001（对应需求原文 M01）
-- **状态**：Stable（2026-09-08 PM 按 DoD 验收 APPROVED，Task-001 交付；**CHANGE-001 编码完成待 PM 复核**，2026-09-08）
-- **版本**：v0.1.1（2026-09-08 批准，契约基线 Frozen）；CHANGE-001 执行回填（CR-001/CR-002/ACR-001/ACR-002）→ 收口定稿 v0.1.2
+- **状态**：Stable（2026-09-08 PM 按 DoD 验收 APPROVED，Task-001 交付；**CHANGE-001 PM 复核 APPROVED（2026-09-08）→ Applied**）
+- **版本**：v0.1.2（2026-09-08 定稿：契约基线 v0.1.1 Frozen 之上执行 CHANGE-001——CR-001 容器化/CR-002 内容级语义/ACR-001 两级主体/ACR-002 判定非基准，API-M001-013~017 新增登记 Active）
 - **Domain**：作业评定
 - **Owner Agent**：AGENT-M001
 - **文档目录**：`docs/modules/M001/`
@@ -61,7 +61,7 @@ V1 的**基座模块**：承载"家庭空间与作业任务"这一入口域。�
 
 ## Exposed Services
 
-- **REST API**（前缀 `/api/v1`）：家庭认证、学生子账号（ACR-001 新增）、学校字典、学生档案、作业任务（清单见 `MODULE_API.md`；API-M001-001~012 Frozen 面 + ACR-001 新增端点待编号）
+- **REST API**（前缀 `/api/v1`）：家庭认证、学生子账号（API-M001-013~017，ACR-001 新增）、学校字典、学生档案、作业任务（清单见 `MODULE_API.md`；API-M001-001~012 Frozen 面 + API-M001-013~017 Active）
 - **内部服务接口**（进程内 Python Interface，供同进程其他模块调用）：`FamilySpaceService`、`TaskQueryService`（含 CR-001 段级查询）、`TaskStateService`（方法级契约见 `MODULE_API.md` §内部接口）
 
 ## Forbidden Access

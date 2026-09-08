@@ -1,6 +1,6 @@
 # M001 模块数据（权威源）—— 作业任务管理
 
-- **状态**：随 CHANGE-001 修订（2026-09-08 编码完成回填；变更经 CR-001/CR-002/ACR-001/ACR-002 批准，待 PM 收口复核后定稿 v0.1.2）
+- **状态**：v0.1.2 定稿（2026-09-08 CHANGE-001 PM 复核 APPROVED/Applied；变更经 CR-001/CR-002/ACR-001/ACR-002 批准执行）
 - **Owner**：M001（家庭数据唯一写入口；DATA-011 学校字典仅初始化 seed 写入，运行期无写路径）；映射全局实体 DATA-001 / DATA-002 / DATA-011（`DATA_MODEL.md` 为全局登记，本文件为字段级权威源）
 - **存储**：SQLite 单文件（ADR-004/ASM-010）；ORM 抽象为 PostgreSQL 迁移预留（见 `MODULE_DESIGN.md`）
 

@@ -1,6 +1,6 @@
 # M001 模块 API（权威源）—— 作业任务管理
 
-- **状态**：随 CHANGE-001 修订（2026-09-08 编码完成回填；CR-001/CR-002/ACR-001/ACR-002 已批准，API-M001-001~012 冻结面修订 + ACR-001 新增端点待 PM 收口登记编号后定稿 v0.1.2）
+- **状态**：**v0.1.2（定稿）**（2026-09-08 CHANGE-001 PM 复核 APPROVED；API-M001-001~012 冻结面随变更后实况修订 + ACR-001 新增端点登记 API-M001-013~017）
 - **REST 前缀**：`/api/v1`；**认证**：除注册/登录外均需 `Authorization: Bearer <token>`
 - **两级主体（ACR-001/ADR-009）**：`family`（家长，Bearer 来自 `/family/login`）= 本家任意学生可操作 + 兜底；`student`（学生子账号，Bearer 来自 `/student/login`）= **仅本人数据**（URL 传参他人 → 404 防探测；管理类家长专属操作 → 403）。两类 token 均可被既有资源端点识别，`family_id` 为过滤底线
 - **错误体统一**：`ErrorResponse { "code": string, "message": string, "request_id": string }`（HTTP 状态映射见契约 Failure Behavior）
@@ -24,16 +24,13 @@
 | API-M001-010 | 更新任务 | PATCH `/tasks/{task_id}` | 仅 draft/published 且未开始上传时可改（防基准漂移） |
 | API-M001-011 | 推进任务状态 | POST `/tasks/{task_id}/status` | 合法迁移：publish/close/reopen |
 | API-M001-012 | 学校字典列表 | GET `/schools` | 全局共享只读学校列表（建档下拉数据源，ADR-008） |
+| API-M001-013 | 开通学生子账号 | POST `/students/{student_id}/account` | **family 仅**：为学生档案开通子账号（login_name 学生命名空间唯一；弱口令返回 password_warning） |
+| API-M001-014 | 更新学生子账号 | PATCH `/students/{student_id}/account` | **family 仅**：停用/启用（status）或改密（password），至少一项 |
+| API-M001-015 | 学生登录 | POST `/student/login` | 校验子账号凭据 → student 主体会话 token（subject_type=student）；命名空间独立防爆破 |
+| API-M001-016 | 学生登出 | POST `/student/logout` | student/family 均可注销当前会话（204 幂等） |
+| API-M001-017 | 学生主体信息 | GET `/student/me` | **student 仅**：当前学生档案（StudentDTO）；family 主体 → 403 |
 
-> **ACR-001 新增端点（编码已交付；API ID 待 Project Master 收口分配后登记）**：
-
-| 名称 | Method/Path | 主体 | 摘要 |
-| --- | --- | --- | --- |
-| 学生子账号开通 | POST `/students/{student_id}/account` | family 仅 | 为学生档案开通子账号（login_name 学生命名空间唯一；弱口令返回 password_warning） |
-| 学生子账号更新 | PATCH `/students/{student_id}/account` | family 仅 | 停用/启用（status）或改密（password），至少一项 |
-| 学生登录 | POST `/student/login` | 公开 | 校验子账号凭据 → student 主体会话 token（subject_type=student）；命名空间独立防爆破 |
-| 学生登出 | POST `/student/logout` | student | 注销当前会话（204 幂等） |
-| 学生主体信息 | GET `/student/me` | student 仅 | 当前学生档案（StudentDTO）；family 主体 → 403 |
+> API-M001-013~017（ACR-001 新增）由 Project Master 于 2026-09-08 CHANGE-001 收口分配编号并登记 `API_REGISTRY.md`（状态 Active）；详细契约见文末"ACR-001 新增端点"小节。
 
 ## 详细契约
 
@@ -120,34 +117,34 @@
 - Response `200 { "items": [ { "school_id": uuid, "name": str, "stage": str } ], "page": n, "page_size": n, "total": n }`
 - Errors：`401` 未登录；`422` 参数非法
 
-## ACR-001 新增端点（学生子账号与主体信息；详细契约）
+## ACR-001 新增端点详细契约（API-M001-013~017）
 
-> 新增端点由 ACR-001（Approved）随 CHANGE-001 落地，**API ID 待 Project Master 收口分配**；冻结前如有调整经 CHANGE 复核。
+> 新增端点由 ACR-001（Approved）随 CHANGE-001 落地（2026-09-08 PM 收口分配 API ID）；状态 Active（CHANGE 批准引入），待用户批准冻结面扩展（如有，走 CHANGE 复核）。
 
-### 开通学生子账号
+### API-M001-013 开通学生子账号
 - `POST /api/v1/students/{student_id}/account`（Bearer；**family 仅**，student 主体 → 403）
 - Request `{ "login_name": str(3..64), "password": str(6..128) }`（学生弱口令放行，响应带提示）
 - Response `201 { "student_id": uuid, "login_name": str, "status": "active", "created_at": ISO, "updated_at": ISO, "password_warning": str|null }`
 - Errors：`404` 学生档案不存在/不属本家庭（防探测）；`409` 该学生已有子账号或登录名被占用；`422` 校验失败
 
-### 更新学生子账号（停用/启用/改密）
+### API-M001-014 更新学生子账号（停用/启用/改密）
 - `PATCH /api/v1/students/{student_id}/account`（Bearer；**family 仅**）
 - Request `{ "status": "active"|"disabled"|null, "password": str(6..128)|null }`（至少一项显式；PATCH 语义）
 - Response `200` 同开通响应（status/password_warning 反映变更后实况）
 - Errors：`404` 学生档案或子账号不存在/不属本家庭；`422` 校验失败
 
-### 学生登录
+### API-M001-015 学生登录
 - `POST /api/v1/student/login`（公开）
 - Request `{ "login_name": str, "password": str }`
 - Response `200 { "token": str, "expires_at": ISO, "subject_type": "student", "student_id": uuid, "student_name": str }`
 - 命名空间：与家庭登录名可同名不互扰；登录防爆破按 `student` 命名空间独立
 - Errors：`401` 凭据错误/账号已停用；`403` 账号被临时锁定（爆破退避）
 
-### 学生登出
+### API-M001-016 学生登出
 - `POST /api/v1/student/logout`（Bearer；student/family 均可注销当前会话）
 - Response `204`（幂等）
 
-### 学生主体信息
+### API-M001-017 学生主体信息
 - `GET /api/v1/student/me`（Bearer；**student 仅**）
 - Response `200 StudentDTO`（当前学生档案，含 school）
 - Errors：`403` family 主体或未绑定学生档案

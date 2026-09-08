@@ -3,7 +3,7 @@
 > 维护：Project Master / 各模块 Owner Agent。
 > 注意：本表只做 **导航与状态登记**；API 的完整定义（请求/响应/错误/契约）以所属模块的 `MODULE_API.md` 为权威源，本表不复制定义（Single Source of Truth，见 `DEVELOPMENT_GUIDE.md`）。
 >
-> 状态：**V1 启用，M001 Frozen / M002 Frozen 已登记**（2026-09-08）。API-M001-001~012 **Frozen**（修改须走 CR；M001 变更 `CR-001`/`ACR-001`/`CR-002`/`ACR-002` 均 **Approved**，**CHANGE-001 编码/测试/回填完成，待 PM 复核**——冻结面契约描述随变更后实况更新于 `MODULE_API.md`，ACR-001 新增端点已编码、**API ID 待 Project Master 收口分配**）；API-M002-001~006 **Frozen**（契约基线 **v0.3.0**，2026-09-08 用户批准；先采后认重构 + 内容级判定口径；v0.1.0 四接口语义废弃）；M003~M007 在各自契约阶段逐条登记；登记前不得实现无契约接口。
+> 状态：**V1 启用，M001 Frozen / M002 Frozen 已登记**（2026-09-08）。API-M001-001~012 **Frozen**（修改须走 CR；M001 变更 `CR-001`/`ACR-001`/`CR-002`/`ACR-002` 均 **Approved** 并随 **CHANGE-001 已完成（PM 复核 APPROVED，2026-09-08）**落地，冻结面契约按变更后实况更新于 `MODULE_API.md`）；**API-M001-013~017 新增登记（Active，ACR-001 学生子账号端点，CHANGE-001 引入）**；API-M002-001~006 **Frozen**（契约基线 **v0.3.0**，2026-09-08 用户批准；先采后认重构 + 内容级判定口径；v0.1.0 四接口语义废弃）；M003~M007 在各自契约阶段逐条登记；登记前不得实现无契约接口。
 
 ## API 登记表
 
@@ -21,6 +21,11 @@
 | API-M001-010 | 更新任务 | M001 | v0.1 | Frozen | PATCH `/api/v1/tasks/{task_id}` | `docs/modules/M001/MODULE_API.md` |
 | API-M001-011 | 推进任务状态 | M001 | v0.1 | Frozen | POST `/api/v1/tasks/{task_id}/status` | `docs/modules/M001/MODULE_API.md` |
 | API-M001-012 | 学校字典列表 | M001 | v0.1 | Frozen | GET `/api/v1/schools` | `docs/modules/M001/MODULE_API.md` |
+| API-M001-013 | 开通学生子账号 | M001 | v0.1 | Active | POST `/api/v1/students/{student_id}/account` | `docs/modules/M001/MODULE_API.md` |
+| API-M001-014 | 更新学生子账号 | M001 | v0.1 | Active | PATCH `/api/v1/students/{student_id}/account` | `docs/modules/M001/MODULE_API.md` |
+| API-M001-015 | 学生登录 | M001 | v0.1 | Active | POST `/api/v1/student/login` | `docs/modules/M001/MODULE_API.md` |
+| API-M001-016 | 学生登出 | M001 | v0.1 | Active | POST `/api/v1/student/logout` | `docs/modules/M001/MODULE_API.md` |
+| API-M001-017 | 学生主体信息 | M001 | v0.1 | Active | GET `/api/v1/student/me` | `docs/modules/M001/MODULE_API.md` |
 | API-M002-001 | 创建上传批次 | M002 | v0.3.0 | Frozen | POST `/api/v1/upload-batches` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-002 | 上传作业照片 | M002 | v0.3.0 | Frozen | POST `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-003 | 照片列表/待处理队列 | M002 | v0.3.0 | Frozen | GET `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |

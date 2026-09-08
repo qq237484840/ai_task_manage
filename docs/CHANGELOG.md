@@ -3,6 +3,17 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.11.0 —— 2026-09-08
+
+### CHANGE-001 完成（M001 定稿 v0.1.2）+ Task-002 正式签发（M002 编码启动）
+
+- **CHANGE-001 PM 复核 APPROVED → Applied（AGENT-M001 完成）**：`CR-001`（任务=多学科作业登记单容器 + 学科作业段 `task_items.group_no`）/`ACR-001`（两级主体：`student_accounts` 学生子账号 + family/student 双型会话 + 命名空间隔离防爆破 + student 仅本人越权 404）/`CR-002`+`ACR-002`（`reference_answer`=非判定基准辅助字段，端到端直判 ADR-010）——代码落地 + 测试 54→**89 全绿** + M001 九件套回填定稿 + DATA_MODEL/REQ-001/Registry 同步
+- **API-M001-013~017 收口登记（Active）**：开通/更新学生子账号、学生登录/登出/主体信息（ACR-001 新增端点，API ID 由 Project Master 分配）
+- **M001 契约定稿 v0.1.2**（Stable + 维护态）：MODULE.md/CONTRACT/API/DATA/DESIGN/FILES/SUMMARY/TEST/CHANGELOG 状态头与 API 编号同步
+- **Task-002 正式签发（AGENT-M002 → Active 编码中，任务书 `docs/agents/Task-002.md`）**：实现 M002 v0.3.0（backend `modules/m002` + 图片质检/归一/受控存储 + 先采后认归属 + tests + 回填九件套）；M001 依赖侧已就绪（`get_task_group`/`can_accept_photo`/双主体认证/`mark_in_progress`）
+- 同步：`PROJECT_STATUS.md` → **v0.11.0**、`MODULE_REGISTRY.md`（M001 v0.1.2、M002 Task-002 编码中）、`API_REGISTRY.md`（API-M001-013~017 新增）、`AGENT_REGISTRY.md`（AGENT-M001 维护态、AGENT-M002 Task-002）、`ROADMAP.md`（采集链当前主线）
+- 下一步：M002 编码（Task-002）→ ROADMAP M-A 里程碑 PM 验收（学生自主采集闭环）
+
 ## v0.10.0 —— 2026-09-08
 
 ### M002 契约批准冻结 + Task-002 签发 + M001 变更执行启动

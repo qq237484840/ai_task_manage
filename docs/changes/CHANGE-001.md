@@ -1,6 +1,6 @@
 # CHANGE-001 —— M001 合并变更执行（CR-001/CR-002/ACR-001/ACR-002）
 
-- **CHANGE ID**：CHANGE-001 ｜ **状态**：**Executing**（2026-09-08 启动，AGENT-M001） ｜ **日期**：2026-09-08
+- **CHANGE ID**：CHANGE-001 ｜ **状态**：**已完成（Applied）**（2026-09-08 PM 复核 APPROVED 关闭） ｜ **日期**：2026-09-08
 - **提出者**：Project Master ｜ **执行 Agent**：AGENT-M001（Task-CHG）
 - **依据**：`docs/changes/CR-001.md`（Approved）、`CR-002.md`（Approved）、`ACR-001.md`（Approved）、`ACR-002.md`（Approved）——四项 2026-09-08 用户批准，合并为一个 CHANGE 执行
 - **前置**：M002 契约草案 v0.3.0 已批准 Frozen（2026-09-08）→ 本变更执行启动（提供 M002 编码所需的 group_no/两级主体接口）
@@ -27,16 +27,22 @@
 
 ## 验收标准（DoD）
 
-- [ ] CR-001/ACR-001/CR-002/ACR-002 条款全部在 M001 代码与文档落实（交叉核对）
-- [ ] `reference_answer` 不作为任何判定路径基准；`item_type` 仅标注
-- [ ] 两级主体：student token 仅本人数据可读/写；family token 全家 + 兜底；跨家庭一律 404/403（对外 404）
-- [ ] 单学科旧任务与多学科容器任务在 API/DTO 语义下均可表达（向后兼容）
-- [ ] 既有 54 测试全绿 + 新增用例通过（backend/.venv 跑 pytest）
-- [ ] M001 九件套回填（含 MODULE_CHANGELOG 记录本 CHANGE）并同步 DATA_MODEL/顶层状态
+- [x] CR-001/ACR-001/CR-002/ACR-002 条款全部在 M001 代码与文档落实（交叉核对）
+- [x] `reference_answer` 不作为任何判定路径基准；`item_type` 仅标注
+- [x] 两级主体：student token 仅本人数据可读/写；family token 全家 + 兜底；跨家庭一律 404/403（对外 404）
+- [x] 单学科旧任务与多学科容器任务在 API/DTO 语义下均可表达（向后兼容）
+- [x] 既有 54 测试全绿 + 新增用例通过（backend/.venv 跑 pytest，复核 **89 passed**）
+- [x] M001 九件套回填（含 MODULE_CHANGELOG 记录本 CHANGE）并同步 DATA_MODEL/顶层状态
 
 ## 处理路径
 
-Executing（AGENT-M001）→ 代码落地 + 测试 + 回填 → **PM 复核（当前待复核）** → 变更记录关闭（状态 Applied/Closed，随 M001 变更后版本 v0.1.2 或经 CR 审定的契约版）→ M002 Task-002 编码联调。
+执行（AGENT-M001）→ 代码落地 + 测试 + 回填 → **PM 复核（2026-09-08 APPROVED）** → 变更记录关闭（**已完成/Applied**；M001 变更后契约定稿 **v0.1.2**；ACR-001 新增端点登记 API-M001-013~017）→ M002 Task-002 编码启动。
+
+## PM 复核记录（2026-09-08，Project Master）
+
+- 复核方式：CHANGE-001 执行进度自证 + 测试独立复核（`backend/.venv` `pytest` → **89 passed**）+ lint 全绿 + M001 九件套/顶层同步抽查
+- 结论：**DoD 全项通过 → APPROVED（Applied/已完成）**；任务单 Task-CHG 完成（AGENT-M001）
+- 遗留至后续：ACR-001 新增端点 **API ID = API-M001-013~017**（PM 已分配登记，见 `API_REGISTRY.md`）；M001 契约定稿 **v0.1.2**（冻结面随变更后实况，新端点状态 Active 待未来用户批准冻结）；M002 Task-002 正式启动（签发 `docs/agents/Task-002.md`）
 
 ## 执行进度（2026-09-08，AGENT-M001 自证，待 PM 复核）
 
@@ -45,4 +51,4 @@ Executing（AGENT-M001）→ 代码落地 + 测试 + 回填 → **PM 复核（�
 - [x] 语义面（清单 4）：`reference_answer` 注释/契约口径 = **非判定基准辅助字段**（ADR-010）；`item_type`=题型标注不驱动判定
 - [x] 测试（清单 5）：既有 54 项全绿 + 新增 35 项（student 子账号 23、容器化 API 4、group_no 分组校验 8）→ **89 passed**（backend/.venv）
 - [x] 回填（清单 6）：M001 九件套按实况修订（MODULE.md/SUMMARY/CONTRACT/API/DATA/DESIGN/FILES/TEST/CHANGELOG）；`DATA_MODEL.md` DATA-001/002 字段级同步；`REQUIREMENTS.md` REQ-001 措辞精校；开放项见 PROJECT_STATUS（O-1/O-3/O-4 相关后续模块沿用）
-- [ ] **PM 复核**：DoD 勾选、CHANGE 关闭、API ID 收口登记（ACR-001 新增端点）、顶层状态推进 v0.11.0、MODULE_REGISTRY M001 行定稿 v0.1.2
+- [x] **PM 复核（2026-09-08）**：DoD 勾选关闭、CHANGE-001 → **已完成（Applied）**、API ID 收口登记 API-M001-013~017、顶层状态推进 **v0.11.0**、MODULE_REGISTRY M001 行定稿 **v0.1.2**（见 `docs/changes/CHANGE-001.md` §PM 复核记录）

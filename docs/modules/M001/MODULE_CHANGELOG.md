@@ -2,6 +2,7 @@
 
 | 版本 | 日期 | 作者 | 变更 |
 | --- | --- | --- | --- |
+| v0.1.2 (定稿) | 2026-09-08 | Project Master | **CHANGE-001 PM 复核 APPROVED → 关闭（Applied）**：DoD 全项勾选；API-M001-013~017（ACR-001 新增端点）分配登记（Active）；M001 契约随变更后实况定稿 v0.1.2（本九件套状态头同步）；模块进入维护态，支持 M002 Task-002 联调。 |
 | v0.1.2 (回填) | 2026-09-08 | AGENT-M001 | **CHANGE-001 编码完成回填**（CR-001/CR-002/ACR-001/ACR-002 批准合并执行；代码+测试已落地，**待 PM 复核后关闭/定稿**）：① CR-001 任务=多学科登记单容器（`tasks.subject` 可空/'mixed'；`task_items.group_no` 学科作业段 + 结构校验 + 段级查询 `get_task_group(s)`/`can_accept_photo`）；② ACR-001 两级主体（`student_accounts` 表、`auth_sessions.subject_type`/`student_id`、`AuthContext` 双主体、学生登录/登出/me、子账号管理端点、student 越权 404/家长专属 403、登录爆破命名空间隔离）；③ CR-002/ACR-002 语义面（`reference_answer` 标注为非判定基准辅助字段，判定链端到端直判不依赖参考答案）。测试 54→89 全绿（新增：student 子账号 23 + 容器化 API 4 + group_no 校验 8）；student_account_service/schema/student_auth 等文件新增，见 `MODULE_FILES.md`。 |
 | v0.7.0 (验收) | 2026-09-08 | Project Master | **PM DoD 验收 APPROVED（用户：验收通过）**：Task-001 交付物按 `AGENT_GUIDE.md` §6 全项通过 → M001 Testing→**Stable**（契约 v0.1.1 Frozen 不变，API-M001-001~012 未越契约）。M001 进入维护态，M002 契约设计启动。 |
 | v0.6.0 (实现) | 2026-09-08 | Project Master | **Task-001 实现回填**：M001 编码+测试完成（54 passed）——模块状态 Developing→Testing；工程落地 backend/（FastAPI）+ frontend/（零构建 H5）+ tests/；九件套实现版同步（FILES/TEST/DESIGN）；API 契约未变更（保持 Frozen）。详见项目 `CHANGELOG.md` v0.6.0。 |

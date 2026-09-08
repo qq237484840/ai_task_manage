@@ -1,6 +1,6 @@
 # M001 文件级知识（L6）—— 作业任务管理
 
-- **状态**：已实现 + CHANGE-001 编码回填（Task-001 交付 `54 passed`；CHANGE-001 后 `89 passed`，待 PM 复核）。下表 File/Purpose/Dependencies/Exports/Modification Risk 均为**落盘实况**。
+- **状态**：已实现 + CHANGE-001 完成（Task-001 交付 `54 passed`；CHANGE-001 Applied 后 `89 passed`，2026-09-08 PM 复核 APPROVED）。下表 File/Purpose/Dependencies/Exports/Modification Risk 均为**落盘实况**。
 
 ## 工程根结构（FastAPI 单体 + 零构建原生 H5，ADR-004）
 

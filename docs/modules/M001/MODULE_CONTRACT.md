@@ -1,10 +1,10 @@
 # M001 模块契约（黑盒）—— 作业任务管理
 
-- **Module ID**：M001 ｜ **版本**：v0.1.1（契约基线，Frozen）→ **v0.1.2（CHANGE-001 回填，待 PM 复核）** ｜ **日期**：2026-09-08
-- **状态**：Frozen（v0.1.1）→ CHANGE-001 修订执行中（CR-001/CR-002/ACR-001/ACR-002 已批准；编码+测试完成，文档随实况回填，**待 Project Master 复核后关闭/定稿**）
+- **Module ID**：M001 ｜ **版本**：**v0.1.2**（CHANGE-001 Applied 后定稿，2026-09-08 PM 复核 APPROVED） ｜ **日期**：2026-09-08
+- **状态**：Frozen（v0.1.1，契约基线）→ CHANGE-001 修订 **已完成/Applied**（CR-001/CR-002/ACR-001/ACR-002 批准执行；PM 复核 APPROVED 2026-09-08）
 - **适用**：黑盒约定。内部实现（类/库/表结构细节）见 `MODULE_DESIGN.md` 与 `MODULE_DATA.md`
 - **v0.1.1 变更摘要**：用户 M001 开发输入增补"学校基础资料"（REQ-009/ADR-008/DATA-011）：新增全局共享只读 `schools` 字典（seed 预置，无运行期维护 API）；`students.school` 自由文本 → `school_id` 必填（FK→schools）；新增 API-M001-012（`GET /schools`）；学生档案必填关联学校（名称+学段）
-- **v0.1.2 变更摘要（CHANGE-001）**：① **CR-001 容器化**：任务=多学科作业登记单容器，`subject` 放宽为可空/'mixed'，学科粒度下放到题目 `(subject, group_no)` 学科作业段（段结构校验 + M002 归属用段级查询）；② **ACR-001 两级主体**：新增 `student_accounts` 子账号（家长开通/停用/改密）、`auth_sessions` 增加 `subject_type`/`student_id`（family/student 双型会话）、学生独立登录（命名空间隔离防爆破）且仅本人数据（越权对外 404、家长专属操作 403）；③ **CR-002/ACR-002 判定语义**：`reference_answer` 明确为**非判定基准辅助字段**（端到端直判 ADR-010），主观题拒绝录入防误导
+- **v0.1.2 变更摘要（CHANGE-001，PM 复核 APPROVED 2026-09-08，Applied）**：① **CR-001 容器化**：任务=多学科作业登记单容器，`subject` 放宽为可空/'mixed'，学科粒度下放到题目 `(subject, group_no)` 学科作业段（段结构校验 + M002 归属用段级查询）；② **ACR-001 两级主体**：新增 `student_accounts` 子账号（家长开通/停用/改密）、`auth_sessions` 增加 `subject_type`/`student_id`（family/student 双型会话）、学生独立登录（命名空间隔离防爆破）且仅本人数据（越权对外 404、家长专属操作 403）；③ **CR-002/ACR-002 判定语义**：`reference_answer` 明确为**非判定基准辅助字段**（端到端直判 ADR-010），主观题拒绝录入防误导；ACR-001 新增端点登记 API-M001-013~017（Active）
 
 ## Purpose
 

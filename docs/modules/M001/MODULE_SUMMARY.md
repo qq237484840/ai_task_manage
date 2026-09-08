@@ -1,6 +1,6 @@
 # M001 模块摘要 —— 作业任务管理（30 秒速览）
 
-- **状态**：Stable + CHANGE-001 编码完成回填（89 测试全绿，2026-09-08；待 PM 复核后收口 v0.1.2）
+- **状态**：Stable + CHANGE-001 **Applied**（v0.1.2 定稿，2026-09-08 PM 复核 APPROVED；89 测试全绿）
 - **入口文档**：`MODULE.md`（总览）→ `MODULE_CONTRACT.md`（黑盒契约）→ `MODULE_API.md` → `MODULE_DATA.md`
 
 | 维度 | 摘要 |
@@ -14,7 +14,7 @@
 | Data | `schools`（全局只读公共）、`family_accounts`、`students`、`student_accounts`、`auth_sessions`（family/student 两型）、`tasks`、`task_items`（映射 DATA-001/DATA-002/DATA-011） |
 | 核心规则 | 家庭数据带 `family_id` 强制过滤（例外：`schools` 公共只读）；student 主体仅本人（越权对外 404）；子账号管理/建档家长专属（403）；密码/令牌哈希存储；登录爆破 family/student 命名空间隔离；任务状态机 `draft→published→in_progress→closed`；发布后/开始上传后题目不可改 |
 | Main Risks | 题目录入负担（RISK-002 缓解中）；账号数据属未成年人个人信息（RISK-004）；子账号口令由儿童保管风险（RISK 缓解：停用开关+家长兜底）；seed 学校覆盖不足（REQ-009） |
-| Status | Stable + CHANGE-001 执行回填（编码/测试完成，待 PM 复核；历史见 `MODULE_CHANGELOG.md`） |
+| Status | Stable + CHANGE-001 Applied（v0.1.2 定稿；历史见 `MODULE_CHANGELOG.md`） |
 
 ## 进入本模块前建议阅读
 
