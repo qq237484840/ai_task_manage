@@ -20,8 +20,9 @@ class Settings(BaseSettings):
 
     # 存储（ADR-004：SQLite 单文件，默认 backend/data/app.db）
     database_url: str = "sqlite:///" + (_PROJECT_ROOT / "backend" / "data" / "app.db").as_posix()
-    # H5 静态目录（零构建前端，由 FastAPI 托管）
-    frontend_dir: str = str(_PROJECT_ROOT / "frontend")
+    # H5 静态目录（ADR-012：Vite 构建产物 frontend/dist，由 FastAPI 托管；
+    #   dev 前端由 Vite dev server 提供；AT_FRONTEND_DIR 可覆盖）
+    frontend_dir: str = str(_PROJECT_ROOT / "frontend" / "dist")
 
     # 认证（契约 Security / Configuration）
     auth_session_ttl_days: int = 30
@@ -36,6 +37,30 @@ class Settings(BaseSettings):
     # 分页（契约 pagination.default）
     pagination_default_size: int = 20
     pagination_max_size: int = 100
+
+    # ---- 归属与窗口配置（CR-003 / ADR-013；登记见 docs/CONFIGURATION.md）----
+    # 生效与锁定规则：变更只影响未聚合对象；已聚合按 task_groups.policy_version（5 条规则见 CONFIGURATION §一）
+    timezone: str = "Asia/Shanghai"  # AT_TIMEZONE：归属日 / 周次计算时区（固定不跟随设备）
+    term_start: str = ""  # AT_TERM_START：学期开始日 ISO 日期（week_index 起算基准 = 该日所在周的周一）
+    term_end: str = ""  # AT_TERM_END：学期结束日 ISO 日期（区间外 = 假期）
+    day_cutoff: str = "04:00"  # AT_DAY_CUTOFF：归属日边界，belong_date = (ts - cutoff).date()
+
+    @property
+    def day_cutoff_parts(self) -> tuple[int, int]:
+        """解析 `day_cutoff`（HH:MM）为 (hour, minute)，非法值回退 04:00。"""
+        try:
+            hour_s, _, minute_s = self.day_cutoff.partition(":")
+            hour, minute = int(hour_s), int(minute_s or 0)
+        except (TypeError, ValueError):
+            return 4, 0
+        if not (0 <= hour <= 23 and 0 <= minute <= 59):
+            return 4, 0
+        return hour, minute
+
+    @property
+    def policy_version(self) -> str:
+        """当前生效的窗口/归属策略版本标识（写入 `task_groups.policy_version`）。"""
+        return f"v1:{self.timezone}|{self.term_start}|{self.term_end}|{self.day_cutoff}"
 
 
 @lru_cache

@@ -1,84 +1,72 @@
-"""API：多学科作业登记单容器（CR-001：subject 放宽 + 学科作业段 group_no）。"""
+"""API：聚合任务（契约 v0.2.0）。
+
+原 CR-001「多学科容器/段级」语义已由 ADR-013 作废；本文件同步为聚合层
+（`task_groups` / `task_group_subjects`）用例：019 列表 / 020 详情 / 周末合并。
+"""
 from __future__ import annotations
 
-from tests.conftest import create_student, valid_task_payload
+from tests._m001_helpers import DAY, FRIDAY, TEST_TERM_START, create_task_v2, install_fixed_window, task_payload, text_source
+from tests.conftest import create_student
+
+SATURDAY = "2026-09-12"
 
 
-def _item(seq: int, *, subject: str, group_no: int = 0, item_type: str = "objective") -> dict:
-    return {
-        "seq": seq,
-        "item_type": item_type,
-        "subject": subject,
-        "group_no": group_no,
-        "stem": f"第{seq}题",
-        "reference_answer": "1" if item_type == "objective" else None,
-    }
+def _student(world, name: str = "聚合学生") -> dict:
+    return create_student(world["client"], world["ha"], school_id=world["school_primary"]["school_id"], name=name)
 
 
-def _a_student(world) -> dict:
-    return create_student(world["client"], world["ha"], school_id=world["school_primary"]["school_id"], name="多科生")
-
-
-def test_create_multi_subject_container_task_without_subject(world):
-    """多学科登记单：task.subject 留空（NULL）+ 题目按 (subject, group_no) 显式分段。"""
+def test_day_task_generates_aggregation(world):
     c, ha = world["client"], world["ha"]
-    stu = _a_student(world)
-    items = [_item(1, subject="math", group_no=1), _item(2, subject="math", group_no=1),
-             _item(3, subject="chinese", group_no=2, item_type="subjective")]
-    resp = c.post(
-        "/api/v1/tasks",
-        json=valid_task_payload(stu["student_id"], title="多科登记单", subject=None, items=items),
-        headers=ha,
-    )
-    assert resp.status_code == 201
-    data = resp.json()
-    assert data["subject"] is None
-    assert [(i["subject"], i["group_no"]) for i in data["items"]] == [
-        ("math", 1),
-        ("math", 1),
-        ("chinese", 2),
-    ]
+    install_fixed_window(c, DAY, term_start=TEST_TERM_START)
+    stu = _student(world)
+    create_task_v2(c, ha, task_payload(stu["student_id"]))
+    body = c.get("/api/v1/task-groups", headers=ha).json()
+    assert body["total"] == 1
+    group = body["items"][0]
+    assert group["group_key"] == DAY and group["window_type"] == "day"
+    assert group["display_name"] == "09-09 周三"
+    assert group["policy_version"]
+    assert [s["subject"] for s in group["subjects"]] == ["math"]
+    assert len(group["subjects"][0]["content_refs"]) == 1
+    detail = c.get(f"/api/v1/task-groups/{group['group_id']}", headers=ha).json()
+    assert detail["group_id"] == group["group_id"]
 
 
-def test_create_mixed_subject_container_task(world):
-    """subject='mixed' 保留字面语义（多学科登记单标注）。"""
+def test_weekend_days_merge_into_single_aggregation(world):
     c, ha = world["client"], world["ha"]
-    stu = _a_student(world)
-    items = [_item(1, subject="math", group_no=1), _item(2, subject="english", group_no=2)]
-    resp = c.post(
-        "/api/v1/tasks",
-        json=valid_task_payload(stu["student_id"], subject="mixed", items=items),
-        headers=ha,
-    )
-    assert resp.status_code == 201
-    assert resp.json()["subject"] == "mixed"
+    stu = _student(world)
+    install_fixed_window(c, FRIDAY, term_start=TEST_TERM_START)
+    create_task_v2(c, ha, task_payload(stu["student_id"], sources=[text_source("数学：周五作业")]))
+    install_fixed_window(c, SATURDAY, term_start=TEST_TERM_START)
+    create_task_v2(c, ha, task_payload(stu["student_id"], sources=[text_source("数学：周六作业")]))
+    body = c.get(f"/api/v1/task-groups?student_id={stu['student_id']}", headers=ha).json()
+    assert body["total"] == 1
+    group = body["items"][0]
+    assert group["group_key"] == f"W:{FRIDAY}" and group["window_type"] == "weekend"
+    assert group["display_name"] == "周末作业"
+    assert len(group["subjects"][0]["content_refs"]) == 2  # 两天内容项合并
 
 
-def test_create_task_group_structure_violations_422(world):
-    """显式分组结构违规 → 422（混入 0 / 组号不连续 / 交错 / 组内科目不一）。"""
+def test_task_groups_filters(world):
     c, ha = world["client"], world["ha"]
-    stu = _a_student(world)
-    cases = [
-        [_item(1, subject="math", group_no=0), _item(2, subject="math", group_no=1)],          # 混 0
-        [_item(1, subject="math", group_no=1), _item(2, subject="math", group_no=3)],          # 不连续
-        [_item(1, subject="math", group_no=1), _item(2, subject="math", group_no=2),
-         _item(3, subject="math", group_no=1)],                                                # 交错
-        [_item(1, subject="math", group_no=1), _item(2, subject="english", group_no=1)],       # 组内科目不一
-    ]
-    for items in cases:
-        resp = c.post(
-            "/api/v1/tasks",
-            json=valid_task_payload(stu["student_id"], title="非法分组", items=items),
-            headers=ha,
-        )
-        assert resp.status_code == 422, resp.text
+    install_fixed_window(c, DAY, term_start=TEST_TERM_START)
+    s1, s2 = _student(world, "甲"), _student(world, "乙")
+    create_task_v2(c, ha, task_payload(s1["student_id"]))
+    create_task_v2(c, ha, task_payload(s2["student_id"]))
+    assert c.get("/api/v1/task-groups", headers=ha).json()["total"] == 2
+    assert c.get(f"/api/v1/task-groups?student_id={s1['student_id']}", headers=ha).json()["total"] == 1
+    assert c.get("/api/v1/task-groups?window_type=day", headers=ha).json()["total"] == 2
+    assert c.get("/api/v1/task-groups?window_type=weekend", headers=ha).json()["total"] == 0
+    assert c.get("/api/v1/task-groups?week_index=2", headers=ha).json()["total"] == 2
+    assert c.get("/api/v1/task-groups?week_index=5", headers=ha).json()["total"] == 0
 
 
-def test_legacy_single_subject_task_default_group_ok(world):
-    """旧单学科任务（无 group_no）默认收敛为 0 段，行为向后兼容。"""
-    c, ha = world["client"], world["ha"]
-    stu = _a_student(world)
-    resp = c.post("/api/v1/tasks", json=valid_task_payload(stu["student_id"], title="旧单科"), headers=ha)
-    assert resp.status_code == 201
-    assert resp.json()["subject"] == "math"
-    assert all(i["group_no"] == 0 for i in resp.json()["items"])
+def test_task_group_scope_and_404(world):
+    c, ha, hb = world["client"], world["ha"], world["hb"]
+    install_fixed_window(c, DAY)
+    stu = _student(world)
+    create_task_v2(c, ha, task_payload(stu["student_id"]))
+    gid = c.get("/api/v1/task-groups", headers=ha).json()["items"][0]["group_id"]
+    assert c.get(f"/api/v1/task-groups/{gid}", headers=hb).status_code == 404
+    assert c.get("/api/v1/task-groups/00000000-0000-0000-0000-000000000000", headers=ha).status_code == 404
+    assert c.get("/api/v1/task-groups", headers=hb).json()["total"] == 0

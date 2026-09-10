@@ -1,74 +1,26 @@
-# M002 模块摘要 —— 作业图片采集与归属
+# M002 模块摘要 —— 作业图片采集与挂接（30 秒速览）
 
-- **状态**：Developing（契约 **v0.3.0 Frozen**，2026-09-08 用户批准；Task-002 编码中）
-- **数据**：DATA-003（上传批次 + 照片）｜ **依赖**：M001（CR-001 扩展）/ M003（归属建议 + 内容级识别，契约轮，ADR-010/011）｜ **消费者**：M003、M007、H5
-- **文档集**：`docs/modules/M002/`（九件套）
+- **状态**：Developing（代码基线已按契约 v0.4.1 实施完成：`Task-008` 后端 + `Task-009` 前端 + `Task-010` 门控修复，均经 PM 复核 APPROVED）＋ **契约 v0.4.1 —— Frozen（用户批准 2026-09-10；v0.4.1 = `CR-004` Applied）**（按 `CR-003`/`ADR-013`/`ADR-014`）
+- **入口文档**：`MODULE.md`（总览）→ `MODULE_CONTRACT.md`（黑盒契约）→ `MODULE_API.md` → `MODULE_DATA.md`
+- **前版**：v0.3.0 Frozen（2026-09-08 用户批准）—— 其"段级 1:N 归属 `(task_id, subject, group_no)` + 完成程度外置 M003/M004"语义**已作废**
 
-## 一句话
+| 维度 | 摘要 |
+| --- | --- |
+| Purpose | V1 链路 H：作业照片**采集 → 质检 → 归一 → 受控存储 → N:N 挂接（建议+逐张复核）→ 窗口级门控 → 完成分析（草稿→家长确认）** |
+| Key Decisions | **ADR-013 双层模型**（挂接目标 = **聚合学科子任务 `task_group_subjects` ★判定单元**，N:N）；**ADR-014**（V1 = M001+M002+`app/core/ai/`；**M003/M004 职责并入链路 H**，ID 保留 Deferred；M005~M007 后置 V2）；ADR-011 AI Provider 默认真实三方/Mock 降级；ADR-009/ACR-001 双主体 |
+| Inputs | 上传批次指令（含 **`kind`**）；图片文件（multipart）；挂接建议触发；逐张复核（accept/reject/改挂）；完成分析生成/确认/重跑 |
+| Outputs | 质检报告；照片记录（`unassigned`）；**N:N 挂接关系**（建议/确认/驳回）；**门控状态**（待复核 N）；**完成分析草稿/确认**（聚合子任务级 → 回写 M001） |
+| Dependencies | M001（窗口/聚合/判定单元/回写接口）+ **`app/core/ai/`**（挂接建议/完成分析） |
+| APIs | 既有 `API-M002-001~006`（001/002/003/005 修订）+ **新增 5 端点**（挂接建议查询 / 门控状态 / 完成分析生成·确认·重跑，**`API-M002-007~011`**）+ 内部 `PhotoQueryService`/`PhotoLinkService` |
+| Data | **Own**：DATA-003（`upload_batches` 含 `kind` + `photos`）、**DATA-016**（`photo_subject_links`，N:N）、**DATA-017**（`completion_analyses`） |
+| 核心规则 | 入口决定 `kind`（权威在 `upload_batches.kind`）；上传不填任何内容；`unassigned→suggested→assigned/rejected`；**一张照片可跨学科挂接多条**；**手工挂接必须保留**；**窗口级门控**（全部挂接确认才可分析）；分析确认 → `commit_conclusion` 回写 + `consumed_at` 锁定；质检被拒不留痕；已消费不可变 |
+| Main Risks | 门控与消费锁定的一致性；AI 建议/分析降级（手工兜底必须可用）；大规模照片展示性能（RISK 见 `CHANGE-003` §5）；未成年人作业照片高敏（RISK-004） |
+| Status | 契约 **v0.4.1 —— Frozen（用户批准 2026-09-10；v0.4.1 = `CR-004` Applied）**（变更记录见 `MODULE_CHANGELOG.md`） |
 
-学生把一天各科作业照片一起拍上传，系统**先收好、再认到具体哪科作业**（AI 建议 + 家长/学生兜底确认），这是 AI 作业闭环"能看到作业内容"的输入起点（REQ-002）。
+## 进入本模块前建议阅读
 
-## 关键决策
-
-### 质检/预处理（v0.1.0 确认，保留）
-
-| # | 决策 | 结论 |
-| --- | --- | --- |
-| D1 | 质量检测策略 | **本地规则先行**（模糊/过暗过亮/倾斜/遮挡/缺页 = 可解释图像规则，阈值配置化、规则版本化，无外部 AI）；`QualityChecker` 协议预留 Vision 接入位 |
-| D2 | 预处理范围 | **仅轻量归一**：EXIF 方向归一 + 统一 JPEG + 长边缩放；矫正/增强归 M003 识别前链路 |
-| D3 | ~~任务首张通过即 in_progress~~ | **被 v0.2.0 取代**（见 R2）：触发点改为"首次照片 assigned 到任务" |
-| D4 | 不合格处理 | **不入库 + 逐图报告**：`422 image_quality_rejected` 逐项原因引导重拍（保留） |
-
-### 审查重构（v0.2.0，PD-014~016）
-
-| # | 决策 | 结论 |
-| --- | --- | --- |
-| R1/PD-014 | 任务粒度 | task = **多学科作业登记单容器**；题目按学科作业段（`task_items.group_no`）组织；学科卡 = `(subject, group_no)` 聚合 → M001 CR-001 |
-| R2/PD-015 | 采集模型 | **先采后认**：上传不绑定任务/学科 → `unassigned`；AI 建议 → `suggested`；家长/学生确认 → `assigned(到学科作业段)` 或 `rejected`；首次 assigned 触发任务 `in_progress`（幂等）｜ ~~完成程度 = 学科作业段照片覆盖二值化~~（v0.3.0 移除，见 R4） |
-| R3/PD-016 | 身份主体 | 两级主体：家庭账号（家长）+ 学生子账号（ADR-009）；学生自主登记/拍照、家长兜底 → ACR-001 |
-
-### v0.3.0 升级（2026-09-08，PD-017~024/CR-002/ACR-002/ADR-010）
-
-| # | 决策 | 结论 |
-| --- | --- | --- |
-| R4/v0.3.0 | 完成程度口径 | **移除"学科作业段照片覆盖二值化"语义**：M002 职责边界收敛为采集/质检/归一/归属/证据供给；完成程度与对错由内容级判定链（M003 识别 + M004 逐题对齐判定，ADR-010）回写，M002 的 assigned 照片为判定证据（v0.2.0 该表述作废） |
-| R5/v0.3.0 | AI 执行策略 | 归属建议与内容级识别 Provider 按 ADR-011：**真实三方默认**，Mock 降级为测试桩/离线（`mock-*` 标注）；M002 本地质检/归一仍无外部依赖（D1/D2 保留） |
-| R6/v0.3.0 | 证据消费 | M002 提供"已 assigned 学科作业段照片证据集 + 归属/批次元数据"供 M003/M004/M007 消费；识别消费 `mark_consumed` 保留（证据锁定） |
-
-### 采集补全（v0.2.0，D5~D8 = 完整性审查逐项确认）
-
-| # | 决策 | 结论 |
-| --- | --- | --- |
-| D5 | 数量上限 | 单上传批次 ≤50 张；归属到同任务累计 ≤200 张（均配置化，422/409） |
-| D6 | 页序来源 | `seq_no` 服务端按接收顺序自增（批次内 UNIQUE），不接受前端页码 |
-| D7 | 撤销窗口 | `consumed_at IS NULL`（未被 M003 消费）的照片可删除（物理删 + 审计）；已消费不可变 |
-| D8 | 并发归属 | 服务层按 `(family_id, batch_id)` 应用级互斥串行，冲突 `409 concurrent_conflict` |
-
-## 模块行为（黑盒）
-
-- 上传 = 建批次（可选）→ 单张上传（主体鉴权 → 基础校验 → 本地质检 → 归一 → 受控存储 → 入库 `unassigned`）｜ 失败（415/413/422/422 质检）不留痕
-- 归属 = AI（M003）建议写 `suggestion_json` → 家长/学生确认 `assigned`（校验目标任务状态/学生/上限；首次触发 `mark_in_progress`）或 `rejected`
-- 消费 = M003 读取/识别后置 `consumed_at`；此后照片不可删/不可改派
-- 读取仅经鉴权端点（原/归一），访问审计；删除（未消费）物理删 + 审计
-
-## REST API（Draft，API-M002-001~006）
-
-| API | 方法/路径 | 用途 |
-| --- | --- | --- |
-| API-M002-001 | POST `/api/v1/upload-batches` | 创建上传批次（学生本人 / 家长代传指定学生） |
-| API-M002-002 | POST `/api/v1/photos` | 上传单张作业照片（质检+归一+入库 unassigned） |
-| API-M002-003 | GET `/api/v1/photos` | 照片列表/待处理队列（按学生/状态/批次/任务过滤） |
-| API-M002-004 | GET `/api/v1/photos/{photo_id}/content` | 受控取图（原/归一，审计 + Range） |
-| API-M002-005 | POST `/api/v1/photos/{photo_id}/associate` | 归属操作（assign/confirm_suggestion/reject；首张 assigned 触发 in_progress） |
-| API-M002-006 | DELETE `/api/v1/photos/{photo_id}` | 撤销/清理未消费照片（物理删 + 审计） |
-
-## 数据与安全要点
-
-- `upload_batches` / `photos` 均含 `family_id`（冗余防御）；照片含归属三元组（`task_id/subject/group_no`）与建议快照（`suggestion_json`）、质量快照（`quality_report_json`）、`sha256`、`consumed_at`
-- 未成年人作业照片高敏感（DATA_MODEL）：受控目录、双层鉴权读取、访问审计、不入普通日志
-- 两级主体：student 仅本人、family 全家 + 兜底（ADR-009/ACR-001）
-
-## 运行与验证
-
-- 本地质检/归一纯本地 Pillow 规则无外部依赖；归属建议为契约接口（Provider 按 ADR-011 默认真实三方，本地运行验证可注入 Mock 测试桩/离线 `mock-*`）
-- 验收口径：见 `MODULE_TEST.md`（合成图确定性质检、上传/归属状态机、in_progress 单次触发、数量上限、消费后不可变、越权矩阵双主体、审计）
+1. `CLARIFICATION-2026-09-10.md` §2.C/D（照片 / 判定 / 挂接）——**权威源**
+2. `ADR-013`（双层模型 + 配置锁定 + 判定落聚合层）+ `ADR-014`（M003/M004 并入、执行方收窄）
+3. `REQ-002`（已精校）+ `REQ-003`/`REQ-007`（照片 / 挂接文案）
+4. `CONFIGURATION.md`（门控 / 上限 / 质检阈值）
+5. `DATA_MODEL.md`（DATA-003/016/017）

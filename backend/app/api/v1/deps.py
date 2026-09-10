@@ -8,9 +8,18 @@ from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.modules.m001.services.window_resolver import DefaultWindowResolver
 from app.shared.auth import AuthContext, resolve_auth
 
 _bearer = HTTPBearer(auto_error=False)
+
+
+def get_window_resolver(request: Request) -> DefaultWindowResolver:
+    """归属引擎依赖：优先 `app.state.window_resolver`（测试/替换策略），否则按应用配置构建。"""
+    resolver = getattr(request.app.state, "window_resolver", None)
+    if resolver is None:
+        resolver = DefaultWindowResolver(request.app.state.settings)
+    return resolver
 
 
 def get_session(request: Request) -> Iterator[Session]:

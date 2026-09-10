@@ -1,118 +1,88 @@
-"""单测：题目集业务校验（seq 连续唯一 + 主客观参考答案规则）。"""
+"""单测：契约 v0.2.0 入参校验（输入源 seq 连续 / 内容项 / 改归属日 / 隐式确认）。"""
+from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
 
-from app.modules.m001.schemas.task import TaskItemIn
-from app.modules.m001.services.task_service import validate_items
+from app.modules.m001.schemas.task import (
+    BelongDateChange,
+    ContentItemIn,
+    ParseConfirmation,
+    SourceIn,
+    TaskIngest,
+)
+from app.modules.m001.services.task_service import validate_sources
 from app.shared.exceptions import ValidationAppError
 
 
-def item(seq: int, item_type: str = "objective", answer: str | None = "答案") -> TaskItemIn:
-    return TaskItemIn(
-        seq=seq,
-        item_type=item_type,
-        subject="math",
-        stem=f"第{seq}题",
-        reference_answer=answer,
-    )
+def src(seq: int, kind: str = "text", text: str = "数学：练习题", photo_id: str | None = None) -> SourceIn:
+    return SourceIn(seq=seq, kind=kind, text_content=text if kind == "text" else None, photo_id=photo_id)
 
 
-def test_empty_items_rejected():
+# —— validate_sources ——
+def test_empty_sources_rejected():
     with pytest.raises(ValidationAppError):
-        validate_items([])
-
-
-def test_duplicate_seq_rejected():
-    with pytest.raises(ValidationAppError):
-        validate_items([item(1), item(1)])
+        validate_sources([])
 
 
 def test_non_contiguous_seq_rejected():
     with pytest.raises(ValidationAppError):
-        validate_items([item(1), item(3)])
+        validate_sources([src(1), src(3)])
 
 
-def test_unordered_items_normalized_to_seq_order():
-    out = validate_items([item(2), item(1)])
+def test_seq_must_start_at_one():
+    with pytest.raises(ValidationAppError):
+        validate_sources([src(2), src(3)])
+
+
+def test_unordered_sources_normalized_to_seq_order():
+    out = validate_sources([src(2, text="语文：背诵"), src(1)])
     assert [o["seq"] for o in out] == [1, 2]
-    assert out[0]["stem"] == "第1题"
+    assert out[1]["text_content"] == "语文：背诵"
 
 
-def test_subjective_item_rejects_reference_answer():
+# —— SourceIn 段落契约 ——
+def test_text_source_requires_text():
     with pytest.raises(ValidationError):
-        item(1, item_type="subjective", answer="有答案")
+        SourceIn(seq=1, kind="text", text_content="   ")
 
 
-def test_subjective_item_without_answer_ok():
-    it = TaskItemIn(seq=1, item_type="subjective", subject="math", stem="写出计算过程", reference_answer=None)
-    out = validate_items([it])[0]
-    assert out["reference_answer"] is None
+def test_image_source_requires_photo_id():
+    with pytest.raises(ValidationError):
+        SourceIn(seq=1, kind="image")
 
 
-def test_objective_item_without_answer_allowed():
-    it = TaskItemIn(seq=1, item_type="objective", subject="math", stem="1+1=?", reference_answer=None)
-    out = validate_items([it])[0]
-    assert out["reference_answer"] is None
+def test_text_source_ignores_photo_id():
+    s = SourceIn(seq=1, kind="text", text_content="数学：题", photo_id="11111111-1111-1111-1111-111111111111")
+    assert s.photo_id is None
 
 
-# —— CR-001 容器化：学科作业段 group_no 结构约束 ——
+def test_task_ingest_requires_at_least_one_source():
+    with pytest.raises(ValidationError):
+        TaskIngest(student_id="11111111-1111-1111-1111-111111111111", sources=[])
 
 
-def gitem(
-    seq: int,
-    *,
-    group_no: int = 0,
-    subject: str = "math",
-    item_type: str = "objective",
-    answer: str | None = "答案",
-) -> TaskItemIn:
-    return TaskItemIn(
-        seq=seq,
-        item_type=item_type,
-        subject=subject,
-        group_no=group_no,
-        stem=f"第{seq}题",
-        reference_answer=answer,
-    )
+# —— 内容项归一化 ——
+def test_content_subject_normalized_and_blank_rejected():
+    assert ContentItemIn(subject="  Math ", text=" 1+1 ").subject == "math"
+    with pytest.raises(ValidationError):
+        ContentItemIn(subject="   ", text="x")
 
 
-def test_default_single_segment_mixed_subject_ok():
-    """全 0 = 默认单段（旧数据兼容），允许跨科目同段。"""
-    out = validate_items([gitem(1, subject="math"), gitem(2, subject="chinese")])
-    assert [o["group_no"] for o in out] == [0, 0]
+# —— 改归属日 ——
+@pytest.mark.parametrize("bad", ["2026/09/09", "2026-9-9", "not-a-date", "2026-02-30", ""])
+def test_belong_date_change_rejects_bad_format(bad):
+    with pytest.raises(ValidationError):
+        BelongDateChange(belong_date=bad)
 
 
-def test_explicit_groups_ok():
-    out = validate_items([gitem(1, group_no=1), gitem(2, group_no=1), gitem(3, group_no=2)])
-    assert [o["group_no"] for o in out] == [1, 1, 2]
+def test_belong_date_change_ok():
+    assert BelongDateChange(belong_date="2026-09-09").belong_date == "2026-09-09"
 
 
-def test_explicit_groups_must_start_at_one():
-    with pytest.raises(ValidationAppError):
-        validate_items([gitem(1, group_no=2), gitem(2, group_no=2)])
-
-
-def test_explicit_groups_must_be_contiguous():
-    with pytest.raises(ValidationAppError):
-        validate_items([gitem(1, group_no=1), gitem(2, group_no=3)])
-
-
-def test_mixing_group_zero_with_explicit_rejected():
-    with pytest.raises(ValidationAppError):
-        validate_items([gitem(1, group_no=0), gitem(2, group_no=1)])
-
-
-def test_group_internal_subject_must_be_uniform():
-    with pytest.raises(ValidationAppError):
-        validate_items([gitem(1, group_no=1, subject="math"), gitem(2, group_no=1, subject="english")])
-
-
-def test_group_blocks_must_be_contiguous_no_interleave():
-    with pytest.raises(ValidationAppError):
-        validate_items([gitem(1, group_no=1), gitem(2, group_no=2), gitem(3, group_no=1)])
-
-
-def test_group_no_preserved_in_output():
-    out = validate_items([gitem(1, group_no=1, subject="math"), gitem(2, group_no=2, subject="chinese")])
-    assert out[1]["group_no"] == 2 and out[1]["subject"] == "chinese"
+# —— 隐式确认必须携带摘要（防盲确认） ——
+def test_implicit_confirmation_requires_digest():
+    with pytest.raises(ValidationError):
+        ParseConfirmation(implicit=True)
+    ok = ParseConfirmation(implicit=True, digest={"subjects": ["math"], "content_texts": ["题"]})
+    assert ok.implicit is True

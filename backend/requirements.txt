@@ -5,6 +5,13 @@ sqlalchemy>=2.0
 pydantic>=2.7
 pydantic-settings>=2.3
 
+# M002 (Task-002) 运行依赖 —— 作业图片采集与归属（D1/D2：本地规则质检 + 轻量归一，纯本地 Pillow）
+pillow>=10.0
+python-multipart>=0.0.9   # FastAPI 文件上传（multipart/form-data）解析
+
+# 时区数据（ADR-013 归属窗口：Linux 系统自带 tzdata，Windows 需显式安装，否则 ZoneInfo("Asia/Shanghai") 不可用）
+tzdata>=2024.1
+
 # 测试依赖（pytest + TestClient 需 httpx）
 pytest>=8.0
 httpx>=0.27

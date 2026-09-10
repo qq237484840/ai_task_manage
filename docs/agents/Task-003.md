@@ -1,13 +1,13 @@
 # Task-003 任务书 —— 前端技术栈切换（Vue3 + Vite + TypeScript + Vant 4 工程化，承载 M001 页面迁移与托管切换）
 
 - **Task ID**：Task-003 ｜ **Agent**：AGENT-M001 ｜ **Kind**：跨模块前端基建（CHANGE-002，M001 前端迁移）
-- **签发**：Project Master，2026-09-08 ｜ **状态**：**Active（已签发，待执行）**
+- **签发**：Project Master，2026-09-08 ｜ **状态**：**已完成（2026-09-09 PM 复核 DoD APPROVED；CHANGE-002 关闭条件挂起，见 §6 项 7）**
 - **前置**：**ADR-012 Accepted**（2026-09-08 用户 Q1~Q3 决策）；本机 **Node ≥20** 已由 PM 预装（npm 联网可用）；M001 契约 **v0.1.2 Stable**（前端为表现层，REST 契约唯一事实源，本次零契约变更）
 - **任务书登记**：`docs/AGENT_REGISTRY.md`（AGENT-M001 行）｜ **验收**：本任务书 §6 DoD（PM 复核 APPROVED）
 
 ## 1. Objective（目标）
 
-将前端自「零构建原生 H5」切换为 **Vue 3 + Vite + TypeScript + Vant 4** 统一工程（ADR-012），**功能等价迁移** M001 全部现有页面，并把 FastAPI 静态托管切换到构建产物 `dist/`。本任务**不改任何 API 契约 / 后端业务 / 数据面 / M002 契约**，为 Task-002 前端基础 UI（M002 页面）与 M003~M007 全部后续 UI 提供统一承载工程。
+将前端自「零构建原生 H5」切换为 **Vue 3 + Vite + TypeScript + Vant 4** 统一工程（ADR-012），**功能等价迁移** M001 全部现有页面，并把 FastAPI 静态托管切换到构建产物 `dist/`。本任务**不改任何 API 契约 / 后端业务 / 数据面 / M002 契约**，为 Task-002 前端基础 UI（M002 页面）与**后续 V1 前端（含横切 `app/core/ai/` 相关界面）**提供统一承载工程（**M005~M007 的 UI 属 V2，`ADR-014`**）。
 
 ## 2. Requirements（依据权威源，只读，禁止复制改写）
 
@@ -60,12 +60,18 @@
 
 ## 6. Acceptance Criteria（DoD，AGENT_GUIDE §6）
 
-- [ ] Vite + Vue3 + TS + Vant 4 工程就绪（package/lock/vite.config/tsconfig/目录约定），`npm run build` 产出 `dist/` 且无类型错误
-- [ ] M001 6 视图 + 导航/会话功能等价迁移（双主体、任务 CRUD + items 动态表单、学生档案、我的/子账号）；**零功能增删**
-- [ ] FastAPI 托管 `dist/`；零构建三文件已退役删除；dev proxy 联调说明可用
-- [ ] 冒烟记录 + pytest 89 全绿回归 + 类型/lint 干净
-- [ ] M001 DESIGN/FILES/SUMMARY 与 ARCHITECTURE 前端实况回填（无契约/后端业务改动）
-- [ ] 与 Task-002 前端接轨协调生效（AGENT-M002 未并行写 frontend）
-- [ ] PM 复核 APPROVED → CHANGE-002 关闭（**关闭条件**：Task-002 前端基础 UI 按新栈实现并在其 DoD 冒烟通过后，由 PM 在 Task-002 复核时一并勾销）
+- [x] Vite + Vue3 + TS + Vant 4 工程就绪（package/lock/vite.config/tsconfig/目录约定），`npm run build` 产出 `dist/` 且无类型错误
+- [x] M001 6 视图 + 导航/会话功能等价迁移（双主体、任务 CRUD + items 动态表单、学生档案、我的/子账号）；**零功能增删**
+- [x] FastAPI 托管 `dist/`；零构建三文件已退役删除；dev proxy 联调说明可用
+- [x] 冒烟记录 + pytest 89 全绿回归 + 类型/lint 干净
+- [x] M001 DESIGN/FILES/SUMMARY 与 ARCHITECTURE 前端实况回填（无契约/后端业务改动）
+- [x] 与 Task-002 前端接轨协调生效（AGENT-M002 未并行写 frontend）
+- [x] PM 复核 **APPROVED（2026-09-09）** → CHANGE-002 关闭（**关闭条件**：Task-002 前端基础 UI 按新栈实现并在其 DoD 冒烟通过后，由 PM 在 Task-002 复核时一并勾销——本任务全部 DoD 已达，关闭勾销留待 Task-002）
 
 > **PM 批注（2026-09-08，签发）**：写权协调——`frontend/**` 在本任务 Active 期间由 AGENT-M001 独占；Task-002（AGENT-M002）后端模块编码正常并行，其 §3.1「前端基础 UI」段**后移接轨**：在 Task-003 验收后按新栈（Vue 组件）实现（已在 Task-002 任务书加接轨批注）。若执行中发现契约面问题（如 dist 路径配置需后端结构调整超出 Allowed-Files）→ 以 Request 提交 PM，禁止自行扩大改动面。
+
+## PM 复核记录（2026-09-09，Project Master）
+
+- **复核方式**：AGENT-M001 执行进度自证 + 独立证据复核——复核时点实测：`backend/.venv` `pytest` **89 passed**（独立重跑）；`frontend/dist/` 构建产物在（vue-tsc 无类型错误 + vite build 成功记录）；零构建 `app.js`/`styles.css` 已退役删除、`index.html` 为 Vite 入口；`frontend/README.md`（构建/开发/dist 托管）与锁文件已落；`GET /` 托管 dist 200 + API 冒烟 19 步通过；M001 DESIGN（决策 16）/FILES/SUMMARY 与 ARCHITECTURE 回填抽查一致；git 改动面无 API 契约与后端业务逻辑改动；AGENT-M002 未并行写 frontend（接轨协调生效）。
+- **结论**：**DoD 全项通过 → APPROVED（2026-09-09）**；本任务 → **已完成（AGENT-M001）**。
+- **关闭条件（遗留，见 §6 项 7）**：CHANGE-002 保持 Executing——待 Task-002 前端基础 UI 按新栈实现并在其 DoD 冒烟通过后，由 PM 在 Task-002 复核时一并勾销关闭。

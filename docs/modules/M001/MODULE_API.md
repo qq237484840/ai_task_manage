@@ -1,12 +1,17 @@
 # M001 模块 API（权威源）—— 作业任务管理
 
-- **状态**：**v0.1.2（定稿）**（2026-09-08 CHANGE-001 PM 复核 APPROVED；API-M001-001~012 冻结面随变更后实况修订 + ACR-001 新增端点登记 API-M001-013~017）
+- **状态**：**v0.2.0（Frozen，用户批准 2026-09-10）** —— 按 `CR-003`/`ADR-013` 修订（任务创建改输入源解析、新增聚合查询端点）。API-M001-001~006/012 保持既有契约；**任务相关端点（007~011）与新增端点为本次修订面**；新增端点 API ID **已由 PM 分配 = `API-M001-018~021`**（`API_REGISTRY.md`，Draft，随 `Task-007` 实施转 Active）；前版 v0.1.2 定稿（2026-09-08）
 - **REST 前缀**：`/api/v1`；**认证**：除注册/登录外均需 `Authorization: Bearer <token>`
 - **两级主体（ACR-001/ADR-009）**：`family`（家长，Bearer 来自 `/family/login`）= 本家任意学生可操作 + 兜底；`student`（学生子账号，Bearer 来自 `/student/login`）= **仅本人数据**（URL 传参他人 → 404 防探测；管理类家长专属操作 → 403）。两类 token 均可被既有资源端点识别，`family_id` 为过滤底线
 - **错误体统一**：`ErrorResponse { "code": string, "message": string, "request_id": string }`（HTTP 状态映射见契约 Failure Behavior）
 - **请求/响应内容类型**：`application/json`；时间一律 UTC ISO-8601
-- API ID 由 Project Master 分配（`API-M001-nnn`），修改须走 CR
-- **DTO 约定**：`StudentDTO = { student_id, name, grade_level, relation, school: { school_id, name, stage }, created_at, updated_at }`（school 为档案必填关联的公共字典条目，ADR-008/REQ-009）；`TaskDetailDTO.subject`/`TaskSummaryDTO.subject` **可空**（CR-001 容器化：多学科登记单为 NULL/'mixed'，学科粒度见题目 `subject`+`group_no`）
+- **API ID**：既有 `API-M001-001~017` 由 Project Master 分配；**本变更新增端点 API ID = `API-M001-018~021`**（已由 PM 分配登记 `API_REGISTRY.md`，Draft；原「申请清单」见文末）
+- **DTO 约定**：`StudentDTO = { student_id, name, grade_level, relation, school: { school_id, name, stage }, created_at, updated_at }`（school 为档案必填关联的公共字典条目，ADR-008/REQ-009）
+  - `TaskDTO`（事实层）= `{ task_id, student_id, category, belong_date, week_index, window_type, spec_status, title, grade_level, status, deadline, contents: [ContentItemDTO], sources: [SourceDTO], created_at, updated_at }`
+  - `ContentItemDTO = { content_id, subject, seq, text }`｜`SourceDTO = { source_id, seq, kind(text|image), text_content|null, photo_id|null }`
+  - `TaskGroupDTO`（聚合层）= `{ group_id, student_id, category, group_key, display_name, window_type, policy_version, subjects: [TaskGroupSubjectDTO], created_at }`
+  - `TaskGroupSubjectDTO = { group_subject_id, subject, content_refs, conclusion|null, conclusion_status(pending|draft|confirmed) }`
+  - ~~`TaskDetailDTO.subject`（`'mixed'` 容器标注）/`items`（逐题）~~ **作废**（ADR-013）
 
 ## 公共 REST API 清单
 
@@ -18,11 +23,11 @@
 | API-M001-004 | 创建学生档案 | POST `/students` | **家长专属**：本家新增学生档案（必填关联学校） |
 | API-M001-005 | 学生档案列表 | GET `/students` | family=本家全部；student=仅本人档案 |
 | API-M001-006 | 更新学生档案 | PATCH `/students/{student_id}` | family=本家任意；student=仅本人（他人 → 404） |
-| API-M001-007 | 创建作业任务 | POST `/tasks` | 含题目集（逐题学科/段号 group_no/题型/非基准辅助参考答案）；student 主体可建本人任务 |
-| API-M001-008 | 任务列表 | GET `/tasks` | 按状态/学生过滤，分页倒序；student 主体仅本人（查他人 → 404） |
-| API-M001-009 | 任务详情 | GET `/tasks/{task_id}` | 含题目；`include_answers` 控制辅助参考答案可见 |
-| API-M001-010 | 更新任务 | PATCH `/tasks/{task_id}` | 仅 draft/published 且未开始上传时可改（防基准漂移） |
-| API-M001-011 | 推进任务状态 | POST `/tasks/{task_id}/status` | 合法迁移：publish/close/reopen |
+| API-M001-007 | **上传任务输入源（链路 T）** | POST `/tasks` | **修订**：提交输入源（图片 / 粘贴文本，多段，**无需填内容**）→ 归属窗口 + AI 解析草稿；返回 `TaskDTO`（`spec_status=placeholder\|parsed`） |
+| API-M001-008 | 任务列表 | GET `/tasks` | **修订**：按 `belong_date`/`week_index`/`status`/学生过滤，分页倒序；student 主体仅本人（查他人 → 404） |
+| API-M001-009 | 任务详情 | GET `/tasks/{task_id}` | **修订**：含内容项 + 输入源；**不再返回逐题 `items`** |
+| API-M001-010 | 更新任务 | PATCH `/tasks/{task_id}` | **修订**：改 `title`/`grade_level`/`deadline` + 内容项增删改 |
+| API-M001-011 | 推进任务状态 | POST `/tasks/{task_id}/status` | 合法迁移：publish/close/reopen（不变） |
 | API-M001-012 | 学校字典列表 | GET `/schools` | 全局共享只读学校列表（建档下拉数据源，ADR-008） |
 | API-M001-013 | 开通学生子账号 | POST `/students/{student_id}/account` | **family 仅**：为学生档案开通子账号（login_name 学生命名空间唯一；弱口令返回 password_warning） |
 | API-M001-014 | 更新学生子账号 | PATCH `/students/{student_id}/account` | **family 仅**：停用/启用（status）或改密（password），至少一项 |
@@ -31,6 +36,17 @@
 | API-M001-017 | 学生主体信息 | GET `/student/me` | **student 仅**：当前学生档案（StudentDTO）；family 主体 → 403 |
 
 > API-M001-013~017（ACR-001 新增）由 Project Master 于 2026-09-08 CHANGE-001 收口分配编号并登记 `API_REGISTRY.md`（状态 Active）；详细契约见文末"ACR-001 新增端点"小节。
+
+## CR-003 新增端点（**API-M001-018~021**，2026-09-10 PM 分配登记）
+
+| API ID | 名称 | Method/Path | 摘要 | 消费者 |
+| --- | --- | --- | --- | --- |
+| API-M001-018 | 解析结果确认（含**隐式确认**） | POST `/tasks/{task_id}/parse-confirmation` | 家长确认解析草稿 → `spec_status=confirmed`；M002 判定链可携带「本次将一并落库的解析摘要」调用（隐式确认 C7） | H5（任务页 / M002 确认页） |
+| API-M001-019 | 聚合任务列表 | GET `/task-groups` | 按 `week_index`/`student_id`/`window_type` 查询聚合（「作业」列表：周次分组 + 周末聚合展示） | H5（M002 作业列表） |
+| API-M001-020 | 聚合任务详情 | GET `/task-groups/{group_id}` | 聚合任务 + 聚合学科子任务（**★判定单元**）详情 | H5 / M002 |
+| API-M001-021 | 手工改归属日 | POST `/tasks/{task_id}/belong-date` | 按契约 §F5 六条连锁规则改归属日（含跨聚合 `photo_subject_links` 迁移回调） | H5（家长维护） |
+
+> 上列 4 端点 = `CHANGE-003` §2.1 A9 申请清单；**ID 由 Project Master 于 2026-09-10 分配**并登记 `API_REGISTRY.md`（状态 Draft，随实施转 Active）。
 
 ## 详细契约
 
@@ -69,40 +85,45 @@
 - Response `200 StudentDTO`
 - Errors：`404`（含跨家庭/他人查询——不泄露存在性）；`422` school_id 不存在
 
-### API-M001-007 创建作业任务
+### API-M001-007 上传任务输入源（链路 T）（修订）
 - `POST /api/v1/tasks`（Bearer）
-- Request（单学科登记单）
+- Request：
 ```json
 {
-  "title": "数学口算 20 题",
-  "subject": "math",
-  "grade_level": "3",
-  "content": "课本 P23 练习",
   "student_id": "<uuid>",
-  "deadline": "2026-09-08T20:00:00Z",
-  "items": [
-    { "seq": 1, "item_type": "objective", "subject": "math", "stem": "12 × 8 = ?", "reference_answer": "96" }
+  "category": "school",
+  "grade_level": "3",
+  "sources": [
+    { "seq": 1, "kind": "image", "photo_id": "<uuid>" },
+    { "seq": 2, "kind": "text", "text_content": "数学：口算 20 题；语文：抄写第 3 课生字" }
   ]
 }
 ```
-- **多学科登记单（CR-001 容器化）**：`subject` 省略（NULL）或传 `'mixed'`；每道 `items[].subject` 必填，`items[].group_no` 为学科作业段号——全部缺省=0 单段（旧兼容，允许跨科目）；显式分组时从 1 起连续、段内科目一致、同段连续不交错、禁止与 0 混用
-- 约束：`student_id` 必须属于当前家庭；student 主体只能为**本人**创建（他人/不存在 → 404 防探测）；至少 1 题；`items` 唯一连续 seq；`reference_answer` 为**非判定基准辅助字段**（ADR-010/ACR-002：判定链端到端直判，不以其比对）——仅客观题可选录入，主观题一律拒绝（防误导）
-- Response `201 TaskDetailDTO`（状态 draft；subject 可空/'mixed'，items 含 group_no）
-- Errors：`422` 校验/分组结构违规；`404` 学生档案不属本家庭或非本人（防探测）
+- 语义：**上传无需填写任何内容**；`belong_date`/`week_index`/`window_type` 由 `WindowResolver` 按**上传时刻**自动解析；同日同类型已有任务 → **幂等归集**（追加 `sources` / 追加 `task_contents`），不新建；否则新建 `tasks`（`spec_status=placeholder`，`title` 自动生成如「09-09 周三」，家长可改）
+- 解析：服务端调用 `app/core/ai/` 得「今日任务」草稿（学科 + 内容项）→ 落 `task_contents` 并置 `spec_status=parsed`；**解析失败/超时 → 保持 `placeholder`** 并返回降级提示（非阻断，家长可手工录入）
+- 约束：`student_id` 属当前家庭；student 主体只能为**本人**（他人/不存在 → 404 防探测）；`sources` 至少 1 段、`seq` 连续；`kind=image` 时 `photo_id` 必须为**本家已上传照片**（M002，存在性校验经内部接口）
+- Response `201 TaskDTO`（含 `contents`/`sources`；`spec_status=placeholder|parsed`）
+- Errors：`422` 校验失败；`404` 学生档案/照片不属本家庭或非本人；`409` 归属日冲突（并发写入，客户端重试即幂等）
+- 幂等：`Idempotency-Key` 头可选；同 key 重复提交返回首次结果
+
+### API-M001-007b 补充输入源（同日内追加）
+- 同 `POST /api/v1/tasks`（携带已存在任务的同一 `student_id` + 同一归属日）→ 追加 `sources`/`contents`，不新建任务（A3：同学科追加内容项、新学科新增标签）
+- 响应与错误同 API-M001-007；**不改变**已有聚合的 `policy_version`
 
 ### API-M001-008 任务列表
 - `GET /api/v1/tasks?status=&student_id=&page=&page_size=`（Bearer）
 - Response `200 { "items": [TaskSummaryDTO], "page": n, "page_size": n, "total": n }`（倒序）
 
-### API-M001-009 任务详情
-- `GET /api/v1/tasks/{task_id}?include_answers=false`（Bearer）
-- Response `200 TaskDTO`（含 `items`）；`include_answers=true` 时客观题返回 `reference_answer`
+### API-M001-009 任务详情（修订）
+- `GET /api/v1/tasks/{task_id}`（Bearer）
+- Response `200 TaskDTO`（含 `contents` 内容项 + `sources` 输入源 + `spec_status`）；**不再返回逐题 `items`/`reference_answer`**（`task_items` 废弃）
 - Errors：`404` 不存在/不属于本家庭
 
-### API-M001-010 更新任务
+### API-M001-010 更新任务（修订）
 - `PATCH /api/v1/tasks/{task_id}`（Bearer）
-- Request：可改标题/内容/题目集/截止时间（仅当 `status in {draft, published}` 且尚未有任何上传提交——有提交即冻结题目）
-- Errors：`409` 状态不允许修改（任务已开始）
+- Request：改 `title`/`grade_level`/`deadline`、内容项增删改（家长维护草稿）
+- 约束：`belong_date`/`week_index`/`window_type` **不可经本端点修改**（须走「手工改归属日」端点，触发 §F5 连锁）；聚合被完成分析消费后归属字段禁改（409）
+- Errors：`409` 状态/锁不允许修改；`422` 校验失败
 
 ### API-M001-011 推进任务状态
 - `POST /api/v1/tasks/{task_id}/status`
@@ -116,6 +137,37 @@
 - Query：`stage` ∈ `primary|junior|senior`（可空，默认不过滤）；`keyword` 名称模糊匹配（可空）；分页同默认规则
 - Response `200 { "items": [ { "school_id": uuid, "name": str, "stage": str } ], "page": n, "page_size": n, "total": n }`
 - Errors：`401` 未登录；`422` 参数非法
+
+## CR-003 新增端点详细契约（API-M001-018~021）
+
+> 4 端点 = `CHANGE-003` §2.1 A9；契约要素（请求/响应/错误/鉴权/幂等/事务/副作用/兼容性）齐备；ID 已由 PM 于 2026-09-10 分配。
+
+### API-M001-018 解析结果确认（含隐式确认）
+- `POST /api/v1/tasks/{task_id}/parse-confirmation`（Bearer）
+- Request `{ "confirmed": true, "contents": [ { "content_id": uuid, "subject": str, "text": str } ] | null, "implicit": bool=false, "digest": { "subjects": [str], "content_texts": [str] } | null }`
+- 语义：家长确认解析草稿 → `spec_status=confirmed`；`contents` 提供则**整体替换**内容项（校正草稿）；`implicit=true` 时由 **M002 判定链**调用（携带 `digest` = 本次将一并落库的解析摘要），用于「确认作业完成情况」时一并确认任务解析（C7）
+- **约束**：`implicit=true` 时调用方**必须已展示 `digest`**（契约层约束；M001 记录调用来源 = `app/core/ai/`/M002）
+- 幂等：重复确认 `200` 同结果
+- Errors：`404` 任务不属本家/不存在；`409` 任务已 `confirmed` 且 `contents` 冲突；`422` 校验失败
+
+### API-M001-019 聚合任务列表
+- `GET /api/v1/task-groups?student_id=&week_index=&window_type=&page=&page_size=`（Bearer）
+- 用途：「作业」列表（周次分组 + 周末聚合展示）；family=本家全部，student=仅本人
+- Response `200 { "items": [TaskGroupDTO], "page": n, "page_size": n, "total": n }`
+- Errors：`404` 学生档案不属本家/非本人；`422` 参数非法
+
+### API-M001-020 聚合任务详情
+- `GET /api/v1/task-groups/{group_id}`（Bearer）
+- Response `200 TaskGroupDTO`（含 `subjects: [TaskGroupSubjectDTO]` 判定单元 + `policy_version`）
+- Errors：`404` 聚合不属本家/不存在
+
+### API-M001-021 手工改归属日
+- `POST /api/v1/tasks/{task_id}/belong-date`（Bearer）
+- Request `{ "belong_date": "YYYY-MM-DD" }`
+- 语义：按契约 §F5 六条连锁规则执行（单事务）：重算快照 → 迁移聚合 FK（目标无则建）→ 源聚合空则删 → **`conclusion_status=confirmed` 拒绝（409）** → 审计 → **跨聚合迁移同步 `photo_subject_links` 挂接目标**（M002 内部接口回调）
+- Response `200 TaskDTO`（含新 `belong_date`/`week_index`/`window_type`）
+- 副作用：可能创建/删除聚合、触发 M002 挂接迁移；审计留痕
+- Errors：`409`（已被完成分析消费 / 非法目标日）；`404` 任务不属本家；`422` 校验失败
 
 ## ACR-001 新增端点详细契约（API-M001-013~017）
 
@@ -156,15 +208,33 @@
 | 接口 | 方法 | 说明 | 消费者 |
 | --- | --- | --- | --- |
 | `FamilySpaceService` | `get_student(family_id, student_id) -> StudentDTO` | 校验档案归属并返回（含 school 信息） | M002 |
-| `TaskQueryService` | `get_task(family_id, task_id, include_answers=False) -> TaskDetailDTO` | 任务+题目读取 | M002/M004/M005/M007 |
-| `TaskQueryService` | `list_tasks(family_id, *, student_id=None, status=None) -> list[TaskDetailDTO]` | 列表读取 | M007 |
-| `TaskQueryService` | `can_accept_submission(family_id, task_id, student_id) -> bool` | 该任务对该学生档案当前可上传？ | M002 |
-| `TaskQueryService` | `get_task_groups(family_id, task_id) -> list[(subject, group_no)]` | 任务内学科作业段清单（CR-001/M002 归属段校验） | M002/M004 |
-| `TaskQueryService` | `get_task_group(family_id, task_id, subject, group_no, *, include_answers=False) -> TaskGroupSegmentDTO` | 某学科作业段题目（段不存在/越权 → PermissionDenied） | M002/M004 |
-| `TaskQueryService` | `can_accept_photo(family_id, task_id, student_id) -> bool` | 任务当前可接受归属照片（CR-001 归属语义，与 can_accept_submission 等价） | M002 |
-| `TaskStateService` | `mark_in_progress(family_id, task_id)` | 首次有效上传后由 M002 调用推进 | M002 |
+| `TaskQueryService` | `get_task(family_id, task_id) -> TaskDTO` | 任务（事实层）+ 内容项 + 输入源读取 | M002 |
+| `TaskQueryService` | `list_tasks(family_id, *, student_id=None, belong_date=None, status=None) -> list[TaskDTO]` | 事实层列表 | M002 |
+| `TaskQueryService` | `resolve_window(ts) -> WindowInfo` | 归属窗口解析（预览；**纯计算，不锁配置**） | M002、H5 |
+| `TaskQueryService` | `list_groups(family_id, *, student_id=None, week_index=None, window_type=None) -> list[TaskGroupDTO]` | 聚合列表 | M002 |
+| `TaskQueryService` | `get_group(family_id, group_id) -> TaskGroupDTO` | 聚合任务 + 判定单元读取 | M002 |
+| `TaskQueryService` | `ensure_group(family_id, student_id, category, belong_date) -> TaskGroupDTO` | 幂等取/建聚合（写路径；**不覆盖已存在聚合的 `policy_version`**） | M002 |
+| `TaskAggregationService` | `commit_conclusion(family_id, group_subject_id, conclusion, evidence, confidence, status) -> TaskGroupSubjectDTO` | M002 回写判定结论（**DATA-013 唯一写入口**） | M002 |
+| `TaskAggregationService` | `migrate_links_hook(family_id, task_id, old_group_key, new_group_key)` | 改归属日时通知 M002 迁移 `photo_subject_links`（M001 在事务中回调） | M001 → M002 |
+| `TaskStateService` | `mark_in_progress(family_id, task_id)` | 首次有效写入后由 M002 调用推进（幂等） | M002 |
+
+> ~~`get_task_groups` / `get_task_group` / `can_accept_photo` / `can_accept_submission`（段级 `(subject, group_no)` 语义）~~ **作废**（ADR-013：学科作业段取消）
+
+## API ID 申请清单（**已由 PM 分配**，2026-09-10；登记 `API_REGISTRY.md`）
+
+> 依据 `CHANGE-003` §2.1 A9；**禁止模块 Agent 自行编号**（`ID_GOVERNANCE.md`）。同时列明**既有端点修订**（不新增 ID，走 CR 修订）。
+
+| 申请序号 | 名称 | Method/Path | 用途 | 分配 ID |
+| --- | --- | --- | --- | --- |
+| M001-A1 | 解析结果确认（含隐式确认） | POST `/api/v1/tasks/{task_id}/parse-confirmation` | 家长/C7 隐式确认解析草稿 → `spec_status=confirmed` | **API-M001-018** |
+| M001-A2 | 聚合任务列表 | GET `/api/v1/task-groups` | 「作业」列表（周次分组 + 周末聚合） | **API-M001-019** |
+| M001-A3 | 聚合任务详情 | GET `/api/v1/task-groups/{group_id}` | 聚合 + 判定单元详情 | **API-M001-020** |
+| M001-A4 | 手工改归属日 | POST `/api/v1/tasks/{task_id}/belong-date` | §F5 连锁规则改归属日 | **API-M001-021** |
+
+**既有端点修订（不新增 ID）**：`API-M001-007`（POST `/tasks` → 上传输入源 + AI 解析）、`API-M001-008`（列表按 `belong_date`/`week_index`）、`API-M001-009`（详情返回内容项/输入源，去掉 `items`）、`API-M001-010`（更新面收窄，归属字段改走 M001-A4）。`API-M001-001~006`、`API-M001-011~017` 语义不变。
 
 > 内部接口越权语义统一 `PermissionDenied`（REST 层转对外 404/403 防探测口径）；student 主体调内部接口同样由上层带 `scope_student_id` 限定本人。
 
-> 注：`reference_answer` 仅在评分域（M005，同一家庭上下文）允许读取；M004 匹配不需要答案。DTO 字段与 REST 一致，避免双套模型（单 Source of Truth 于 `MODULE_DATA.md` 字段定义）。
+> 注：原 `reference_answer` 辅助字段随 `task_items` 废弃（ADR-013 继承「端到端直判、不维护参考答案基准」原则）；DTO 字段与 REST 一致，避免双套模型（单一 Source of Truth 于 `MODULE_DATA.md` 字段定义）。
+
 > 学校名称查询：M007 展示"学生 · 学校"时经 `FamilySpaceService.get_student`（StudentDTO.school）或学校只读查询获取；学校字典为公共数据，无家庭上下文限制。

@@ -4,7 +4,19 @@ __pycache__/
 .venv/
 backend/.venv/
 backend/data/*.db
+# M002 本地受控图片目录（运行时数据，MODULE_FILES.md 约定不入 git；备份随 data/ 整体处理）
+backend/data/images/
 .pytest_cache/
+
+# Node / frontend（ADR-012：Vite 工程，dist 为构建产物不入库）
+frontend/node_modules/
+frontend/dist/
+frontend/node_modules/.tmp/
+
+# E2E 验收工作区（Task-011 固化；node_modules 与一次性运行产物不入库，shots/ 与 browser_evidence.json 作为证据保留）
+.e2e/node_modules/
+.e2e/*.xml
+.e2e/seed_state.json
 
 # OS
 .DS_Store

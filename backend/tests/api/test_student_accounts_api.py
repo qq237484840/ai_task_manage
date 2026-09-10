@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import pytest
 
-from tests.conftest import PW, create_student, valid_task_payload
+from tests._m001_helpers import task_payload
+from tests.conftest import PW, create_student
 
 
 def open_account(client, headers, student_id, login, password=PW) -> dict:
@@ -237,15 +238,17 @@ def _seed_tasks_for_matrix(world, student_session) -> dict:
     """构造：s1 任务 t1、s2 任务 t2（同家）、B 家任务 t3。"""
     c, ha = world["client"], world["ha"]
     t1 = c.post(
-        "/api/v1/tasks", json=valid_task_payload(student_session["s1"]["student_id"], title="本人任务"), headers=ha
+        "/api/v1/tasks", json=task_payload(student_session["s1"]["student_id"]), headers=ha
     )
     assert t1.status_code == 201
     t2 = c.post(
-        "/api/v1/tasks", json=valid_task_payload(student_session["s2"]["student_id"], title="老二任务"), headers=ha
+        "/api/v1/tasks",
+        json=task_payload(student_session["s2"]["student_id"], sources=[{"seq": 1, "kind": "text", "text_content": "语文：背诵"}]),
+        headers=ha,
     )
     assert t2.status_code == 201
     other = create_student(c, world["hb"], school_id=world["school_primary"]["school_id"], name="B家")
-    t3 = c.post("/api/v1/tasks", json=valid_task_payload(other["student_id"], title="B家任务"), headers=world["hb"])
+    t3 = c.post("/api/v1/tasks", json=task_payload(other["student_id"]), headers=world["hb"])
     assert t3.status_code == 201
     return {"t1": t1.json(), "t2": t2.json(), "t3": t3.json()}
 
@@ -268,24 +271,25 @@ def test_student_task_crud_other_404(world, student_session):
     assert c.post(f"/api/v1/tasks/{other_id}/status", json={"action": "close"}, headers=hs).status_code == 404
 
 
-def test_student_task_detail_own_with_answers(world, student_session):
+def test_student_task_detail_own(world, student_session):
     tasks = _seed_tasks_for_matrix(world, student_session)
     c, hs = student_session["client"], student_session["hs"]
     own = tasks["t1"]["task_id"]
-    assert c.get(f"/api/v1/tasks/{own}", headers=hs).status_code == 200
-    assert c.get(f"/api/v1/tasks/{own}?include_answers=true", headers=hs).status_code == 200
+    body = c.get(f"/api/v1/tasks/{own}", headers=hs)
+    assert body.status_code == 200 and body.json()["student_id"] == student_session["s1"]["student_id"]
 
 
 def test_student_create_task_self_ok_other_404(world, student_session):
+    _seed_tasks_for_matrix(world, student_session)
     c, hs, s1, s2 = (
         student_session["client"],
         student_session["hs"],
         student_session["s1"],
         student_session["s2"],
     )
-    own = c.post("/api/v1/tasks", json=valid_task_payload(s1["student_id"], title="学生自建"), headers=hs)
+    own = c.post("/api/v1/tasks", json=task_payload(s1["student_id"]), headers=hs)
     assert own.status_code == 201 and own.json()["status"] == "draft"
-    other = c.post("/api/v1/tasks", json=valid_task_payload(s2["student_id"], title="越权"), headers=hs)
+    other = c.post("/api/v1/tasks", json=task_payload(s2["student_id"]), headers=hs)
     assert other.status_code == 404
 
 
@@ -296,6 +300,6 @@ def test_student_status_flow_own_task(world, student_session):
         student_session["hs"],
         student_session["s1"],
     )
-    task = c.post("/api/v1/tasks", json=valid_task_payload(s1["student_id"]), headers=ha).json()
+    task = c.post("/api/v1/tasks", json=task_payload(s1["student_id"]), headers=ha).json()
     r = c.post(f"/api/v1/tasks/{task['task_id']}/status", json={"action": "publish"}, headers=hs)
     assert r.status_code == 200 and r.json()["status"] == "published"

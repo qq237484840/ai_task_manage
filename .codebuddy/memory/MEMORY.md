@@ -1,39 +1,53 @@
 # MEMORY —— 长期项目记忆
 
-> 就地更新说明：2026-09-08（执行批 2）：**M002 契约草案 v0.3.0 用户批准 → Frozen**（MODULE.md Developing；CONTRACT/API/DATA Frozen；Task-002 签发，AGENT-M002 Active）→ **顶层同步 v0.10.0** → **CHANGE-001 立项**（合并 CR-001/CR-002/ACR-001/ACR-002 的 M001 变更执行，AGENT-M001 Task-CHG，Executing）——下一开发段=CHANGE-001 编码（group_no 数据面 + 学生子账号认证面 + reference_answer 非基准 + 测试回归 + M001 九件套回填）→ Task-002（M002 v0.3.0 实现）→ ROADMAP M-A 验收。前情（同日前两条）：批准包四项批准+ADR-010/011 Accepted → M002 v0.3.0 起草。
+> 原则：`docs/` 为 Single Source of Truth。本文件只留**跨会话要点与指针**；执行流水/证据原文见 `.codebuddy/memory/YYYY-MM-DD.md`。
 
-> 就地更新说明：2026-09-08（执行批 5，Project Master，Task-002 签发审计 grill，覆盖批 4）：审计发现 **M-A 全量域验收需 M003（布置单识别）+ 真实三方，Task-002 原「按 M-A 验收 → 转 Testing」会造成挂起** → 用户逐项确认：**Task-002 验收锚 = M002 模块级 DoD 独立收口**；**前端基础 UI 纳入并补 DoD 冒烟**；**PM 复核 APPROVED → M002 直定稿 v0.3.0 Stable（维护态，循 M001 前例，无独立 Testing 轮）**；M-A 全量验收随 M003 到位后统一执行（ROADMAP 不变）。已修订 `Task-002.md`（header/§5/§6+审计批注）、`ROADMAP.md`（M-A 分工批注）、`AGENT_REGISTRY.md`、`PROJECT_STATUS.md`。Task-002 依赖接口经代码核查全部落地。
->
-> 就地更新说明：2026-09-08（执行批 6，Project Master，用户技术方案变更）：用户要求前端改用 Vue3 生态 → PM 可行性评估（REST 契约零影响 / M001 前端 431 行小规模 / Task-002 前端 UI 未实现 = 唯一零浪费窗口 / 挂载点解耦）→ **3 决策点确认**：Q1=**Vant 4 纯移动库**（用户原点名 EP，PM 提示移动密度与 ADR-004 冲突后改选）、Q2=**TypeScript**、Q3=**独立前置任务 + Task-002 后段接轨** → 落库 **v0.12.0**：**ADR-012 Accepted（PD-025）**（Vue3+Vite+TS+Vant4 + Router hash + Pinia + axios 错误映射；FastAPI 托管 `dist/`；零构建三文件退役）+ **CHANGE-002 立项（Executing）** + **Task-003 签发（AGENT-M001）**（`frontend/**` 独占写权；M001 6 视图迁移 + 托管切换 + 冒烟/89 回归 + 回填）；Task-002 前端 UI 段**后移接轨**（后端并行）；Node 20 安装两次受进程占用暂失败，Task-003 前需重试。前情：M002 v0.3.0 Frozen + CHANGE-001 Applied + M001 v0.1.2 Stable + Task-002 编码中。
+## 项目一句话
 
-> 就地更新说明：2026-09-08（执行批 4，Project Master 收口，覆盖批 2/批 3）：**CHANGE-001 PM 复核 APPROVED → 已完成/Applied**（89 测试复核全绿）；**API-M001-013~017 收口登记（Active）**（子账号开通/更新、学生登录/登出/me）；**M001 定稿 v0.1.2 Stable + 维护态**；**顶层状态推进 v0.11.0**（PROJECT_STATUS/CHANGELOG/MODULE_REGISTRY/AGENT_REGISTRY/ROADMAP/INDEX 全部同步）；**Task-002 任务书落盘 `docs/agents/Task-002.md`**——AGENT-M002 编码 M002 v0.3.0（backend modules/m002 + 前端基础 UI + 测试 + 回填）。前情：执行批 3（CHANGE-001 编码+回填完成待复核）；执行批 2（M002 v0.3.0 Frozen/顶层 v0.10.0/CHANGE-001 立项）。
+中小学生 AI 作业与学习成长综合评定系统 V1。**V1 有效模块 = M001 + M002 + 横切 `app/core/ai/`**（M003~M007 登记保留、**Deferred**，`ADR-014`）。形态：**FastAPI + SQLite 单体**（ADR-004）+ 移动优先 H5 **Vue3 + Vite + TS + Vant 4**（ADR-012，FastAPI 托管 `frontend/dist`）+ **两级主体** family/student（ADR-009/ACR-001：家庭级隔离 + 学生仅本人）+ **判定 = 聚合子任务(学科)级**（ADR-013）+ **真实三方 AI Provider 默认 / Mock 降级**（ADR-011）+ 学校字典全局只读 seed（ADR-008）。方法学：**文档驱动 + 多 Agent 治理**（ID 仅 Project Master 分配）。
 
-## 项目概览
-- 仓库：`c:\DevProject\AI.TaskManage`，git 分支 main。
-- **业务（V1，2026-09-08 由用户提供）**：中小学生 AI 作业与学习成长综合评定系统 —— V1 MVP =「AI 每日作业智能评定系统」，闭环：创建任务→上传照片→AI识别→任务匹配→质量评价→AI教师评价→今日报告。仅 M001~M007 七模块（需求原文 M01~M07），禁止知识图谱/画像/组卷/班级管理/多租户等（ADR-002）。
-- **已确认技术决策（用户 2026-09-08 答复，全部落库）**：技术栈=移动优先 H5 + FastAPI + SQLite 单体（ADR-004）；身份=纯家庭模式，家庭账号家长=布置者+学生档案=评定对象、家庭级数据隔离（ADR-005），扩展为**两级主体**（ADR-009：家长+学生子账号）；正确度判定=**内容级主客观全判 + 端到端直判，不维护参考答案字段**（ADR-006 **Superseded→ADR-010**，PD-021/022）；AI Provider=抽象 + **真实三方默认，Mock 降级测试桩/离线**（ADR-007 **Superseded→ADR-011**，PD-019/需求⑤）；部署=需联网访问三方 API + SQLite + 本地图片目录（ASM-010，2026-09-08 修订）；学科=小学语数英书面作业起步、无法判断→标记+家长复核/重拍（ASM-011）；匹配/评判=**内容级**（布置精确到题，逐题对齐判完成/对错，PD-018）；M005=六维保留但 **AI 评判为核**（PD-023）；报告=**草稿→家长复核定稿归档**（PD-024）。
-- **学校基础资料（2026-09-08，M001 开发输入）**：学校字典=全局共享只读（seed 预置、后台维护暂缓），学生档案 `school_id` 必填关联，字段=名称+学段（ADR-008/REQ-009/DATA-011）；ADR-005 家庭隔离的唯一限定例外，学校管理域仍禁止。
-- **M002 作业图片采集决策（2026-09-08，D1~D4 = PD-010~013，用户确认推荐项）**：① 质量检测=**本地规则先行**（模糊/过暗/过亮/倾斜/遮挡/缺页启发式可解释判定、阈值配置化、规则版本 v1.0，无外部 AI；`QualityChecker` 协议预留 Vision 接入位）；② 预处理=**仅轻量归一**（EXIF 方向归一 + 统一 JPEG 编码 + 长边 ≤2000px；透视矫正/增强归 M003 识别前链路）；③ 提交建模=懒创建/自动归属 open 提交 + 显式 complete，**任务首张质检通过入库即触发 mark_in_progress**（published→in_progress，幂等，可继续上传至 close）；④ 不合格=**不入库 + 逐图报告**（失败不留文件/行/状态；422 `image_quality_rejected` 引导重拍）。
-- **M002 完整性审查重构决策（2026-09-08，PD-014~016 + D5~D8，用户逐项确认；M002 契约 v0.1.0→v0.2.0）**：① **任务粒度**：task=多学科作业登记单容器（subject 语义放宽待 CR-001）+ `task_items.group_no` 学科作业段，学科卡=`(subject,group_no)`，照片最终单归属到作业段；② **先采后认**：上传按批次不预选任务/学科→`unassigned`→AI(M003)建议`suggested`→家长/学生确认`assigned`/`rejected`；首次 assigned 触发任务 `mark_in_progress`（幂等，取代 D3 旧触发）；完成程度=作业段照片覆盖二值化；③ **两级主体**：家庭账号家长（全家+兜底）+学生子账号（完整登录、仅本人；学生自主登记/拍照、家长兜底）→ ADR-009/ACR-001；④ **补全 D5~D8**：批次≤50/任务 assigned≤200；页序服务端自增；未消费(`consumed_at IS NULL`)照片可撤销（物理删+审计）；`(family_id,batch_id)` 串行化+409。
-- **主线功能域重排（2026-09-08，v0.9.0，PD-020/g4）**：主线计划与验收里程碑按 **4 功能域**组织（新建 `docs/ROADMAP.md` v0.9.0），**保留 M001~M007 模块组织与契约治理、开发顺序 M001→M007 不变**：A 学生自主采集闭环（布置登记拍照识别草稿→确认补正→生效；完成作业拍照，PD-017/g1）→ B 家长复核确认闭环（照片归属确认/纠错）→ C 大模型内容级匹配+家长兜底（逐题对齐判完成/对错，主客观全判，低置信/无法判断入复核）→ D 综合评判+每日报告定稿（草稿→复核定稿→归档）。里程碑 M-A~M-D + M-END 全链路回归。
-- **变更/风险登记（2026-09-08）**：`CR-001`/`ACR-001`/`CR-002`/`ACR-002` 均 **Approved** 并**合并为 `docs/changes/CHANGE-001.md`（Executing，AGENT-M001）**；ADR-010/011 → **Accepted**（ADR-006/007 Superseded 正式生效）；**M002 契约 v0.3.0 Frozen（2026-09-08 用户批准，Task-002/AGENT-M002 Active）**；`RISK_REGISTER` RISK-006~007 + RISK-008（三方依赖）、RISK-009（照片出域合规）。
-- **前端技术栈统一（2026-09-08，PD-025 → ADR-012/CHANGE-002/Task-003）**：Vue3 + Vite + TypeScript + **Vant 4**（移动组件库；用户确认替代 Element Plus）+ Vue Router(hash) + Pinia + axios 错误语义映射（400/401/403/404/409/413/415/422）；`frontend/src` 工程化、FastAPI 托管 `dist/`、零构建三文件退役；M001 现有页面由 Task-003（AGENT-M001）等价迁移，Task-002 起全部前端 UI 按新栈。工作量基线 3.5~5.5 人日（含 TS）。
-- 采用「文档驱动 + 总控 Agent 治理 + 模块 Agent 实现」多 Agent 工程模式。用户提供的 #0~#107 方法论已落实为 docs/ 体系。
-- 状态 **v0.12.0**：Phase 3 功能域主线 + 内容级重构 + 前端工程化切换 —— **M001 Stable v0.1.2**（维护态 + **Task-003 Active**：ADR-012 前端栈切换 CHANGE-002，AGENT-M001 迁移 M001 页面）；**M002 Developing（契约 v0.3.0 Frozen，Task-002 AGENT-M002 编码中，前端 UI 段待 Task-003 后按新栈接轨）**；主线计划=`ROADMAP.md`（当前=采集链 M-A）。REQ-001~009 Approved；PD-001~025 全部确认（PD-025=前端技术栈）；跨模块开放项 O-1~O-9 见 PROJECT_STATUS（O-8、O-6 已关闭）。
+## 当前状态（2026-09-10，顶层 v0.22.0）
 
-## 用户偏好与决策（稳定事实）
-- 文档语言：**中文为主**，代码/API 标识符英文。
-- 文档体系分层渐进：模块九件套在模块划分时按真实模块生成，**勿建空模板文件**。
-- 源码目录自 Task-001 起落地：`backend/`（含 `.venv`，Python 3.12）+ `frontend/` + `backend/tests/`；后端改动需同步回填 docs 与测试。
-- ID 治理规范先行（ID_GOVERNANCE.md）；ID（M/API/REQ/ADR/CR/ACR/CHANGE/BUG/TD/RISK/ASM/AGENT）**仅由 Project Master 分配**，Agent 不得自行编号。
-- 单条需求详情入 `docs/requirements/REQ-xxx.md`，需变更登记先 CR/ACR；普通增量改动记 `CHANGELOG.md`。
-- README 只做入口，业务知识一律入 docs 分层，禁止知识重复/Single Source of Truth。
-- 确认交互形式：一次 ask_followup 多问（≤4 题），选项带推荐标注，用户逐项答复后落库。
-- **用户偏好复用**：后续项目均采用本治理模式。治理模板包位于仓库内 `ai-governance-template/`（v1.0.0，含 INSTALL.md；占位符 {{PROJECT_NAME}}/{{PROJECT_DIR}}/{{INIT_DATE}}）。新项目铺装=复制 docs/ + 按 INSTALL 替换占位符 + 确认默认假设。模板为复用资产，治理规范改进须回同步模板并递增版本。
+- **`CHANGE-003`**：**已关闭（Closed，2026-09-10，PM 复核 APPROVED = ④ 判达成）**。路径 = `Task-011` 取证（条件达成，3 缺口）→ `Task-012`/`Task-013` 修复 AI 通路缺陷（均 `Fixed`）→ **`Task-014`（AGENT-M002）去替身复审**（移除 `m002_ai_port` 端口替身 + `TD-003` 垫片清理 + 剧本 4/5 真机 + 浏览器级 18/18 PASS）→ **PM 亲手判别力复现**（关兜底 → 边界 2 例 `FF`/`RED_EXIT=1`；还原 → 4 passed/`GREEN_EXIT=0`）+ 全量 237/0 + 写区双证 → 双 BUG 置 **Verified** → **④ 判达成 → CHANGE-003 关闭**。**V1 域 A/B/C 交付完成**；已知边界 = 真实三方 AI 无密钥（Mock 证据显著标注 `mock=True`，非三方联调）。
+- **契约定稿**：M001 **v0.2.0 Frozen** ｜ M002 **v0.4.1 Frozen**（`CR-004` Applied：`API-M002-007` 响应体**以运行实现为准** = `{photo_id, status, suggestions[]}`；非破坏性、前端零返工、后端零代码改动）。
+- **③ 交付清单（均 APPROVED）**：`Task-006` 横切 AI 层（Vision/OCR/LLM 三协议 + Mock/真实配置化 + prompt 版本化 + schema 校验拦截 + 超时重试降级 + 三能力接口 `parse_task_spec`/`suggest_photo_links`/`analyze_completion` + DATA-009 `ai_call_records`）｜`Task-007` M001 双层模型（`WindowResolver` 4 点切日/周次/周末合并 + `task_groups`/`task_group_subjects` 聚合 + 链路 T + 端点 018~021）｜`Task-008` M002 v0.4.0（入口 `kind` → N:N 挂接 → 逐张复核 → 窗口级门控 → 完成分析）｜`Task-009` 前端「作业」域（**路由 `path` 仍 `/photos`**、`name=homework`）｜`Task-010` `BUG-002` 修复 **Verified**（门控默认路径改走契约内 `list_groups`，弃 `FakeGateway` 桩，新增真机集成 4 例）。
+- **实测基线**：全量 `pytest` = **237 tests / 0 failed / 0 errors / 0 skipped**（PM 实测 `--junitxml` + `EXIT=0`；`237 = 235 passed + 2 xpassed`，较 `Task-013` 首轮 236 增 1 = `Task-012` 新增用例；原 227 基线；**勿采信历史口述数字**）。缺陷双哨兵 `test_bug003_*` / `test_bug004_*`（`xfail(strict=False)`）**均已 XPASS**（回归即回落 xfailed）。
+- **缺陷台账**：`BUG-001` 已修复 ｜ `BUG-002` **Verified** ｜ **`BUG-003` = Verified（`Task-013` 修复 + `Task-014` 去替身复审）**（`core/ai/providers/mock.py` 读 `candidate_subjects` → `candidates`，与 `service.py:197` 注入及 prompt `$candidates` 对齐；**PM 两次亲手红→绿**：① service 面回退键名 `4 failed/1 passed` → 还原全绿；② `Task-013-D1` API 面 `test_scenario5_*` 断言回退后 `F`（实测 `unassigned` + `suggestions == []`）→ 还原 `.`；**③ `Task-014` 判别力复核：关 Mock 兜底 → 边界 2 例 `FF`（实测 `unassigned` + `[]`，`RED_EXIT=1`）→ 还原 4 passed（`GREEN_EXIT=0`）**；2026-09-10 **Verified**）｜ **`BUG-004` = Verified（`Task-012` 修复 + `Task-014` 真实装配路径复审成立）**（keyword 调用 `parser(session, sources=...)` + `SourceInput` 适配（**只转发文本源**，图片源保持 `placeholder` 防伪造）+ `_coerce_draft` 支持 `ParsedContentItem` + `logger.warning` 可观测；`session` 经 `task_service.py:178` **单行**下传（PM 2026-09-10 裁决「采纳 A」/最小扩权）→ `ai_call_records` 落条；`xfail` 自然 **XPASS**；`BUG-004.md §7.1` 修复记录由执行方追加 + PM 复核认可（状态已置 **`Verified`**，`Task-014` 复审通过）；PM 已**更正**其 §5.8.1「`Task-013` 并发抖动」归因 —— 真因 = `get_ai_settings` + `get_ai_service` **双 `lru_cache` 跨用例泄漏**）。详见 `docs/changes/BUG-003.md §7.1`、`docs/agents/Task-012.md` §3.5、`Task-013.md §5`/§5D。
+- **技术债**：`TD-001`（`get_group_subject` 全量扫描 N+1 放大）、`TD-002`（契约未暴露 `window_task_id`/`task_status`）；**`TD-003` → Closed**（`Task-014`：`clients/task_client.py` 的 `except TypeError` 签名兼容垫片删除，按 M001 v0.2.0 Frozen 契约直调；死代码证明 = 真机门控集成 10 例 + 上层 40+ 例 0 触发）；**PM 裁决不立 `TD-004`**（`getattr(...,None)+raise` 为存在性探针，与签名兼容垫片语义不同，不掩盖契约缺口）→ `docs/TECH_DEBT.md`；**无阻塞项**。
+- 历史批次（v0.9.0~v0.20.0）明细见 `.codebuddy/memory/2026-09-08.md` 与 `2026-09-10.md`（含各轮 PM 裁决与证据原文）。
+
+## 架构定稿要点（ADR-013）
+
+- **双层模型**：**事实层按天**（`tasks` 唯一键 **`(student_id, category, belong_date)`**；`subject`/`content`/`task_items` 废弃停写）+ **聚合层跨天**（`task_groups` → `task_group_subjects` **★判定单元** → `photo_subject_links` **N:N** → `completion_analyses`）；**挂接与判定落聚合层**。
+- **窗口语义**：日界 **凌晨 4 点**（`AT_DAY_CUTOFF`，`Asia/Shanghai`）；`week_index` = `AT_TERM_START` 所在周周一起算；**周五~周日合并「周末作业」**；每个 `belong_date` 至少一个聚合（最小 1 天）。
+- **配置锁定**：变更只影响未聚合对象；已聚合按生成时 `policy_version`；锁定粒度 = 每个 `(学生, 聚合对象)`；**写入触发锁定，纯浏览不锁**；`belong_date` 上传即固化、不回算历史。
+- **输入源**：图片 / 文本 / 聊天记录（只支持**粘贴文本**）；`kind` 由**菜单入口**决定（「任务」→ `task_spec`，「作业」→ `homework`）；作业上传**不填内容**。
+
+## 用户偏好与稳定约定
+
+- 中文文档、代码/API 标识符英文；README 只做入口；模块九件套按真实需要生成、勿建空模板；后端改动同步回填 docs 与测试。
+- 单条需求详情入 `docs/requirements/`；需变更先 CR/ACR 登记；普通增量记 `CHANGELOG.md`；禁止知识重复；治理模板包 `ai-governance-template/` 改进须回同步并递增版本。
+- 确认交互：一次 `ask_followup` ≤4 题、选项带推荐标注，用户逐项答复后落库。
+- **PM 复核铁律**：不采信执行方自述 —— 须**可复现命令 + 原文输出**；「零改动」以 `git diff` + **mtime 审计**双证；用例真实性须**审读测试代码**（警惕 `FakeGateway` / 端口替身掩盖真机缺口）。
+- **流程教训（`BUG-002`）**：跨模块消费链**至少一条真机集成用例**；**契约外接口不得作为唯一来源**，消费面须与 `MODULE_API.md` 内部服务接口表逐条对齐。
+- **验收/复核铁律（v0.21.0 起累积）**：① 替身/桩**须在 docstring 显式标注并向 PM 报备**，PM 核验「证据是否经**真实装配路径**」；② `xfail` **不得删除或放宽**，修复后须自然 **XPASS**（**红→绿**取证，PM 应亲手复现）；③ 证据**逐条分域标注**（浏览器级 / API 级 / 服务级**不得混同**）；④ 「零改动」双证；⑤ **DoD × 写区冲突裁决判据**：先读码核实物理可行性 → 证据**可经真实生产路径获得**则**最小扩权**（限定文件/行/语义，写入任务书 §3.5 并附硬约束），否则降级口径并显式标注；⑥ 修复类任务**禁止用 `try/except TypeError` 兼容旧签名**（`BUG-004` 教训）；⑦ **症状在哪一层，证据就必须到哪一层**（症状在 API 面 → 仅 service 面证据不足）；⑧ 任务书**自检「交付物 ⊆ 写区」**（`Task-013` §5A/§8 冲突教训）。
 
 ## 关键索引
-- 知识地图入口：`docs/INDEX.md`
-- 状态：`docs/PROJECT_STATUS.md`（**v0.12.0** / Phase 3 功能域主线+内容级重构+前端工程化 / PD-001~025）；**主线计划：`docs/ROADMAP.md`（v0.9.0，功能域 A~D 里程碑）**；假设：`docs/ASSUMPTIONS.md`（ASM-001~011）；决策：`docs/adr/ADR-001~012.md`（ADR-006/007 **Superseded**；ADR-010/011/012 **Accepted**）
-- 需求：`docs/REQUIREMENTS.md` + `docs/requirements/REQ-001~009.md`（Approved，REQ-001~007 随 CR-002 精校预告）；模块：`docs/MODULE_REGISTRY.md`（M001 **Stable**，M002 Designing/Draft v0.2.0，M003~M007 Planned）；API：`docs/API_REGISTRY.md`（API-M001-001~012 **Frozen**，API-M002-001~006 **Draft**，改须 CR）；数据：`docs/DATA_MODEL.md`（DATA-001~011，DATA-001 判定基准语义随 CR-002）；Agent：`docs/AGENT_REGISTRY.md`（AGENT-M001 Active/Task-001 APPROVED，AGENT-M002 待 Task-002 签发）；风险：`docs/RISK_REGISTER.md`（RISK-001~009）；变更：`docs/changes/`（CR-001/002、ACR-001/002 均 Open）
-- 当前阶段：Phase 3 —— **M001 Stable v0.1.2（维护态，前端迁移 Task-003）+ M002 编码中（Task-002）**：M001 工程与 **89** 测试细节见 `docs/modules/M001/`；**前端技术栈切换（2026-09-08，ADR-012/CHANGE-002/Task-003）**：Vue3 + Vite + TS + Vant 4 工程、M001 6 视图迁移、FastAPI 托管 `dist/`（AGENT-M001，`frontend/**` 独占写权）；**M002 契约 v0.3.0 Frozen 落库 `docs/modules/M002/`**：先采后认归属 + 完成程度改由内容级判定链回写（R4~R6），API-M002-001~006（Frozen）；图片存 `<backend>/data/images` 分层、鉴权读取+访问审计；**主线按功能域重排见 `docs/ROADMAP.md`**；**待办（下一开发段）**：并行执行 **Task-003**（AGENT-M001 前端切换：Vite 工程+页面迁移+托管 dist+回填）与 **Task-002 后端**（AGENT-M002：backend modules/m002 + tests + 回填；M001 依赖已就绪；M003 建议写入口预留）→ Task-002 前端基础 UI 在 Task-003 验收后**按新栈**实现 → M002 模块级 DoD 复核（定稿 v0.3.0 Stable）→ ROADMAP M-A 全量验收随 M003 → M003~M007 依序 → 全系统回归（真实三方+Mock 双跑）。细节见 `docs/modules/M002/MODULE_*.md`、`docs/agents/Task-002.md`、`docs/agents/Task-003.md`、`docs/adr/ADR-012.md`、`docs/ROADMAP.md` 与 `.codebuddy/memory/2026-09-08.md`。
-- 治理模板包：`ai-governance-template/`（README v1.0.0 / INSTALL.md）。
+
+- 入口 `docs/INDEX.md`；状态 `docs/PROJECT_STATUS.md`（**v0.22.0**；M001/M002 均 **Stable**）；主线 `docs/ROADMAP.md`（**V1 域 = A+B+C 已交付完成（`CHANGE-003` Closed，2026-09-10），域 D 后置 V2**）。
+- 权威源 `docs/requirements/CLARIFICATION-2026-09-10.md`；配置 `docs/CONFIGURATION.md`（`AT_*` + §五 `AT_AI_*` 全表）；数据 `docs/DATA_MODEL.md`（DATA-001/003 修订 + DATA-012~018；DATA-009 = 物理表 `ai_call_records`）。
+- 决策 `docs/adr/ADR-001~014.md`（ADR-006/007/010 Superseded；关键 = ADR-013 双层模型、ADR-014 范围收窄 + AI 层执行方、ADR-011 AI Provider/Mock、ADR-012 前端栈）。
+- 模块 `docs/MODULE_REGISTRY.md`（M001 v0.2.0 Frozen **Stable** / M002 **v0.4.1 Frozen Stable** / M003~M007 Deferred）；API `docs/API_REGISTRY.md`（`API-M001-018~021`、`API-M002-007~011` Active）。
+- 变更 `docs/changes/`：CHANGE-001 Applied、CHANGE-002 Executing、**CHANGE-003 **Closed**（PM 复核 APPROVED = ④ 判达成，2026-09-10）**、`CR-004` **Applied**、`BUG-001` 已修复、`BUG-002` **Verified**、**`BUG-003` Verified**、**`BUG-004` Verified**；任务书 `docs/agents/Task-00x.md`（Task-006~011 已完成；**`Task-012`/`Task-013`/`Task-014` 均已完成（PM 复核成立，2026-09-10）**；**任务队列无 Active**）。
+- 技术债 `docs/TECH_DEBT.md`（TD-001/TD-002；**TD-003 → Closed**；PM 裁决**不立 TD-004**）。
+
+## 环境与实况备忘
+
+- 后端 venv = `backend/.venv`（Python 3.12）；**pytest 基线 = 237**。代码基线：M001 v0.2.0、M002 v0.4.1、横切 `app/core/ai/` 均已实施。
+- **浏览器级验收环境**（`Task-011` 固化）：`.e2e/`（`package.json` + `playwright-core`）+ 系统 Edge 通道（`channel: 'msedge'`）；种子 `.e2e/seed.py` 建独立库 `backend/data/acceptance.db`；起服务 = `AT_DATABASE_URL='sqlite:///./data/acceptance.db'` + `uvicorn app.main:app --port 8011`（**先确认端口未被历史进程占用**）。
+- **分层约束**：M001 **禁止 import M002**（实测 `grep -rn "modules.m002" backend/app/modules/m001` = 0）；跨模块唯一通道 = **回调注册**（`m001.services.aggregation_service.register_links_migration_hook`，M002 导入期注册；`main.py` 启动期 `ensure_links_migration_hook_registered()` 幂等自愈已接线）。
+- **`tzdata` 已解决**：`backend/requirements.txt` 含 `tzdata>=2024.1`；`WindowResolver` 固定 UTC+8 回退保留为最后防线。
+- 前端 `frontend/`：托管 = `backend/app/main.py` StaticFiles → `frontend/dist`（`core/config.py` `frontend_dir` 可覆盖）；dev = Vite proxy `/api/v1` → `127.0.0.1:8000`；**Vant 4 已全局注册**（`src/main.ts`）。
+- **前端类型检查必须显式指定工程**：`npx vue-tsc --noEmit -p tsconfig.app.json; "EXIT=$LASTEXITCODE"`（走根 `tsconfig.json` 引用工程会漏检 `src/**`；PowerShell 管道会吞退出码）。Node 22.22.2 实机路径 = `C:\Users\Administrator\.workbuddy\binaries\node\versions\22.22.2-2`（带 `-2` 后缀，PATH 需自加）。
+- **git 跟踪现状**：`backend/app/core/ai/`、`backend/tests/e2e/`、`frontend/src/` 等为**新建未跟踪**目录 → 写区核验须用 `git status --porcelain` 佐证（`git diff --name-only` 不含其条目）。**V1 全部成果尚未入库**（收口时 `git status --porcelain` = 128 条，分支领先 `origin/main` 2 commits）—— 提交须用户显式指示。
+- **`.gitignore` 已加固（2026-09-10 收口体检）**：忽略 `.e2e/node_modules/`、`.e2e/*.xml`、`.e2e/seed_state.json`（此前 `.e2e/node_modules` **未被忽略**，误 `git add` 会引入 playwright-core 全量依赖）；`.e2e/shots/*.png` 与 `.e2e/browser_evidence.json` **保留为浏览器级证据**，故意不忽略。

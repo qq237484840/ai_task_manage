@@ -18,7 +18,7 @@
 | 命名空间 | 格式 | 连续编号域 | 分配时机 | 状态机 | 登记位置 |
 | --- | --- | --- | --- | --- | --- |
 | 需求 | `REQ-nnn` | 全局 | 需求录入 | Draft/Approved/In Progress/Done/Deprecated | `REQUIREMENTS.md` + `requirements/REQ-nnn.md` |
-| 模块 | `Mnnn` | 全局 | 模块划分 | Planned/…/Stable/Deprecated/Archived | `MODULE_REGISTRY.md` |
+| 模块 | `Mnnn` | 全局 | 模块划分 | Planned/…/Stable/Deprecated/Archived（+ 项目扩展态 **Deferred**，`ADR-014`） | `MODULE_REGISTRY.md` |
 | API | `API-Mnnn-nnn` | 模块内 | 接口设计 | Draft/Active/Frozen/Deprecated/Removed | `API_REGISTRY.md` + 模块 `MODULE_API.md` |
 | 数据实体 | `DATA-nnn` | 全局 | 数据设计 | 草案/定稿 | `DATA_MODEL.md` |
 | 架构决策 | `ADR-nnn` | 全局 | 决策定稿 | Proposed/Accepted/Superseded | `adr/ADR-nnn.md` |

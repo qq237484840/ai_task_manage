@@ -1,52 +1,63 @@
-# M002 模块测试计划（DoD 依据）—— 作业图片采集与归属
+# M002 测试策略与结果 —— 作业图片采集与挂接
 
-- **状态**：已批准基线（契约 **v0.3.0 Frozen**，2026-09-08）｜ 数量与命名以 Task-002 实测为准，DoD 验收时核对
-- **目录**：`backend/tests/`（M001 先例）；测试随代码落地（红→绿）
-- **说明**：以下为**验收口径清单**（映射到黑盒契约各段落），合成图以确定性像素构造（白底黑字/灰块/运动模糊/低亮度等），**不依赖真实拍照**
+- **状态**：**v0.4.0（Frozen，用户批准 2026-09-10）** —— 既有实况基线 = **112 passed**（Task-002，2026-09-09：M002 单测 11 + API 12，含 M001 89）；本文件新增**用例设计**（③ 实施阶段落地 = `Task-008`，`CHANGE-003` §2.2 B9）
+- **目录**：`backend/tests/`；测试随代码落地（红→绿）
+- **说明**：**验收口径清单**（映射黑盒契约各段落）；合成图以确定性像素构造，**不依赖真实拍照**；AI 依赖（挂接建议/完成分析）经 **`MockAiClient`** 注入（ADR-011 降级桩）
 
-## 一、质检（D1/D4）—— API-M002-002 拒绝路径
+## 测试分层与"为何需要/为何不需要"
 
-1. 类型：非 jpeg/png/webp → 415；超 10MB → 413；解码像素 >60MP → 422
-2. 模糊图（低于阈值）→ 422 `image_quality_rejected`，message 含逐项原因
-3. 过暗 / 过亮 / 倾斜超限 / 遮挡 / 页角裁切 → 各自 422，报告含 `checks[]`（value/threshold/severity）
-4. 被拒后：**无文件残留、无 `photos` 行、任务状态不变**（断言 DB + 图片目录）
-5. 通过图：quality_report_json 含 `ruleset_version=v1.0` 与全部 checks；可通过配置调节阈值后再判定（阈值配置化断言）
+| 层 | 覆盖 | 为何需要 | 为何不需要其他 |
+| --- | --- | --- | --- |
+| 单元 | 质检规则（模糊/明暗/倾斜/遮挡/裁切）、归一管线、门控计算（待复核 N）、挂接状态机守卫、分析状态机（draft/confirmed/run_no） | 确定性规则 + 状态机是正确性核心 | — |
+| 集成 | Repository 双层过滤、挂接 N:N 唯一约束、分析与 `commit_conclusion` 事务、`migrate_links` 回调、失败无残留 | 跨模块一致性/事务边界 | — |
+| API | 既有 001~006（修订后）+ 新增 5 端点契约断言 | 契约冻结防漂移 | — |
+| 安全 | 未认证 401；跨家庭/跨主体越权 404；**双主体矩阵** | RISK-004 未成年人照片；两级主体验收 | — |
+| 性能 | 单张处理预算断言（<2s） | 本地 CPU 确定性 | 不做并发压测（单家庭低并发 ASM-010） |
+| E2E | 手工冒烟（拍照→复核→门控→分析→确认） | 真实可操作性 | 自动化浏览器测试价值/成本比低 |
 
-## 二、归一与存储（D2）
+## 既有基线（v0.3.0 实况，112 passed）
 
-6. EXIF 方向测试图 → 归一图方向正确；输出恒 JPEG；长边 >2000 → 等比缩至 ≤2000；原始文件未被修改（sha256 不变）
-7. original/normalized 相对路径落 `family/batch/` 分层；行内 sha256 = 原始内容哈希
+- [x] `tests/unit/test_m002_image_processing.py`（11）：质检各检测项、归一、失败无残留
+- [x] `tests/api/test_m002_api.py`（12）：上传/归属状态机、in_progress 单次触发、越权矩阵、消费后不可变
+- [x] 与 M001 89 用例合并运行全绿（`112 tests`）
 
-## 三、上传/批次（D5/D6/D8）
+## 新增用例设计（v0.4.0，B9；③ 实施阶段落地）
 
-8. student 主体上传他人 batch → 404；family 主体可代传本家学生
-9. seq_no 服务端自增（并发上传不重复，UNIQUE 约束 + 串行化断言）
-10. 批次达 50 张后再传 → 422 `batch_photo_limit`
-11. 并发上传同批次 → 无重复 seq/行，极端争用可现 409 `concurrent_conflict`（幂等重试语义）
+### U 单元
+- [ ] **门控计算**：窗口内 K 张照片、M 张未确认挂接 → `pending_photos=M`、`satisfied=(M==0)`
+- [ ] **挂接状态机守卫**：accept 未确认 link / reject 已确认 link / relink 目标非法 → 相应 4xx
+- [ ] **分析状态机**：`draft → confirmed`；`confirmed` 后重跑 → 409；`run_no` 递增
+- [ ] **`kind` 一致性**：批次 `kind=task_spec` 时 `photos.kind` 冗余一致（不一致 → 缺陷）
 
-## 四、归属状态机（R2 + D3/D5/D7）
+### I 集成
+- [ ] **N:N 唯一约束**：同照片同子任务重复挂接 → UNIQUE 幂等；跨学科多条挂接允许
+- [ ] **首确认触发**：照片首条 `confirmed_at` 使窗口任务计数 0→1 → `mark_in_progress` **恰好一次**（幂等）
+- [ ] **分析确认事务**：`completion_analyses.status=confirmed` 与 M001 `commit_conclusion` 同事务；`commit_conclusion` 失败 → 整体回滚
+- [ ] **消费锁定**：分析确认 → 相关照片 `consumed_at` 置位 → 删除 409 `photo_consumed`
+- [ ] **`migrate_links` 回调**：M001 改归属日 → 挂接目标迁移成功；失败 → 整体回滚
+- [ ] **AI 降级**：`MockAiClient` 返回超时/不合规 → 挂接建议缺失（照片留 `unassigned`）+ 手工挂接可用；分析草稿 `无法判断` 不阻断
 
-12. 上传即 `unassigned`；Mock 写入建议 → `suggested`（suggestion_json 快照正确）
-13. `confirm_suggestion` → assigned；`assign`（直接三元组）→ assigned；`reject` → rejected（不可再识别）
-14. 首次 assigned（任务 0→1）→ 任务 `published→in_progress`（**恰好一次**，重复 assign 幂等不重复推进）
-15. 目标任务不存在 / 学生不符 / 任务 `draft|closed` → 409 `task_not_acceptable`/404；归属段不存在 → 404/422
-16. 任务已 assigned ≥200 → 409 `task_photo_limit`
-17. 已 assigned 照片删除（未消费）→ 成功但不回退任务状态
-18. `mark_consumed` 置 `consumed_at` 后：删除 → 409 `photo_consumed`；改派 → 禁止
+### A API
+- [ ] 新增 5 端点契约断言（挂接建议查询/门控/生成/确认/重跑，含门控未达成 409 `gate_not_satisfied`）
+- [ ] 既有 001/002/003/005 修订后断言（`kind` 字段、`links` 替代 `assignment`/`suggestion`、复核动作 accept/reject/relink）
 
-## 五、受控读取与审计（Security）
+### 保留用例（不变）
+- [ ] 质检 D1/D4、归一 D2、批次/页序/上限 D5~D8、受控读取与审计、双主体越权矩阵
 
-19. 家长可见全家照片；学生仅本人（URL 传他人 student_id/photo_id → 404）；跨家庭 404
-20. content 端点返回 correct kind（normalized 恒 JPEG / original 原 mime），支持 Range；记录访问审计
-21. 删除未消费照片物理删除文件 + 行 + 审计记录
+## 执行摘要（模板）
 
-## 六、回归与越权矩阵（ACR-001 配套）
+```text
+$ .venv/Scripts/python.exe -m pytest
+112 passed   # v0.3.0 实况（③ 实施完成后应 ≥ 112 + 新增用例数）
+```
 
-22. 双主体越权矩阵：family/student × 自身/他人/他家庭 的 list/get/associate/delete/content 全绿
-23. 会话无 family_id（student 主体）查询强制本人；审计含 subject_type/id
-24. 全量回归：随 M001 54 测试 + M002 新增用例同跑
+## 手工冒烟清单（真服务，验收口径）
 
-## 七、性能与健壮性
-
-25. 单张处理预算 < 2s（解码+质检+归一，本地 CPU，合成 60MP 极端用例单独标注）
-26. 存储失败 → 500 无残留（文件与行一致性）；异常日志含 request_id
+```text
+启动：cd backend && .venv/Scripts/python.exe -m uvicorn app.main:app --port 8000
+1. 菜单「作业」上传多张照片（不填任何内容）→ 质检通过入库 unassigned
+2. 待复核队列：查看挂接建议 → 逐张 accept/reject/改挂（含手工挂接兜底）
+3. 门控：全部挂接确认 → 门控 satisfied；未确认 → 提示「待复核 N 张」
+4. 完成分析：生成草稿 → 家长确认 → 判定单元回写 + 照片消费锁定
+5. 观察日志：request_id 贯穿；上传/复核/门控/分析/审计记录；无路径/敏感文本明文
+```

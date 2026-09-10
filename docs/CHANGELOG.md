@@ -3,6 +3,174 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.22.0 —— 2026-09-10
+
+### ④ 验收收口：`Task-014` 去替身复审经 **PM 独立复核成立** → `BUG-003`/`BUG-004` **Verified** → `CHANGE-003` **关闭（Closed）**
+
+- **`Task-014`（AGENT-M002，④ 去替身复审）交付**：
+  - **去替身**：移除 `backend/tests/e2e/test_acceptance_scenarios.py::m002_ai_port` fixture（含 `MockAiClient` + `set_ai_client` 注入；全文引用 = 0），两例边界用例（`test_boundary_gate_not_satisfied_409_api_level` / `test_boundary_analysis_confirmed_is_terminal_api_level`）改走 **`app/core/ai` 真实装配路径**，新增判别力断言（`status == "suggested"` + `suggestions` 非空 + `group_subject_id == [gs]`）。
+  - **`TD-003` 清理**：`modules/m002/clients/task_client.py::list_groups` 的 `except TypeError` 签名兼容垫片**删除**，改按 `M001 v0.2.0 Frozen` 契约直调；死代码证明 = 真机门控集成 10 例 + 上层 40+ 例 0 触发。
+  - **剧本 4/5 + 浏览器级**：剧本 4 图片源 `placeholder`/`contents==[]` 边界**未放宽**；剧本 5 手工挂接未受影响；`.e2e/acceptance.mjs` 重写为「3 张照片经真实 AI 通路 → UI 建议 + 采纳入口 → 逐张采纳 → 门控满足 → 生成草稿 → 家长确认」，**18/18 PASS**（`model: "mock-vision"`）。
+  - **去替身审计**：10 条清单（`m002_ai_port` 删除；`MockAiClient` 协议面保留未注入；`FakeGateway` 残留 0；`DefaultAiClient` Mock 兜底属 `ADR-011` 真实装配路径）；证据分域（浏览器级 / API 级 / 服务级）标注。
+- **PM 独立复核（未采信自述，全部亲手复现）**：
+
+| 复验项 | 命令 | 原文结论 |
+| --- | --- | --- |
+| 判别力（红） | `AT_AI_PROVIDER_MODE=real` + `AT_AI_ALLOW_MOCK_FALLBACK=false` → 两例边界 | **`FF`**；`assert 'unassigned' == 'suggested'`（`suggestions=[]`）→ **`RED_EXIT=1`** |
+| 判别力（绿） | 还原 `auto/true` → 边界 2 例 + 剧本 4/5 | **`....` 4 passed** → **`GREEN_EXIT=0`** = 真红真绿（非无脑通过） |
+| 全量回归 | `pytest --tb=no -q --junitxml` | **`tests=237 failures=0 errors=0 skipped=0`**、`EXIT=0`（与 `Task-013` 收口基线一致，**未删减用例**） |
+| 浏览器级 | `.e2e/browser_evidence.json` | **18 项全 `true` / 0 项 `false`**；含 `mock-vision` 显著标注与「采纳 6 次全 200 → `assigned×3` → 门控满足 → 草稿 `draft`」链 |
+| 写区双证 | `git status --porcelain` + mtime 审计 | 两处改动均 `??`（未跟踪写区）；Forbidden 区 mtime **全部早于写区起点**（`mock.py` 20:15:47 / `task_parser.py` 20:11:26 / `BUG-004.md` 20:24:44 等） |
+
+- **PM 裁决**：① `BUG-003` / `BUG-004` → **`Verified`**；② **④ 判达成 → `CHANGE-003` 收口（Closed）**；③ **同文件 `getattr(..., None) + raise M001UnavailableError` 存在性探针不立 `TD-004`**（与「签名兼容垫片」语义不同，不掩盖契约缺口）。
+- **已知边界（不阻断）**：真实三方 AI Provider **无密钥**，全部 AI 通路证据为 **Mock Provider（`mock=True`，显著标注）**，非三方联调。
+- 修订：`docs/changes/BUG-003.md` / `BUG-004.md`（→ **Verified**）、`docs/changes/CHANGE-003.md`（→ **Closed** + DoD 勾选）、`docs/agents/Task-014.md`（§5 PM 复核）、`docs/TECH_DEBT.md`（`TD-003` → Closed）、`docs/PROJECT_STATUS.md`（→ **v0.22.0**；M002 → Stable）、`docs/CHANGELOG.md`、`docs/INDEX.md`
+
+## v0.21.0 —— 2026-09-10
+
+### ④ 验收已执行（`Task-011`）+ PM 独立复核 = **条件达成（不通过收口）**；签发 `Task-012`/`Task-013` 修复 AI 通路缺陷
+
+- **`Task-011`（AGENT-M002，阶段 ④ 验收）交付**：`CLARIFICATION` §5 **剧本 7 条**逐条取证（剧本 7 **浏览器级**：任务列表页 `GET /api/v1/tasks?...` → **200**，不再 422）+ 全系统回归 + 边界抽查（跨家庭/越权 `404`、`409 gate_not_satisfied`、已确认终态 `409`）+ 只读边界自证。
+  - 新增验收资产：`backend/tests/e2e/`（`test_acceptance_scenarios.py` 11 例 + `test_acceptance_ai_wiring.py` 5 例）+ `.e2e/`（`seed.py`/`acceptance.mjs`/`browser_evidence.json`/`shots/*.png`）+ 任务书 §7 过程记录。
+- **PM 独立复核（未采信自述，全部复现）**：
+
+| 复验项 | 命令 | 原文结论 |
+| --- | --- | --- |
+| 全量回归 | `pytest -q -rxX` | `exit 0`；**227** 点（72+72+72+11）；**2 xfail**（= `BUG-003`/`BUG-004`） |
+| 前端类型检查 | `npx vue-tsc --noEmit -p tsconfig.app.json` | **TSC_EXIT=0** |
+| 前端构建 | `npm run build` | **BUILD_EXIT=0**（`389 modules transformed`、`✓ built in 3.23s`） |
+| 只读边界（diff） | `git diff --name-only -- backend/app frontend/src` | 8 文件，**全属 `Task-006~010` 既有未提交基线** |
+| 只读边界（mtime，决定性） | `Where LastWriteTime -gt "2026-09-10 19:20"` | **COUNT=0**（最新 18:02:38 / 17:55:15） |
+| 缺陷根因 | PM 读码 | `BUG-003`/`BUG-004` **均属实 → Confirmed** |
+
+- **PM 裁决 = ④ 条件达成（不通过收口）**，3 项缺口：
+  1. **`BUG-004`（高，Confirmed）**：M001 `default_parser` 以位置参数调用 `app.core.ai.parse_task_spec`（`sources` 为 keyword-only）→ `TypeError` 被 `except Exception: pass` **静默吞掉** → **链路 T 核心 AI 解析通路不可达**（剧本 4 的 `spec_status="parsed"` 实为**本地启发式兜底**产出，**AI 语义未达成**）；PM 另确认异常**无日志**、降级**不可观测**。
+  2. **`BUG-003`（中，Confirmed）**：`MockVisionProvider` 读 `context["candidate_subjects"]`，而 `AIService` 注入 `context["candidates"]`（prompt 亦为 `$candidates`）→ **Mock 挂接建议恒空**（剧本 5/6 的「AI 给出挂接建议」未发生，浏览器级实际走**手工挂接**；`409 gate_not_satisfied` 边界仅能经 M002 **AI 端口替身**触达）。
+  3. **真实三方无密钥 → 未覆盖**（已知边界；`ADR-011` Mock 为最低验收线，不阻断 ④，但须在收口结论标注）。
+- **采信部分**：`.e2e/acceptance.mjs` 为**真实浏览器级**（Edge + `playwright-core` 驱动真实 uvicorn 托管的 `frontend/dist`，Network + 4 截图 + `browser_evidence.json` 66.6 KB）；剧本 1/2/3 的日界 4 点规则由**生产 `DefaultWindowResolver`** 对真实时间戳证明（`FixedResolver` 注入口径已在 docstring 声明）。
+- **签发修复任务（并行，写区不重叠）**：
+  - **`Task-012`**（`AGENT-M001`）：`BUG-004` 修复 —— 关键字调用 + `SourceInput` 转换 + 降级**可观测**（`logger.warning`）+ 以 `ai_call_records` 证明 AI 真跑；写区 = `modules/m001/services/task_parser.py` + M001 侧用例。
+  - **`Task-013`**（`AGENT-AI`）：`BUG-003` 修复 —— Mock 读 key 对齐 `candidates` + 新增**经 `AIService` 装配路径**的防漂移用例 + 整改「直调 Mock + 手写 context」既有用例（本次漏检根因）；写区 = `app/core/ai/**` + AI 层用例。
+- **收口路径**：修复经 PM 复核 APPROVED → 签发 **`Task-014`**（`AGENT-M002`）**去替身复审**（剧本 4/5 AI 真机 + `409` 边界去替身 + 浏览器级复跑）→ `BUG-003`/`BUG-004` → **Verified** → ④ 判**达成** → `CHANGE-003` 收口。
+- 修订：`docs/agents/Task-011.md`（§8 PM 复核结论）、`docs/agents/Task-012.md`（**新建**）、`docs/agents/Task-013.md`（**新建**）、`docs/changes/BUG-003.md` / `BUG-004.md`（→ **Confirmed** + §7 PM 复核 + 派单）、`docs/changes/CHANGE-003.md`（④ 行 + DoD 注）、`docs/PROJECT_STATUS.md`（→ **v0.21.0**）、`docs/CHANGELOG.md`、`docs/INDEX.md`、`docs/AGENT_REGISTRY.md`
+
+## v0.20.0 —— 2026-09-10
+
+### `CR-004` 经用户批准 → **Applied**（M002 契约 v0.4.0 → v0.4.1）；签发 `Task-011`（阶段 ④ 验收）
+
+- **CR-004 Applied（用户批准 2026-09-10）**：`API-M002-007` 响应体以**运行实现为准**修订 —— **v0.4.0** `{photo_id, links:[LinkDTO], suggested_at}` → **v0.4.1** `{photo_id, status, suggestions:[LinkSuggestionItem]}`，其中 `LinkSuggestionItem = {link_id, group_subject_id, subject|null, confidence|null, source(ai|manual), suggested_at}`。
+  - **性质 = 非破坏性**：不新增/不删除端点，不改 Method/Path/错误语义（`401`/`404`/`500` 不变）；`API-M002-007` 状态保持 **Active**，端点在册不变。
+  - **理由**：① `links` 与 `API-M002-003`/`005` 的「已建立挂接关系」语义冲突，**建议态**用 `suggestions` 更准确；② 实现逐条返回 `confidence`/`suggested_at`，「采纳 / 驳回 / 重试建议」界面需要；③ 前端 `Task-009` 已按实现取用、**前后端运行一致**，本 CR 属「文档追平实现」。
+  - **影响面**：**前端零返工、后端零代码改动**（仅文档）；测试无需新增；无其他消费方。
+  - **PM 读码核实（未采信 CR 描述）**：`backend/app/modules/m002/schemas.py`（`LinkSuggestionItemOut`/`LinkSuggestionOut`）+ `api/link_routes.py:31-65` —— `retry` 查询参数缺省 `false`；返回 `rejected_at IS NULL` 的挂接项（含 AI 未确认建议、手工挂接、已确认项）；`subject` 经 M001 契约内接口解析、失败为 `null`；`suggested_at = link.created_at`。契约文本已逐字对齐，并补登 `LinkSuggestionItem`/`LinkSuggestionResult` DTO 约定。
+  - **落地（9 处文档）**：`modules/M002/MODULE_API.md`（版本行 → v0.4.1 + §API-M002-007 + DTO 约定）、`MODULE_CHANGELOG.md`（新增 v0.4.1 条目）、`MODULE_CONTRACT.md`（版本 + 签署区 v0.4.1 说明）、`MODULE.md`/`MODULE_SUMMARY.md`（状态与版本）、`API_REGISTRY.md`（`API-M002-007` 版本列 → v0.4.1 + 头部变更记录）、`MODULE_REGISTRY.md`（M002 契约版本 → v0.4.1 Frozen；③ 实施状态收口）、顶层 `PROJECT_STATUS.md`/`CHANGELOG.md`/`INDEX.md`/`AGENT_REGISTRY.md`。
+  - **范围声明**：`MODULE_DATA`/`MODULE_DESIGN`/`MODULE_FILES`/`MODULE_TEST` 仍以模块基线 **v0.4.0** 描述 —— 本 CR **不涉**数据模型 / 分层设计 / 文件面 / 测试基线。
+- **签发 `Task-011`（AGENT-M002，`Kind` = 验收）**：**阶段 ④** = `CLARIFICATION` §5 **验收剧本 7 条逐项验收**（含**浏览器级**）+ **全系统回归**（域 A/B/C；Mock 必跑 / 真实三方双跑；`vue-tsc` 0 error + `npm run build` EXIT=0 + 生产产物经 FastAPI 托管可访问）。
+  - **只读边界（硬约束）**：`backend/app/**` 与 `frontend/src/**` **零改动** —— 发现偏差 → 登记 `BUG-00x` 上报 PM，**不得自行修复**；允许新增验收脚本/证据（建议 `backend/tests/e2e/`）。
+  - `TD-001`/`TD-002` **不属**本任务：观察记录即可，不影响 ④ 判定。
+- 修订：`docs/modules/M002/*`（5 件）、`docs/API_REGISTRY.md`、`docs/MODULE_REGISTRY.md`、`docs/changes/CR-004.md`（→ **Applied** + §落地记录）、`docs/agents/Task-011.md`（**新建**）、`docs/AGENT_REGISTRY.md`、`docs/PROJECT_STATUS.md`、`docs/CHANGELOG.md`、`docs/INDEX.md`
+
+## v0.19.0 —— 2026-09-10
+
+### BUG-002（门控链路）修复交付 + PM 复核 APPROVED → Verified；Task-010 关闭；CHANGE-003 ③ 收口（④ 可启动）
+
+- **修复点（单点最小改动；M001 零改动 / 无契约变更）**：`DefaultM001Gateway.get_group_subject` 默认路径改走**契约内** `list_groups(session, family_id)`，经 `_to_group_ref` 由 `TaskGroupDTO` 回填 `group_key`/`window_type`/`student_id`/`group_id`/`category`；**移除**对 M001 契约外内部方法 `TaskGroupService.get_group_subject` 的消费（其 `TaskGroupSubjectDTO` 物理上不含 group 上下文，无法补齐，故不保留为加速路径）。`gate_service.py` **未改**（未放宽门控）。
+- **门控恢复后端强制**：`GET /photo-gates` 按真实 `group_key` 分桶（多窗口 ≥2 条、`?group_key=` 精确命中、计数正确）；`POST /completion-analyses` 存在未确认挂接 → **`409 gate_not_satisfied` 实测可达**；`API-M002-005` 响应 `gate` 由 `null` → 真实窗口 key 与计数；无挂接窗口保持 `satisfied(total=0)` 契约语义。
+- **测试补强（消除 `FakeGateway` 桩盲区 —— 本次缺陷直接成因）**：新增 `backend/tests/integration/test_m002_gate_real_m001.py`（**真机 M001 网关**，4 例：多窗口分组 / 未复核完 → 409 / 全确认 → 201 draft / 空窗口语义）；**红→绿取证**（临时回退修复后 ①② 失败于 `gate=None` 与 `group_key=''`，还原后 4/4 绿）。
+- **PM 独立复验（未采信自述）**：新增用例 **4 passed**；全量 `pytest` = **211 passed / 0 failed**（基线 207 + 4，exit 0）；`git diff --name-only -- backend` 与 Task-009 开工前完全一致，且 **mtime 审计**证明 `m001/**` 无 Task-010 期间写入、`frontend/src/**` 最新写入 17:55（早于起始 18:02）；检索 `TEMP-`/`CAP_` 残留 **0**；`read_lints` = **0**；测试代码审读确认全程真实网关无桩。
+- **执行方两条决策说明均获认可**：① 不保留契约外加速路径（无法补齐 group 上下文，符合 `BUG-002` §3.2）；② 不适用 `get_group` 直取（M002 侧无 `group_id`）。
+- **新增技术债并启用 `docs/TECH_DEBT.md`**：**`TD-001`**（`get_group_subject` 由直取退化为按 family 全量 `list_groups` 扫描，展示链路 N+1 放大；`gate_service` 已有 `ref_cache`，V1 规模可接受，规模化前建议批量建映射）、**`TD-002`**（契约未暴露 `window_task_id`/`task_status` → `API-M002-005` 的 `task_id` 恒 `null`、M001 窗口任务 `mark_in_progress` 不触发）。
+- **状态流转**：`BUG-002` → **Verified**；`Task-010` 关闭；`CHANGE-003` ③ **前端 + 后端修复项全部关闭 → ④ 验收剧本 7 条解除前置阻塞、可启动**；`CR-004` 仍为 **Proposed（待用户批准）**，与本修复无耦合。
+- 修订：`docs/agents/Task-010.md`（关闭 + §7 复核结论）、`docs/changes/BUG-002.md`（→ Verified）、`docs/TECH_DEBT.md`（**新建**）、`docs/modules/M002/MODULE_CHANGELOG.md`（执行方追加 Task-010 条目）、`docs/AGENT_REGISTRY.md`、`docs/changes/CHANGE-003.md`、`docs/PROJECT_STATUS.md`、`docs/CHANGELOG.md`、`docs/INDEX.md`
+
+## v0.18.0 —— 2026-09-10
+
+### Task-009（前端「作业」域迁移）交付并 PM 复核 APPROVED + 门控链路缺陷（BUG-002）确认与修复签发（Task-010）+ CR-004 提案
+
+- **`Task-009` 交付 → PM 复核 APPROVED（2026-09-10）**：前端照片域迁移为**作业域**，交付 8 文件（7 改 + 新增 `frontend/src/components/PhotoCard.vue`）——
+  - 菜单「照片」→「**作业**」（`BottomNav.vue` + 页面标题）；**路由 `path` 保留 `/photos`**（`name` 改 `homework`/`homework-upload`，深链不破坏）
+  - `api/index.ts` + `api/types.ts` 补齐 M002 v0.4.0 六个调用面（`POST /photos/{id}/links`、`GET …/link-suggestions`、`GET /photo-gates`、`POST /completion-analyses` + `/confirmation` + `/rerun`；`GET /photos` 参数补 `kind`/`group_subject_id`），**删除死代码 `associatePhoto` 及段级类型（运行期 404 根因）**
+  - `PhotoListView.vue` 重做：**按周次/窗口分组**（显示名取 `task-groups.display_name`：「第 N 周」/「周末作业」）+ **逐张复核三路径**（accept/reject/relink，目标改 `group_subject_id`，**彻底停读已废弃 `task_items`**）+ 手工挂接兜底保留（B6）+ **门控**（待复核 N 张）+ **完成分析**（draft → 确认可校正 → 重跑仅 draft）
+- **PM 独立复验（未采信自述）**：`vue-tsc --noEmit -p tsconfig.app.json` = **0 error**；`npm run build` = **EXIT=0**；全前端 `associate` / `task_items` 命中 = **0**；`git diff --name-only -- backend` **与开工前完全一致**（本任务未新增/修改任何后端文件）
+- **`BUG-002` 确认（严重级别：高）**：`GET /photo-gates` **无法按窗口分组**（`group_key` 恒空 → 全部照片落单桶）+ `POST /completion-analyses` **门控前置失效**（`409 gate_not_satisfied` 不可达）+ `LinkReviewOut.gate` 错误。**根因（PM 独立核实）**：M002 网关 `task_client.py:290` 消费 M001 **契约外**接口 `get_group_subject`（M001 v0.2.0 内部服务接口表未登记该接口），其 `TaskGroupSubjectDTO` **不含** `group_key`/`window_type`/`student_id`（这些仅在 `TaskGroupDTO` 上）→ `_to_subject_ref(raw, raw)` 得空串 → `gate_service` 单桶聚合、`get_gate(真实 key)` 恒不匹配。既有单测用 `FakeGateway` 桩（完整 `GroupSubjectRef`）**未覆盖真机 M001**，故盲区长期存在。**前端 `localGate` 仅展示层兜底，不构成强制**
+- **签发 `Task-010`（AGENT-M002）**：门控链路修复 + 测试补强 —— 默认路径改走**契约内接口**（`list_groups` / `get_group -> TaskGroupDTO`）回填 group 上下文；补 **真机 M001↔M002 集成用例 ≥3**（弃 `FakeGateway` 桩）；回归 **≥210 passed / 0 failed**（基线 207 不退化）；**`backend/app/modules/m001/**` 与 `frontend/**` 只读、契约文本禁改**。**该任务为 ④ 验收必要前置**
+- **`CR-004` 登记（Proposed，待用户批准）**：`API-M002-007` 响应体以**运行实现**为准修订为 `{photo_id, status, suggestions:[{link_id, group_subject_id, subject, confidence, source, suggested_at}]}`（契约原写 `{photo_id, links, suggested_at}`）。理由：`links` 与 `API-M002-003/005` 的「已建立挂接关系」语义冲突，且实现信息更完整；**前端零返工、后端零代码改动**（仅文档追平实现）
+- **状态流转**：`CHANGE-003` ③ **前端项关闭**；③ 新增「后端修复（门控）= `Task-010`」进行中；④ 验收剧本 7 条**待 `Task-010` 关闭后启动**
+- 修订：`docs/agents/Task-009.md`（关闭 + §7 复核结论）、`docs/agents/Task-010.md`（新建）、`docs/changes/BUG-002.md`（新建）、`docs/changes/CR-004.md`（新建）、`docs/agents/Task-006/007/008.md`（状态行漂移修正）、`docs/AGENT_REGISTRY.md`、`docs/changes/CHANGE-003.md`、`docs/PROJECT_STATUS.md`、`docs/INDEX.md`
+
+## v0.17.0 —— 2026-09-10
+
+### CR-003 ③ 实施收口（Task-006 / Task-007 / Task-008 交付） + 前端作业域任务签发（Task-009）
+
+- **三线交付 + PM 复核 APPROVED（2026-09-10）**：
+  - **`Task-007`（AGENT-M001 / M001 v0.2.0 实施）**：事实层按天（唯一键 `(student_id, category, belong_date)`）+ 归属引擎 `WindowResolver`（4 点日界 / 周次 / 周五~周日合并 / 假期自然周）+ 聚合层（`task_groups` / `task_group_subjects`，`ensure_group` 惰性幂等 + `policy_version` 锁定）+ 链路 T（输入源 → AI 解析草稿 → 显式 / 隐式确认）+ 改归属日连锁（幂等 / 跨聚合迁移 / 已消费 409）+ `API-M001-007/009/010` 修订与 `018~021` 新增 + **前端任务域**（列表 / 详情 / 编辑）
+  - **`Task-008`（AGENT-M002 / M002 v0.4.0 实施）**：入口 `kind`（权威落 `upload_batches.kind`）+ `photo_subject_links` **N:N** + 逐张复核（accept / reject / relink）+ 窗口级门控 + `completion_analyses`（draft → confirmed → rerun）+ AI 降级兜底（`unassigned` + 手工挂接保留）+ `API-M002-001/003/005` 修订与 `007~011` 新增；**`Task-002` 冻结段增量改接收口**（PD-029）
+  - **`Task-006`（AGENT-AI / 横切 `app/core/ai/`）**：Provider 三协议（Vision / OCR / LLM）+ Mock / 真实三方配置化 + prompt 版本化 + 结果 schema 校验拦截 + 超时 / 重试 / 降级 + 三能力接口（`parse_task_spec` / `suggest_photo_links` / `analyze_completion`）+ DATA-009 `ai_call_records` 落库（专属 39 例）
+- **PM 独立复验（未采信自述）**：全量 `pytest` = **207 passed / 0 failed**（JUnit XML 精确计数，多次复现）；`read_lints` 0；**`main.py` 启动期幂等自愈已接线**（`ensure_links_migration_hook_registered()` 于 `create_app()` 的 `include_router` 之后调用；实测「清空槽位 → `create_app()` 自愈」通过），与 M002 导入期注册构成「**导入期 + 启动期**」双保险
+- **分层违规闭合**：M001 `_discover_links_migration_hook` 反向 import 已删除（`grep "modules.m002" backend/app/modules/m001` = 0 真实 import）；跨模块唯一通道 = **回调注册**，未注册时审计 `links_migration_skipped` + 跳过不阻断
+- **治理回填（PM）**：`API_REGISTRY.md` → **`API-M001-018~021` / `API-M002-007~011` Draft → Active**（PM 实测 9 条路由存在），`API-M002-005` 路径更正为 `POST /api/v1/photos/{photo_id}/links`（`/associate` 已移除）；`CONFIGURATION.md` 新增**第五节「AI 接入层配置」**（`AT_AI_*` 全表，独立 `AISettings`，密钥不入库不入日志）；`DATA_MODEL.md` DATA-009 字段按物理表 `ai_call_records` **实施回填**
+- **签发 `Task-009`（AGENT-M002，前端「作业」域迁移，`docs/agents/Task-009.md`）**：菜单「照片」→「**作业**」+ 周次 / 周末分组展示 + M002 v0.4.0 前端调用面（`/photos/{id}/links`、`/link-suggestions`、`/photo-gates`、`/completion-analyses*`）+ 挂接复核目标改 `group_subject_id`（清除 `/associate` 死代码，修运行期 404）+ 门控 / 完成分析 UI。**PM 裁决归属 `AGENT-M002`**（写区 = 前端作业域 + M002 后端，**规避 `frontend/src/api/index.ts` 跨 Agent 写冲突**）；**`backend/**` 对本任务只读**
+- **状态流转**：`CHANGE-003` ③ 后端 + 横切**完成**；③ 前端 = **`Task-009` 进行中**；④ 验收剧本 7 条（含浏览器级）**待 `Task-009` 关闭后启动**
+- 修订：`docs/agents/Task-009.md`（新建）、`docs/API_REGISTRY.md`、`docs/CONFIGURATION.md`、`docs/DATA_MODEL.md`、`docs/AGENT_REGISTRY.md`、`docs/changes/CHANGE-003.md`、`docs/PROJECT_STATUS.md`、`backend/app/main.py`（**PM 独占接线**）
+
+## v0.16.0 —— 2026-09-10
+
+### CR-003 ③ 实施阶段启动（契约定稿 Frozen + Task-007 / Task-008 签发）
+
+- **契约定稿（Frozen，用户批准 2026-09-10）**：**M001 v0.2.0**（事实层按天 + 聚合层 + 链路 T）与 **M002 v0.4.0**（入口 `kind` + N:N 挂接 + 窗口级门控 + 完成分析）经 PM 复核 APPROVED 后由**用户批准冻结**；`MODULE_CONTRACT.md` §签署区落款，九件套状态头由「草案」→「Frozen」，`MODULE_CHANGELOG.md` 补 Frozen 行、开放项全部关闭
+- **③ 实施签发**：**`Task-007`**（AGENT-M001，M001 实施：事实层按天重构 → 归属引擎 `WindowResolver` → 聚合层 → 链路 T；API 修订 007/009/010 + 新增 `API-M001-018~021`）与 **`Task-008`**（AGENT-M002，M002 实施：入口 `kind` → **N:N 挂接** → 逐张复核 → **窗口级门控** → 完成分析；API 修订 001/002/003/005 + 新增 `API-M002-007~011`；**Task-002 冻结段增量改接**，PD-029）；两任务**前置已满足、可启动**
+- **`Task-006`**（AGENT-AI，横切 `app/core/ai/`）**并行可启动**；M001/M002 实施期以 **Mock** 解阻（`ADR-011`）
+- **状态流转**：`CHANGE-003` §3 执行分解 → ③ 实施拆为 Task-007（M001）/ Task-008（M002）+ 前端行（待另行签发）；§4 DoD「契约 Frozen」项勾选；**④ 验收剧本 7 条未启动**
+- **遗留（待签发）**：前端「照片」改名「作业」+ 周次 / 周末分组展示（PM 另行签发任务）
+- 修订：`docs/modules/M001/**`、`docs/modules/M002/**`（九件套状态头 + CHANGELOG）、`docs/API_REGISTRY.md`、`docs/MODULE_REGISTRY.md`、`docs/AGENT_REGISTRY.md`、`docs/ROADMAP.md`、`docs/INDEX.md`、`docs/PROJECT_STATUS.md`、`docs/changes/CHANGE-003.md`、`docs/agents/Task-007.md`（新建）、`docs/agents/Task-008.md`（新建）
+
+## v0.15.0 —— 2026-09-10
+
+### CR-003 ② 契约修订评审完成（Task-004 / Task-005 交付并经 PM 复核 APPROVED）
+
+- **M001 九件套 → v0.2.0 草案（Task-004，AGENT-M001）**：事实层按天（`tasks` 唯一键 `(student_id, category, belong_date)`；新增 `category`/`belong_date`/`week_index`/`window_type`/`spec_status`；`task_items` **Deprecated**）；新增聚合层 `task_groups`（`policy_version` 锁定）/ `task_group_subjects`（**★判定单元**）/ `task_contents` / `task_spec_sources`；链路 T（输入源 → AI 解析草稿 → 确认 / 隐式确认）+ 归属引擎 `WindowResolver` + 配置锁定语义 + 手工改归属日连锁规则
+- **M002 九件套 → v0.4.0 草案（Task-005，AGENT-M002）**：入口 `kind`（任务/作业，**作业上传不填内容**）；归属放开为 **N:N**（`photo_subject_links`）+ **窗口级门控** + `completion_analyses`；`photos.subject`/`group_no`/`suggestion_json` **Deprecated**、`task_id` 降窗口级；手工挂接兜底保留；`M003`/`M004` 前向引用清理
+- **PM 复核 APPROVED（2026-09-10）**：A1~A11 / B1~B10 逐项落实、九件套语义与 `CLARIFICATION` / `REQ-010` / `ADR-013` / `ADR-014` / `DATA_MODEL` 一致、零写越界（写区 = `docs/modules/M00x/**`）；**两任务关闭**
+- **API ID 分配登记**（PM → `API_REGISTRY.md`，状态 **Draft**）：`API-M001-018`（解析结果确认）/`019`（聚合任务列表）/`020`（聚合任务详情）/`021`（手工改归属日）；`API-M002-007`（挂接建议查询/重试）/`008`（门控状态）/`009`（完成分析生成）/`010`（完成分析确认）/`011`（完成分析重跑）。既有 `API-M001-007/009/010`、`API-M002-001/002/003/005` 为**语义修订**，不新增 ID
+- **`DATA_MODEL.md` 字段级同步（PM）**：DATA-001（`tasks` 新增列 / 唯一键 / `task_items` Deprecated）、DATA-003（`kind` / `task_id` 降窗口级 / Deprecated 列）
+- **状态流转**：`CHANGE-003` ② 契约修订评审 → **完成**（DoD 两项勾选）；③ 实施 **可启动**（Contract First 前置已满足）；**`Task-006`（AGENT-AI）可启动**
+- **遗留**：契约正式 **Frozen 待用户签署**（M001/M002 `MODULE_CONTRACT.md` 签署区）
+- 修订：`docs/API_REGISTRY.md`、`docs/DATA_MODEL.md`、`docs/MODULE_REGISTRY.md`、`docs/AGENT_REGISTRY.md`、`docs/INDEX.md`、`docs/PROJECT_STATUS.md`、`docs/ROADMAP.md`、`docs/changes/CHANGE-003.md`、`docs/agents/Task-004.md`、`docs/agents/Task-005.md`、`docs/modules/M001/**`（九件套）、`docs/modules/M002/**`（九件套）
+
+## v0.14.0 —— 2026-09-10
+
+### V1 范围收窄与横切 AI 接入层执行方定案（ADR-014 / PD-026~029）
+
+- **背景**：`CHANGE-003` §6 四项待确认项（Q1 M003~M007 的 V1 边界 / Q2 `REQ-005`~`REQ-007` 是否 V1 必做 / Q3 `app/core/ai/` 执行方 / Q4 Task-002 去留）**阻塞契约修订评审闭合**；用户就四项**逐项拍板**（均采纳 PM 建议）
+- **ADR-014 Accepted（V1 范围收窄 + 横切层执行方）**：
+  - **Q1 → M003/M004 职责吸收**：M003（AI 作业识别）→ 链路 T 归 **M001**、链路 H 归 **M002** + 横切 `app/core/ai/`；M004（作业任务匹配）→ 聚合子任务级完成结论归 **M002**；**Module ID 保留不撤销，状态 → Deferred**
+  - **Q2 → `REQ-005`/`REQ-006`/`REQ-007` 全部后置 V2**（状态 Approved → **Deferred**，需求单保留不作废；输入口径修正保留作 V2 基线）；**V1 范围唯一清单 = `CLARIFICATION` §4.1 必做 10 项；验收 = §5 剧本 7 条**；M005~M007 → Deferred（V2）
+  - **Q3 → 横切 `app/core/ai/` 执行方 = 新增 `AGENT-AI`**（任务书 `docs/agents/Task-006.md`；写区仅 `backend/app/core/ai/**`；不设业务 Module ID；**启动前置 = ② 契约评审 APPROVED**）
+  - **Q4 → Task-002 = 部分冻结 + 定稿后增量改接**（PD-029）：冻结「归属/挂接」段，允许收尾与 CR-003 无关段（质检/归一/受控存储/受控取图/双主体 API）；Task-005 定稿后按 v0.4.0 增量改接，**返工面限于归属段**
+- **ADR-002 关系**：本次为**经用户批准的显式范围收窄**（非豁免）——仍登记 **M001~M007 七个 Module ID、不新增业务模块**，「禁止提前实现 V2+」继续适用
+- **PD 登记**：PD-026（模块边界）/ PD-027（需求范围）/ PD-028（AI 层执行方）/ PD-029（Task-002 处置）**Confirmed**
+- **治理总表同步（10 份）**：`MODULE_REGISTRY`（M003/M004 职责并入 + M005~M007 Deferred + `Deferred` 状态机说明）/ `AGENT_REGISTRY`（新增 `AGENT-AI`；AGENT-M003~M007 → Inactive；开发顺序收窄为 M001 → M002）/ `REQUIREMENTS` + `REQ-003`~`REQ-007` + `REQ-010`（承载模块改判 + Deferred + 待确认项转决议）/ `ROADMAP`（域 D 与里程碑 M-D 后置 V2；M-END 回归范围 = A/B/C）/ `PROJECT_STATUS`（v0.14.0 + PD-026~029）/ `CHANGE-003`（§2.3 定稿、§3 增 Task-006、§4 DoD、§5 风险解除、**§6 转决议表并关闭**）/ `INDEX` / `API_REGISTRY`（V1 仅 M001/M002 端点）/ `ARCHITECTURE` + `SYSTEM_SUMMARY`（V1 = M001 + M002 + 横切）/ `RISK_REGISTER`（**新增 RISK-012**，RISK-002/005 口径更新）
+- **新增**：`docs/adr/ADR-014.md`、`docs/agents/Task-006.md`
+- **阻塞状态**：`CHANGE-003` §6 **Q1~Q4 全部关闭**，② 契约修订评审（Task-004 / Task-005）边界闭合，可提交 PM 复核
+
+## v0.13.0 —— 2026-09-10
+
+### 需求澄清定稿：作业任务语义重构 + 归属与判定双层模型（CR-003 / ADR-013）
+
+- **用户提出三处需求偏差**（任务模块理解错误 / 「照片」菜单应改名「作业」 / 挂接-复核-分析顺序），经 14 轮 grill 逐条澄清定稿，完整结论（A~F 分支 + 差距分析 + V1 范围 + 验收剧本）见 `docs/requirements/CLARIFICATION-2026-09-10.md`
+- **CR-003 Approved**：① 任务 = 上传照片 / 文本 / 聊天记录（**粘贴文本**，因小程序无接收聊天记录接口）→ AI 解析「今日任务」→ 子任务，**上传无需填写内容**；② 「照片」→「**作业**」菜单，按天归属 + 每周按周次分组 + **周五~周日合并为"周末作业"** + **凌晨 4 点为日界**（9/9 20:00 与 9/10 03:00 同归 9/9）；③ AI 自动挂接 → 家长复核 → **窗口级门控** → 完成情况分析
+- **ADR-013 Accepted（双层模型）**：**事实层按天**（`tasks` 唯一键改为 `(student_id, category, belong_date)`；**`task_items` 逐题建模废弃**）+ **聚合层跨天**（`task_groups` → `task_group_subjects` **★判定单元** → `photo_subject_links` **N:N** → `completion_analyses`）；**判定落聚合层**（理由：周末跨 3 天、布置可能仅其中一天上传，天级判定逻辑矛盾）
+- **ADR-010 → Superseded（判定粒度）**：内容级逐题判定作废 → 聚合子任务(学科)级；端到端直判 / 可观察依据 / 置信度 / `无法判断` 出口 / 家长复核 / 不武断底线（ADR-003）**由 ADR-013 继承**
+- **配置锁定语义**：配置变更**只影响未聚合对象**；已聚合按生成时配置（`task_groups.policy_version`）；锁定**粒度** = 每个 `(学生, 聚合对象)`（同日不同学生可用不同版本）；锁定**触发** = 数据写入（**纯浏览不锁**）；`belong_date` 上传即固化、**不回算历史**
+- **新增配置**：`AT_TIMEZONE`(Asia/Shanghai) / `AT_TERM_START` / `AT_TERM_END` / `AT_DAY_CUTOFF`(04:00，可配)
+- **数据模型**：`DATA_MODEL.md` 新增 **DATA-012~018**（聚合任务 / 聚合学科子任务 / 内容项 / 任务输入源 / 照片挂接 / 完成情况分析 / 窗口策略配置），修订 DATA-001 / DATA-003 / DATA-004 / DATA-005
+- **V1 范围**：必做 10 项；**不做（后置 V2）** = 假期完成计划、评估报告/汇总简报、多任务类型（`category` 仅 `school`）、内容项级判定、聊天记录转发、微信小程序
+- **验收阻塞缺陷（已修复，2026-09-10）**：任务列表页空筛选传 `?status=&student_id=` → 后端严格枚举 → **422**。修复 = `frontend/src/api/http.ts` 请求拦截器**统一剔除空值 query**（`""` / `null` / `undefined`，一次覆盖所有列表页）+ `TaskListView.vue` 不再把空串当枚举回填并补 `catch` + `toastError`（消除未捕获 rejection）。验证：`npm run typecheck`（vue-tsc）通过；接口级对照 `?status=&student_id=` → **422**（复现根因）vs 清洗后 query → **200**
+- **变更执行（2026-09-10 同日落库）**：需求 ID **REQ-010** 分配（承载 CR-003 新语义）+ `REQ-001`~`REQ-007` 按 CR-003 **精校** → 立项 **`CHANGE-003`（Executing）**（执行分解 ① 需求落库 / ② 契约修订评审 / ③ 实施 / ④ 验收）→ 签发 **Task-004**（AGENT-M001，M001 九件套 → v0.2.0 草案）与 **Task-005**（AGENT-M002，M002 九件套 → v0.4.0 草案）→ 治理总表同步（`MODULE_REGISTRY` / `ROADMAP` / `API_REGISTRY` / `RISK_REGISTER` / `AGENT_REGISTRY` / `ARCHITECTURE` / `SYSTEM_SUMMARY`）→ 清理 `backend/app/modules/m002/` 中「M003」前向引用注释漂移（**仅注释、零逻辑改动，pytest 112 全绿**）
+- 新增：`docs/requirements/CLARIFICATION-2026-09-10.md`、`docs/requirements/REQ-010.md`、`docs/changes/CR-003.md`、`docs/changes/CHANGE-003.md`、`docs/changes/BUG-001.md`、`docs/adr/ADR-013.md`、`docs/CONFIGURATION.md`、`docs/agents/Task-004.md`、`docs/agents/Task-005.md`
+- 修订：`docs/DATA_MODEL.md`、`docs/REQUIREMENTS.md`、`docs/requirements/REQ-001~007.md`、`docs/adr/ADR-010.md`（Superseded 标注）、`docs/MODULE_REGISTRY.md`、`docs/ROADMAP.md`、`docs/API_REGISTRY.md`、`docs/RISK_REGISTER.md`、`docs/AGENT_REGISTRY.md`、`docs/ARCHITECTURE.md`、`docs/SYSTEM_SUMMARY.md`、`docs/INDEX.md`、`docs/PROJECT_STATUS.md`
+- **待办（需 Project Master / 用户拍板，阻塞契约评审闭合）**：`CHANGE-003` §6 待确认项 **Q1**（M003~M007 的 V1 边界）/ **Q2**（`REQ-005`~`REQ-007` 是否 V1 必做）/ **Q3**（`app/core/ai/` 执行方）/ **Q4**（Task-002 去留与返工风险）；Task-004/Task-005 契约修订交付 → PM 复核 → 实施（数据层 → 归属引擎 → 聚合层 → AI 接入层 → 前端「照片」改名「作业」）→ 验收剧本 7 条逐项验收 —— **上述待办已于 v0.14.0 全部决议关闭（见上）**
+
 ## v0.12.0 —— 2026-09-08
 
 ### 前端技术栈切换立项（ADR-012 / CHANGE-002 / Task-003）

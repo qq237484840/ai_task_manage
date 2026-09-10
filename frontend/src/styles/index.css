@@ -1,0 +1,249 @@
+/* 全局样式：主题变量（Vant 主题覆盖）+ 布局 + 通用卡片/徽章（迁移自原 styles.css 观感） */
+:root {
+  --van-primary-color: #3b5bdb;
+  --app-bg: #f4f6fb;
+  --app-text: #1e2430;
+  --app-muted: #6b7486;
+  --app-line: #e6e9f0;
+  --app-danger: #d64545;
+  --app-success: #2f9e62;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ---- 通用 ---- */
+.page {
+  padding: 0 14px 76px;
+}
+.page-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 6px;
+}
+.page-topbar h1 {
+  font-size: 20px;
+  margin: 0;
+  flex: 1;
+}
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 18px 0 4px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 16px rgba(16, 24, 40, 0.06);
+  padding: 16px;
+  margin: 12px 0;
+}
+.card.empty {
+  text-align: center;
+  color: var(--app-muted);
+  padding: 34px 12px;
+  font-size: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--app-line);
+}
+.row:last-child {
+  border-bottom: none;
+}
+.row .body {
+  flex: 1;
+  min-width: 0;
+}
+.row .title {
+  font-weight: 600;
+}
+.row .sub {
+  font-size: 12px;
+  color: var(--app-muted);
+  margin-top: 3px;
+}
+
+/* 徽章（任务/题型状态） */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--app-line);
+  color: var(--app-muted);
+  flex: none;
+}
+.badge.draft {
+  background: #e9edf5;
+  color: #5a6478;
+}
+.badge.published {
+  background: #e7f0ff;
+  color: #3b5bdb;
+}
+.badge.in_progress {
+  background: #fff4e0;
+  color: #b07a12;
+}
+.badge.closed {
+  background: #e5efe9;
+  color: var(--app-success);
+}
+.badge.objective {
+  background: #eef2ff;
+  color: #3b5bdb;
+}
+.badge.subjective {
+  background: #f3edff;
+  color: #7048e8;
+}
+.chip {
+  display: inline-block;
+  background: var(--app-line);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
+.muted {
+  color: var(--app-muted);
+}
+.hidden {
+  display: none !important;
+}
+
+/* 原生下拉与多行输入在 Vant 表单内观感统一 */
+.native-select,
+textarea.native-textarea {
+  width: 100%;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--app-line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--app-text);
+}
+.native-select:focus,
+textarea.native-textarea:focus {
+  outline: 2px solid var(--van-primary-color);
+  outline-offset: -1px;
+}
+.field-label {
+  display: block;
+  font-size: 13px;
+  color: var(--app-muted);
+  margin: 12px 0 6px;
+}
+
+/* 任务项编辑器 */
+.item-editor {
+  border: 1px dashed var(--app-line);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 10px 0;
+}
+.item-editor .muted {
+  font-size: 13px;
+  font-weight: 700;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.remove-item {
+  color: var(--app-danger);
+  font-size: 13px;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.answer-note {
+  background: #f7f8fb;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  margin-top: 8px;
+  color: var(--app-success);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.action-gap {
+  height: 14px;
+}
+
+/* 登录页 */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #eef2ff 0%, var(--app-bg) 40%);
+}
+.brand {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.brand .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  margin: 0 auto 12px;
+  background: linear-gradient(135deg, #3b5bdb, #7048e8);
+  color: #fff;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand h1 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+.brand p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+.auth-submit {
+  margin: 18px 0 0;
+  padding: 0 16px;
+}
+
+/* 宽屏微调（移动优先，桌面居中卡片） */
+@media (min-width: 640px) {
+  .grid-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+}
