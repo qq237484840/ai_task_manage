@@ -35,7 +35,7 @@ Contract → API → Data → 必要 Code
 | `AGENT_GUIDE.md` | Agent | 模块 Agent 操作规范/交付物 | 已启用 |
 | `DEVELOPMENT_GUIDE.md` | 治理 | 开发流程/变更治理/评审 | 已启用 |
 | `ID_GOVERNANCE.md` | 治理 | ID 分配规则与唯一性约束 | 已启用 |
-| `PROJECT_STATUS.md` | 状态 | 当前阶段/风险/待决 | **v0.22.0**（④ 验收**收口** = `Task-014` 去替身复审经 PM 复核成立；`BUG-003`/`BUG-004` → **Verified**；`CHANGE-003` → **Closed**；M001/M002 均 **Stable**；`CR-004` Applied → M002 契约 **v0.4.1**） |
+| `PROJECT_STATUS.md` | 状态 | 当前阶段/风险/待决 | **v0.22.0**（④ 验收**收口** = `Task-014` 去替身复审经 PM 复核成立；`BUG-003`/`BUG-004` → **Verified**；`CHANGE-003` → **Closed**；M001/M002 均 **Stable**；`CR-004` Applied → M002 契约 **v0.4.1**；**V1（域 A/B/C）正式验收通过（2026-09-10，PM 执行：构建 `EXIT=0` / 浏览器级 18/18 / 全量 237-0-0-0）**） |
 | `CHANGELOG.md` | 记录 | 变更历史 | **v0.22.0** |
 | `ASSUMPTIONS.md` | 记录 | 假设登记 | ASM-001~011 |
 | `RISK_REGISTER.md` | 记录 | 风险登记 | 已启用（**RISK-001~012**；RISK-010/011 随 CR-003 新增；**RISK-012 随 ADR-014 新增**） |

@@ -1,6 +1,6 @@
 {
   "base": "http://127.0.0.1:8010",
-  "generated_at": "2026-09-10T14:07:39.106Z",
+  "generated_at": "2026-09-10T14:54:27.590Z",
   "checks": [
     {
       "name": "UI 家长登录成功",
@@ -80,7 +80,7 @@
     {
       "name": "剧本5 生成完成分析草稿 201",
       "ok": true,
-      "detail": "POST /completion-analyses → 201 {\"group_key\":\"2026-09-10\",\"items\":[{\"analysis_id\":\"2e3019ed-586e-42a8-8238-977d473e76c7\",\"group_subject_id\":\"065f8f6e-b879-441b-83b2-8e337a63809e\",\"subject\":\"math\",\"conclusion\":\"完成\",\"evidence_photo_ids\":[\"40f772f0-08fa-41e9-8d0f-3176363da567\",\"6b248f29-ea8e-4c37-9440-e12e52ab2c74\",\"2239da0c-cc01-45d0-9b21-0b1d0d6b1037\"],\"confidence\":0.7,\"status\":\"draft\",\"model\":\"mock-vision\",\"prompt_version\":\"v1\","
+      "detail": "POST /completion-analyses → 201 {\"group_key\":\"2026-09-10\",\"items\":[{\"analysis_id\":\"fe58d1ec-cf5f-4004-bc97-4f78c0d46160\",\"group_subject_id\":\"4dc831ae-8656-4d3f-b6b4-648e0ebaa884\",\"subject\":\"math\",\"conclusion\":\"完成\",\"evidence_photo_ids\":[\"94509690-dcf2-44f3-963e-d300da107f7e\",\"3ac69752-a39f-4e80-bd37-65ac6f2f1e80\",\"4ec29586-ca77-493a-af61-95bc669fef36\"],\"confidence\":0.7,\"status\":\"draft\",\"model\":\"mock-vision\",\"prompt_version\":\"v1\","
     },
     {
       "name": "剧本5 草稿 status=draft 且带 evidence_photo_ids",
@@ -102,8 +102,8 @@
       "url": "/api/v1/family/login",
       "status": 200,
       "body": {
-        "token": "WCGkVbt47M_xP2KEYS_NCmUdDwf6xy6njz-fP7RAQgM",
-        "expires_at": "2026-10-10T14:07:24.400Z"
+        "token": "xY0vLGTwLNY_Ej55iDIkFba9sFfvQWr2eLIioUfvQoc",
+        "expires_at": "2026-10-10T14:54:12.885Z"
       }
     },
     {
@@ -112,17 +112,17 @@
       "status": 200,
       "body": [
         {
-          "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+          "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
           "name": "验收学生",
           "grade_level": "三年级",
           "relation": "儿子",
           "school": {
-            "school_id": "9dffd943-2c35-4d23-98ed-9c3ec6e692fd",
+            "school_id": "d47e60fe-2afb-4213-914c-cbc6ddd19d88",
             "name": "北山小学",
             "stage": "primary"
           },
-          "created_at": "2026-09-10T14:06:35.455Z",
-          "updated_at": "2026-09-10T14:06:35.455Z"
+          "created_at": "2026-09-10T14:53:24.398Z",
+          "updated_at": "2026-09-10T14:53:24.398Z"
         }
       ]
     },
@@ -136,8 +136,8 @@
         "total": 4,
         "items": [
           {
-            "task_id": "b247b9c6-92a7-454b-88cb-59f66dba55bd",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "d2e34316-13e2-47b7-8343-0633ec56d8ef",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-13",
@@ -150,12 +150,12 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:52.260Z",
-            "updated_at": "2026-09-10T14:06:57.801Z"
+            "created_at": "2026-09-10T14:53:41.295Z",
+            "updated_at": "2026-09-10T14:53:46.861Z"
           },
           {
-            "task_id": "6e5a69ec-d023-4026-a6af-9c1b45e33e7d",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "55d9a68e-e2db-486f-a985-be0ae21cede8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-12",
@@ -168,12 +168,12 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:46.677Z",
-            "updated_at": "2026-09-10T14:06:52.243Z"
+            "created_at": "2026-09-10T14:53:35.699Z",
+            "updated_at": "2026-09-10T14:53:41.277Z"
           },
           {
-            "task_id": "7a534fd6-77dd-4a68-9628-d36d77504529",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "04547f1f-de06-4b3a-8926-e62887181ee7",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-11",
@@ -186,12 +186,12 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:41.085Z",
-            "updated_at": "2026-09-10T14:06:46.660Z"
+            "created_at": "2026-09-10T14:53:30.065Z",
+            "updated_at": "2026-09-10T14:53:35.685Z"
           },
           {
-            "task_id": "b1d6424e-12c9-411e-a257-ffedef489a01",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "f6109b16-d82d-46f6-98a7-e3ace4dc8ecc",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-10",
@@ -204,8 +204,8 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:35.468Z",
-            "updated_at": "2026-09-10T14:06:41.059Z"
+            "created_at": "2026-09-10T14:53:24.413Z",
+            "updated_at": "2026-09-10T14:53:30.045Z"
           }
         ]
       }
@@ -231,8 +231,8 @@
         "total": 4,
         "items": [
           {
-            "task_id": "b247b9c6-92a7-454b-88cb-59f66dba55bd",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "d2e34316-13e2-47b7-8343-0633ec56d8ef",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-13",
@@ -245,12 +245,12 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:52.260Z",
-            "updated_at": "2026-09-10T14:06:57.801Z"
+            "created_at": "2026-09-10T14:53:41.295Z",
+            "updated_at": "2026-09-10T14:53:46.861Z"
           },
           {
-            "task_id": "6e5a69ec-d023-4026-a6af-9c1b45e33e7d",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "55d9a68e-e2db-486f-a985-be0ae21cede8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-12",
@@ -263,12 +263,12 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:46.677Z",
-            "updated_at": "2026-09-10T14:06:52.243Z"
+            "created_at": "2026-09-10T14:53:35.699Z",
+            "updated_at": "2026-09-10T14:53:41.277Z"
           },
           {
-            "task_id": "7a534fd6-77dd-4a68-9628-d36d77504529",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "04547f1f-de06-4b3a-8926-e62887181ee7",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-11",
@@ -281,12 +281,12 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:41.085Z",
-            "updated_at": "2026-09-10T14:06:46.660Z"
+            "created_at": "2026-09-10T14:53:30.065Z",
+            "updated_at": "2026-09-10T14:53:35.685Z"
           },
           {
-            "task_id": "b1d6424e-12c9-411e-a257-ffedef489a01",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "task_id": "f6109b16-d82d-46f6-98a7-e3ace4dc8ecc",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "student_name": "验收学生",
             "category": "school",
             "belong_date": "2026-09-10",
@@ -299,8 +299,8 @@
             "deadline": null,
             "content_count": 1,
             "source_count": 1,
-            "created_at": "2026-09-10T14:06:35.468Z",
-            "updated_at": "2026-09-10T14:06:41.059Z"
+            "created_at": "2026-09-10T14:53:24.413Z",
+            "updated_at": "2026-09-10T14:53:30.045Z"
           }
         ]
       }
@@ -311,19 +311,75 @@
       "status": 200,
       "body": [
         {
-          "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+          "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
           "name": "验收学生",
           "grade_level": "三年级",
           "relation": "儿子",
           "school": {
-            "school_id": "9dffd943-2c35-4d23-98ed-9c3ec6e692fd",
+            "school_id": "d47e60fe-2afb-4213-914c-cbc6ddd19d88",
             "name": "北山小学",
             "stage": "primary"
           },
-          "created_at": "2026-09-10T14:06:35.455Z",
-          "updated_at": "2026-09-10T14:06:35.455Z"
+          "created_at": "2026-09-10T14:53:24.398Z",
+          "updated_at": "2026-09-10T14:53:24.398Z"
         }
       ]
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/task-groups",
+      "status": 200,
+      "body": {
+        "page": 1,
+        "page_size": 2,
+        "total": 2,
+        "items": [
+          {
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "category": "school",
+            "group_key": "W:2026-09-11",
+            "display_name": "周末作业",
+            "window_type": "weekend",
+            "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
+            "subjects": [
+              {
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "content_refs": [
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
+                ],
+                "conclusion": null,
+                "conclusion_status": "pending"
+              }
+            ],
+            "created_at": "2026-09-10T14:53:35.686Z"
+          },
+          {
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "category": "school",
+            "group_key": "2026-09-10",
+            "display_name": "09-10 周四",
+            "window_type": "day",
+            "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
+            "subjects": [
+              {
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "content_refs": [
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
+                ],
+                "conclusion": null,
+                "conclusion_status": "pending"
+              }
+            ],
+            "created_at": "2026-09-10T14:53:30.047Z"
+          }
+        ]
+      }
     },
     {
       "method": "GET",
@@ -348,62 +404,6 @@
     },
     {
       "method": "GET",
-      "url": "/api/v1/task-groups",
-      "status": 200,
-      "body": {
-        "page": 1,
-        "page_size": 2,
-        "total": 2,
-        "items": [
-          {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "category": "school",
-            "group_key": "W:2026-09-11",
-            "display_name": "周末作业",
-            "window_type": "weekend",
-            "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
-            "subjects": [
-              {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
-                ],
-                "conclusion": null,
-                "conclusion_status": "pending"
-              }
-            ],
-            "created_at": "2026-09-10T14:06:46.661Z"
-          },
-          {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "category": "school",
-            "group_key": "2026-09-10",
-            "display_name": "09-10 周四",
-            "window_type": "day",
-            "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
-            "subjects": [
-              {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
-                ],
-                "conclusion": null,
-                "conclusion_status": "pending"
-              }
-            ],
-            "created_at": "2026-09-10T14:06:41.062Z"
-          }
-        ]
-      }
-    },
-    {
-      "method": "GET",
       "url": "/api/v1/photos?page=1&page_size=50",
       "status": 200,
       "body": {
@@ -412,33 +412,33 @@
         "total": 3,
         "items": [
           {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 3,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
               }
             ],
             "quality": {
@@ -490,39 +490,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.135Z"
+            "created_at": "2026-09-10T14:53:47.180Z"
           },
           {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 2,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
               }
             ],
             "quality": {
@@ -574,39 +574,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.028Z"
+            "created_at": "2026-09-10T14:53:47.098Z"
           },
           {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 1,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
+                "created_at": "2026-09-10T14:53:47.060Z"
               },
               {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
+                "created_at": "2026-09-10T14:53:47.067Z"
               }
             ],
             "quality": {
@@ -658,60 +658,60 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:46.985Z"
           }
         ]
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "POST",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/links",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/links",
       "status": 200,
       "body": {
-        "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
+        "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
         "status": "assigned",
         "task_id": null,
         "links": [
           {
-            "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:29.523Z",
+            "confirmed_at": "2026-09-10T14:54:18.042Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.151Z"
+            "created_at": "2026-09-10T14:53:47.114Z"
           },
           {
-            "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-            "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+            "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+            "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
             "subject": "chinese",
             "source": "ai",
             "confidence": 0.8,
             "confirmed_at": null,
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.151Z"
+            "created_at": "2026-09-10T14:53:47.114Z"
           }
         ],
         "gate": {
@@ -733,8 +733,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -742,22 +742,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -765,16 +765,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -810,117 +810,33 @@
         "total": 3,
         "items": [
           {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 3,
-            "kind": "homework",
-            "status": "assigned",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:58.135Z"
-          },
-          {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 2,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
+                "created_at": "2026-09-10T14:53:47.199Z"
               },
               {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
+                "created_at": "2026-09-10T14:53:47.202Z"
               }
             ],
             "quality": {
@@ -972,39 +888,123 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.028Z"
+            "created_at": "2026-09-10T14:53:47.180Z"
           },
           {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 2,
+            "kind": "homework",
+            "status": "assigned",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:47.098Z"
+          },
+          {
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 1,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
+                "created_at": "2026-09-10T14:53:47.060Z"
               },
               {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
+                "created_at": "2026-09-10T14:53:47.067Z"
               }
             ],
             "quality": {
@@ -1056,60 +1056,60 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:46.985Z"
           }
         ]
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "POST",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/links",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/links",
       "status": 200,
       "body": {
-        "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
+        "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
         "status": "assigned",
         "task_id": null,
         "links": [
           {
-            "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:29.523Z",
+            "confirmed_at": "2026-09-10T14:54:18.042Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.151Z"
+            "created_at": "2026-09-10T14:53:47.114Z"
           },
           {
-            "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-            "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+            "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+            "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
             "subject": "chinese",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:30.456Z",
+            "confirmed_at": "2026-09-10T14:54:18.976Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.151Z"
+            "created_at": "2026-09-10T14:53:47.114Z"
           }
         ],
         "gate": {
@@ -1131,8 +1131,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -1140,22 +1140,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -1163,280 +1163,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
-          }
-        ]
-      }
-    },
-    {
-      "method": "GET",
-      "url": "/api/v1/photos?page=1&page_size=50",
-      "status": 200,
-      "body": {
-        "page": 1,
-        "page_size": 50,
-        "total": 3,
-        "items": [
-          {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 3,
-            "kind": "homework",
-            "status": "assigned",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:30.456Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:58.135Z"
-          },
-          {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 2,
-            "kind": "homework",
-            "status": "suggested",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:58.028Z"
-          },
-          {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 1,
-            "kind": "homework",
-            "status": "suggested",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
-              },
-              {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": null,
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -1464,50 +1200,314 @@
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos?page=1&page_size=50",
+      "status": 200,
+      "body": {
+        "page": 1,
+        "page_size": 50,
+        "total": 3,
+        "items": [
+          {
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 3,
+            "kind": "homework",
+            "status": "suggested",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:47.180Z"
+          },
+          {
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 2,
+            "kind": "homework",
+            "status": "assigned",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.976Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:47.098Z"
+          },
+          {
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 1,
+            "kind": "homework",
+            "status": "suggested",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.060Z"
+              },
+              {
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.067Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:46.985Z"
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "POST",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/links",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/links",
       "status": 200,
       "body": {
-        "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
+        "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
         "status": "assigned",
         "task_id": null,
         "links": [
           {
-            "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-            "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+            "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+            "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
             "subject": "chinese",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:31.394Z",
+            "confirmed_at": "2026-09-10T14:54:19.913Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.068Z"
+            "created_at": "2026-09-10T14:53:47.199Z"
           },
           {
-            "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "source": "ai",
             "confidence": 0.8,
             "confirmed_at": null,
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.069Z"
+            "created_at": "2026-09-10T14:53:47.202Z"
           }
         ],
         "gate": {
@@ -1529,8 +1529,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -1538,22 +1538,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -1561,16 +1561,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -1606,33 +1606,33 @@
         "total": 3,
         "items": [
           {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 3,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:30.456Z",
+                "confirmed_at": "2026-09-10T14:54:19.913Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": null,
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
               }
             ],
             "quality": {
@@ -1684,39 +1684,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.135Z"
+            "created_at": "2026-09-10T14:53:47.180Z"
           },
           {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 2,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:31.394Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": null,
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.976Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
               }
             ],
             "quality": {
@@ -1768,39 +1768,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.028Z"
+            "created_at": "2026-09-10T14:53:47.098Z"
           },
           {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 1,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
+                "created_at": "2026-09-10T14:53:47.060Z"
               },
               {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
+                "created_at": "2026-09-10T14:53:47.067Z"
               }
             ],
             "quality": {
@@ -1852,60 +1852,60 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:46.985Z"
           }
         ]
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "POST",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/links",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/links",
       "status": 200,
       "body": {
-        "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
+        "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
         "status": "assigned",
         "task_id": null,
         "links": [
           {
-            "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-            "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+            "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+            "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
             "subject": "chinese",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:31.394Z",
+            "confirmed_at": "2026-09-10T14:54:19.913Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.068Z"
+            "created_at": "2026-09-10T14:53:47.199Z"
           },
           {
-            "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:32.333Z",
+            "confirmed_at": "2026-09-10T14:54:20.850Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.069Z"
+            "created_at": "2026-09-10T14:53:47.202Z"
           }
         ],
         "gate": {
@@ -1927,8 +1927,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -1936,22 +1936,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -1959,16 +1959,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -2004,33 +2004,33 @@
         "total": 3,
         "items": [
           {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 3,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:30.456Z",
+                "confirmed_at": "2026-09-10T14:54:19.913Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:20.850Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
               }
             ],
             "quality": {
@@ -2082,39 +2082,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.135Z"
+            "created_at": "2026-09-10T14:53:47.180Z"
           },
           {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 2,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:31.394Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:32.333Z",
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.976Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
               }
             ],
             "quality": {
@@ -2166,39 +2166,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.028Z"
+            "created_at": "2026-09-10T14:53:47.098Z"
           },
           {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 1,
             "kind": "homework",
             "status": "suggested",
             "task_id": null,
             "links": [
               {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
+                "created_at": "2026-09-10T14:53:47.060Z"
               },
               {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
+                "created_at": "2026-09-10T14:53:47.067Z"
               }
             ],
             "quality": {
@@ -2250,60 +2250,60 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:46.985Z"
           }
         ]
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "POST",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/links",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/links",
       "status": 200,
       "body": {
-        "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
+        "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
         "status": "assigned",
         "task_id": null,
         "links": [
           {
-            "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-            "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+            "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+            "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
             "subject": "chinese",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:33.270Z",
+            "confirmed_at": "2026-09-10T14:54:21.788Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.018Z"
+            "created_at": "2026-09-10T14:53:47.060Z"
           },
           {
-            "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "source": "ai",
             "confidence": 0.8,
             "confirmed_at": null,
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.021Z"
+            "created_at": "2026-09-10T14:53:47.067Z"
           }
         ],
         "gate": {
@@ -2325,8 +2325,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -2334,22 +2334,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -2357,16 +2357,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -2402,33 +2402,33 @@
         "total": 3,
         "items": [
           {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 3,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:30.456Z",
+                "confirmed_at": "2026-09-10T14:54:19.913Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:20.850Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
               }
             ],
             "quality": {
@@ -2480,39 +2480,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.135Z"
+            "created_at": "2026-09-10T14:53:47.180Z"
           },
           {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 2,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:31.394Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:32.333Z",
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.976Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
               }
             ],
             "quality": {
@@ -2564,39 +2564,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.028Z"
+            "created_at": "2026-09-10T14:53:47.098Z"
           },
           {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 1,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:33.270Z",
+                "confirmed_at": "2026-09-10T14:54:21.788Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
+                "created_at": "2026-09-10T14:53:47.060Z"
               },
               {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
                 "confirmed_at": null,
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
+                "created_at": "2026-09-10T14:53:47.067Z"
               }
             ],
             "quality": {
@@ -2648,60 +2648,60 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:46.985Z"
           }
         ]
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "POST",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/links",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/links",
       "status": 200,
       "body": {
-        "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
+        "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
         "status": "assigned",
         "task_id": null,
         "links": [
           {
-            "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-            "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+            "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+            "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
             "subject": "chinese",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:33.270Z",
+            "confirmed_at": "2026-09-10T14:54:21.788Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.018Z"
+            "created_at": "2026-09-10T14:53:47.060Z"
           },
           {
-            "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "source": "ai",
             "confidence": 0.8,
-            "confirmed_at": "2026-09-10T14:07:34.207Z",
+            "confirmed_at": "2026-09-10T14:54:22.724Z",
             "rejected_at": null,
-            "created_at": "2026-09-10T14:06:58.021Z"
+            "created_at": "2026-09-10T14:53:47.067Z"
           }
         ],
         "gate": {
@@ -2723,8 +2723,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -2732,22 +2732,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -2755,280 +2755,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
-          }
-        ]
-      }
-    },
-    {
-      "method": "GET",
-      "url": "/api/v1/photos?page=1&page_size=50",
-      "status": 200,
-      "body": {
-        "page": 1,
-        "page_size": 50,
-        "total": 3,
-        "items": [
-          {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 3,
-            "kind": "homework",
-            "status": "assigned",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:30.456Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:58.135Z"
-          },
-          {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 2,
-            "kind": "homework",
-            "status": "assigned",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:31.394Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:32.333Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:58.028Z"
-          },
-          {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
-            "seq_no": 1,
-            "kind": "homework",
-            "status": "assigned",
-            "task_id": null,
-            "links": [
-              {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:33.270Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
-              },
-              {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:34.207Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
-              }
-            ],
-            "quality": {
-              "ruleset_version": "v1.0",
-              "passed": true,
-              "checks": [
-                {
-                  "id": "blur",
-                  "passed": true,
-                  "value": 1159.9,
-                  "threshold": 100,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_dark",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 40,
-                  "severity": "reject"
-                },
-                {
-                  "id": "too_bright",
-                  "passed": true,
-                  "value": 177.9,
-                  "threshold": 215,
-                  "severity": "reject"
-                },
-                {
-                  "id": "tilt",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 12,
-                  "severity": "reject"
-                },
-                {
-                  "id": "occlusion",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.08,
-                  "severity": "reject"
-                },
-                {
-                  "id": "page_crop",
-                  "passed": true,
-                  "value": 0,
-                  "threshold": 0.5,
-                  "severity": "reject"
-                }
-              ]
-            },
-            "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
-            },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -3056,19 +2792,283 @@
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos?page=1&page_size=50",
+      "status": 200,
+      "body": {
+        "page": 1,
+        "page_size": 50,
+        "total": 3,
+        "items": [
+          {
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 3,
+            "kind": "homework",
+            "status": "assigned",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:19.913Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:20.850Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:47.180Z"
+          },
+          {
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 2,
+            "kind": "homework",
+            "status": "assigned",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.976Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:47.098Z"
+          },
+          {
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
+            "seq_no": 1,
+            "kind": "homework",
+            "status": "assigned",
+            "task_id": null,
+            "links": [
+              {
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:21.788Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.060Z"
+              },
+              {
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:22.724Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.067Z"
+              }
+            ],
+            "quality": {
+              "ruleset_version": "v1.0",
+              "passed": true,
+              "checks": [
+                {
+                  "id": "blur",
+                  "passed": true,
+                  "value": 1159.9,
+                  "threshold": 100,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_dark",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 40,
+                  "severity": "reject"
+                },
+                {
+                  "id": "too_bright",
+                  "passed": true,
+                  "value": 177.9,
+                  "threshold": 215,
+                  "severity": "reject"
+                },
+                {
+                  "id": "tilt",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 12,
+                  "severity": "reject"
+                },
+                {
+                  "id": "occlusion",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.08,
+                  "severity": "reject"
+                },
+                {
+                  "id": "page_crop",
+                  "passed": true,
+                  "value": 0,
+                  "threshold": 0.5,
+                  "severity": "reject"
+                }
+              ]
+            },
+            "content_urls": {
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
+            },
+            "created_at": "2026-09-10T14:53:46.985Z"
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
@@ -3080,14 +3080,14 @@
         "group_key": "2026-09-10",
         "items": [
           {
-            "analysis_id": "2e3019ed-586e-42a8-8238-977d473e76c7",
-            "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+            "analysis_id": "fe58d1ec-cf5f-4004-bc97-4f78c0d46160",
+            "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
             "subject": "math",
             "conclusion": "完成",
             "evidence_photo_ids": [
-              "40f772f0-08fa-41e9-8d0f-3176363da567",
-              "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-              "2239da0c-cc01-45d0-9b21-0b1d0d6b1037"
+              "94509690-dcf2-44f3-963e-d300da107f7e",
+              "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+              "4ec29586-ca77-493a-af61-95bc669fef36"
             ],
             "confidence": 0.7,
             "status": "draft",
@@ -3096,33 +3096,33 @@
             "run_no": 1,
             "confirmed_by": null,
             "confirmed_at": null,
-            "created_at": "2026-09-10T14:07:35.393Z"
+            "created_at": "2026-09-10T14:54:23.895Z"
           }
         ]
       }
     },
     {
       "method": "POST",
-      "url": "/api/v1/completion-analyses/2e3019ed-586e-42a8-8238-977d473e76c7/confirmation",
+      "url": "/api/v1/completion-analyses/fe58d1ec-cf5f-4004-bc97-4f78c0d46160/confirmation",
       "status": 200,
       "body": {
-        "analysis_id": "2e3019ed-586e-42a8-8238-977d473e76c7",
-        "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+        "analysis_id": "fe58d1ec-cf5f-4004-bc97-4f78c0d46160",
+        "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
         "subject": "math",
         "conclusion": "完成",
         "evidence_photo_ids": [
-          "40f772f0-08fa-41e9-8d0f-3176363da567",
-          "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-          "2239da0c-cc01-45d0-9b21-0b1d0d6b1037"
+          "94509690-dcf2-44f3-963e-d300da107f7e",
+          "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+          "4ec29586-ca77-493a-af61-95bc669fef36"
         ],
         "confidence": 0.7,
         "status": "confirmed",
         "model": "mock-vision",
         "prompt_version": "v1",
         "run_no": 1,
-        "confirmed_by": "02d839a7-6560-41d1-8d7f-2680c331e74e",
-        "confirmed_at": "2026-09-10T14:07:37.494Z",
-        "created_at": "2026-09-10T14:07:35.393Z"
+        "confirmed_by": "07d35f6c-ca39-474d-9634-955f261ace68",
+        "confirmed_at": "2026-09-10T14:54:25.984Z",
+        "created_at": "2026-09-10T14:54:23.895Z"
       }
     },
     {
@@ -3135,8 +3135,8 @@
         "total": 2,
         "items": [
           {
-            "group_id": "35769b74-8596-45cd-84ed-9877bba78087",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "39974fb6-71c1-4b5a-adc1-025243be7ed5",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "W:2026-09-11",
             "display_name": "周末作业",
@@ -3144,22 +3144,22 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "content_refs": [
-                  "0838b591-06ec-42eb-b101-23d24f592bf8",
-                  "5b8c3b22-eb54-4a26-a218-cdb077be4f55",
-                  "b6d3d348-c5e2-4943-8d78-a54b87917cee"
+                  "419486a8-afeb-4a3c-bf30-6fd2889915d7",
+                  "c739faa5-5a0c-4dd6-8c16-4cc69700df0a",
+                  "f5216698-4eaa-4efd-973a-fc9f2f9ec6e5"
                 ],
                 "conclusion": null,
                 "conclusion_status": "pending"
               }
             ],
-            "created_at": "2026-09-10T14:06:46.661Z"
+            "created_at": "2026-09-10T14:53:35.686Z"
           },
           {
-            "group_id": "111b6fc6-72cc-4694-9168-979d7bdc881b",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "group_id": "774fd37f-d8e6-4eb6-bea4-dbbac8cf506b",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "category": "school",
             "group_key": "2026-09-10",
             "display_name": "09-10 周四",
@@ -3167,16 +3167,16 @@
             "policy_version": "v1:Asia/Shanghai|2026-09-01||04:00",
             "subjects": [
               {
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "content_refs": [
-                  "400fa6c0-ed2c-475a-89b2-63c879fe26b1"
+                  "6da17e8e-14ca-4516-82b6-74264f7180be"
                 ],
                 "conclusion": "完成",
                 "conclusion_status": "confirmed"
               }
             ],
-            "created_at": "2026-09-10T14:06:41.062Z"
+            "created_at": "2026-09-10T14:53:30.047Z"
           }
         ]
       }
@@ -3212,33 +3212,33 @@
         "total": 3,
         "items": [
           {
-            "photo_id": "2239da0c-cc01-45d0-9b21-0b1d0d6b1037",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "4ec29586-ca77-493a-af61-95bc669fef36",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 3,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "423b656e-2b7c-460d-a81b-7b50d4b9eef3",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
-                "subject": "math",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:29.523Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
-              },
-              {
-                "link_id": "f1469c11-47d4-4b36-b258-14b8bdc95fe3",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "8654bcc5-857b-43c7-a236-b1107e06fffd",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:30.456Z",
+                "confirmed_at": "2026-09-10T14:54:19.913Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.151Z"
+                "created_at": "2026-09-10T14:53:47.199Z"
+              },
+              {
+                "link_id": "258ab428-5351-4480-bd30-6c8fd31a7895",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
+                "subject": "math",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:20.850Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.202Z"
               }
             ],
             "quality": {
@@ -3290,39 +3290,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=original",
-              "normalized": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized"
+              "original": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=original",
+              "normalized": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.135Z"
+            "created_at": "2026-09-10T14:53:47.180Z"
           },
           {
-            "photo_id": "6b248f29-ea8e-4c37-9440-e12e52ab2c74",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "3ac69752-a39f-4e80-bd37-65ac6f2f1e80",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 2,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "033aa3e4-c43b-455c-ae19-ac7041da351f",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
-                "subject": "chinese",
-                "source": "ai",
-                "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:31.394Z",
-                "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.068Z"
-              },
-              {
-                "link_id": "83dc6a86-8d45-47e0-bd43-cbb6cbdd944c",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "7c24d5e1-13e1-44e8-8f36-c1ab77d8c72d",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:32.333Z",
+                "confirmed_at": "2026-09-10T14:54:18.042Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.069Z"
+                "created_at": "2026-09-10T14:53:47.114Z"
+              },
+              {
+                "link_id": "8e9aa0eb-3d34-47ee-aacc-6e102626eaa6",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
+                "subject": "chinese",
+                "source": "ai",
+                "confidence": 0.8,
+                "confirmed_at": "2026-09-10T14:54:18.976Z",
+                "rejected_at": null,
+                "created_at": "2026-09-10T14:53:47.114Z"
               }
             ],
             "quality": {
@@ -3374,39 +3374,39 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=original",
-              "normalized": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized"
+              "original": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=original",
+              "normalized": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:58.028Z"
+            "created_at": "2026-09-10T14:53:47.098Z"
           },
           {
-            "photo_id": "40f772f0-08fa-41e9-8d0f-3176363da567",
-            "batch_id": "5e87ab2b-5470-41a6-a68c-7ae52b76f5c8",
-            "student_id": "ad857a3e-2acf-419a-a318-f013530b3ccb",
+            "photo_id": "94509690-dcf2-44f3-963e-d300da107f7e",
+            "batch_id": "20aa8f2d-e705-4a5c-a835-d300d9bef4a8",
+            "student_id": "125265bf-e5a7-420e-b7a0-708cbe3b58b6",
             "seq_no": 1,
             "kind": "homework",
             "status": "assigned",
             "task_id": null,
             "links": [
               {
-                "link_id": "358cb36f-418b-4214-8bab-6abd3de3da15",
-                "group_subject_id": "4f607dc2-74aa-42e5-8dd6-8952f571cc31",
+                "link_id": "a6ad91eb-c8d1-4522-aada-f81b7e4cd418",
+                "group_subject_id": "4c7d628f-3adb-4a25-b405-1884a46ec002",
                 "subject": "chinese",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:33.270Z",
+                "confirmed_at": "2026-09-10T14:54:21.788Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.018Z"
+                "created_at": "2026-09-10T14:53:47.060Z"
               },
               {
-                "link_id": "56ddc9db-ea3c-4c28-bd54-2dad9896cca2",
-                "group_subject_id": "065f8f6e-b879-441b-83b2-8e337a63809e",
+                "link_id": "8a929c42-104b-49b4-aba2-51843bf6f490",
+                "group_subject_id": "4dc831ae-8656-4d3f-b6b4-648e0ebaa884",
                 "subject": "math",
                 "source": "ai",
                 "confidence": 0.8,
-                "confirmed_at": "2026-09-10T14:07:34.207Z",
+                "confirmed_at": "2026-09-10T14:54:22.724Z",
                 "rejected_at": null,
-                "created_at": "2026-09-10T14:06:58.021Z"
+                "created_at": "2026-09-10T14:53:47.067Z"
               }
             ],
             "quality": {
@@ -3458,29 +3458,29 @@
               ]
             },
             "content_urls": {
-              "original": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=original",
-              "normalized": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized"
+              "original": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=original",
+              "normalized": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized"
             },
-            "created_at": "2026-09-10T14:06:57.937Z"
+            "created_at": "2026-09-10T14:53:46.985Z"
           }
         ]
       }
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/2239da0c-cc01-45d0-9b21-0b1d0d6b1037/content?kind=normalized",
+      "url": "/api/v1/photos/3ac69752-a39f-4e80-bd37-65ac6f2f1e80/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/6b248f29-ea8e-4c37-9440-e12e52ab2c74/content?kind=normalized",
+      "url": "/api/v1/photos/4ec29586-ca77-493a-af61-95bc669fef36/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     },
     {
       "method": "GET",
-      "url": "/api/v1/photos/40f772f0-08fa-41e9-8d0f-3176363da567/content?kind=normalized",
+      "url": "/api/v1/photos/94509690-dcf2-44f3-963e-d300da107f7e/content?kind=normalized",
       "status": 200,
       "body": "<binary image/jpeg>"
     }

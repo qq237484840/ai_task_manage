@@ -31,7 +31,7 @@
 
 ## 当前阶段
 
-**Phase 4 —— CR-003 变更执行（2026-09-10）**：需求澄清定稿（**CR-003 Approved + ADR-013 Accepted**：事实层按天 + 聚合层跨天，**挂接与判定落聚合层**）→ ① **需求落库 / 配置登记 / 缺陷修复 / 边界决议均已完成**（**`ADR-014` Accepted**，`CHANGE-003` §6 Q1~Q4 全部关闭）→ ② **契约修订评审已完成**（**Task-004**：M001 → v0.2.0；**Task-005**：M002 → v0.4.0；**均交付并经 PM 复核 APPROVED（2026-09-10），两任务关闭**；API ID 已分配登记、`DATA_MODEL` 字段级已同步）→ **契约定稿 = M001 v0.2.0 / M002 v0.4.0 Frozen（用户批准 2026-09-10）** → ③ **后端 + 横切实施已收口（2026-09-10）**（**`Task-006`** 横切 AI 层 / **`Task-007`** M001 / **`Task-008`** M002 三线交付并经 **PM 复核 APPROVED**；`Task-002` 冻结段增量改接收口；207 passed）→ ③ **前端已完成**（**`Task-009`**，AGENT-M002，**PM 复核 APPROVED 2026-09-10** → `CHANGE-003` ③ 前端项**关闭**）→ ③ **门控链路缺陷修复已完成**（**`Task-010`**，AGENT-M002，`BUG-002` → **Verified**，PM 复核 APPROVED 2026-09-10）→ **③ 全部收口（前端 + 后端修复）** → ④ **验收已执行（`Task-011`）+ PM 独立复核 = 条件达成（不通过收口）**：主流程 / 回归 / 前端 DoD / 只读边界全部成立，但 **`BUG-004`（高，AI 解析通路不可达）** 与 **`BUG-003`（中，Mock 建议恒空）** 使剧本 4/5 的 **AI 语义未达成** → 签发 **`Task-012`**（修复 `BUG-004`）/ **`Task-013`**（修复 `BUG-003`）并行（**均已 PM 复核成立 = `Fixed`**）→ **④ 收口 = `Task-014`（AGENT-M002）去替身复审完成**（移除 `m002_ai_port` 端口替身、边界用例改走 `app/core/ai` 真实装配路径、`TD-003` 垫片清理、剧本 4/5 + 浏览器级复跑）→ **PM 独立复核 = 成立**（亲手判别力红→绿、全量 237/0、浏览器 18/18、写区双证）→ **双 BUG 置 `Verified` → ④ 判达成 → `CHANGE-003` 收口（Closed）**。**无阻塞项**（Q1~Q4 已决议；契约已定稿且 **M002 已升至 v0.4.1（`CR-004` Applied）**；`TD-001`/`TD-002` 为后置技术债，不阻断；**已知边界 = 真实三方无密钥，AI 证据均为 Mock Provider 显著标注**）
+**Phase 4 —— CR-003 变更执行（2026-09-10）**：需求澄清定稿（**CR-003 Approved + ADR-013 Accepted**：事实层按天 + 聚合层跨天，**挂接与判定落聚合层**）→ ① **需求落库 / 配置登记 / 缺陷修复 / 边界决议均已完成**（**`ADR-014` Accepted**，`CHANGE-003` §6 Q1~Q4 全部关闭）→ ② **契约修订评审已完成**（**Task-004**：M001 → v0.2.0；**Task-005**：M002 → v0.4.0；**均交付并经 PM 复核 APPROVED（2026-09-10），两任务关闭**；API ID 已分配登记、`DATA_MODEL` 字段级已同步）→ **契约定稿 = M001 v0.2.0 / M002 v0.4.0 Frozen（用户批准 2026-09-10）** → ③ **后端 + 横切实施已收口（2026-09-10）**（**`Task-006`** 横切 AI 层 / **`Task-007`** M001 / **`Task-008`** M002 三线交付并经 **PM 复核 APPROVED**；`Task-002` 冻结段增量改接收口；207 passed）→ ③ **前端已完成**（**`Task-009`**，AGENT-M002，**PM 复核 APPROVED 2026-09-10** → `CHANGE-003` ③ 前端项**关闭**）→ ③ **门控链路缺陷修复已完成**（**`Task-010`**，AGENT-M002，`BUG-002` → **Verified**，PM 复核 APPROVED 2026-09-10）→ **③ 全部收口（前端 + 后端修复）** → ④ **验收已执行（`Task-011`）+ PM 独立复核 = 条件达成（不通过收口）**：主流程 / 回归 / 前端 DoD / 只读边界全部成立，但 **`BUG-004`（高，AI 解析通路不可达）** 与 **`BUG-003`（中，Mock 建议恒空）** 使剧本 4/5 的 **AI 语义未达成** → 签发 **`Task-012`**（修复 `BUG-004`）/ **`Task-013`**（修复 `BUG-003`）并行（**均已 PM 复核成立 = `Fixed`**）→ **④ 收口 = `Task-014`（AGENT-M002）去替身复审完成**（移除 `m002_ai_port` 端口替身、边界用例改走 `app/core/ai` 真实装配路径、`TD-003` 垫片清理、剧本 4/5 + 浏览器级复跑）→ **PM 独立复核 = 成立**（亲手判别力红→绿、全量 237/0、浏览器 18/18、写区双证）→ **双 BUG 置 `Verified` → ④ 判达成 → `CHANGE-003` 收口（Closed）**。**无阻塞项**（Q1~Q4 已决议；契约已定稿且 **M002 已升至 v0.4.1（`CR-004` Applied）**；`TD-001`/`TD-002` 为后置技术债，不阻断；**已知边界 = 真实三方无密钥，AI 证据均为 Mock Provider 显著标注**）→ **2026-09-10 用户委托 PM 执行 V1（域 A/B/C）正式验收 = 通过**（结论见下节「V1 验收结论」）
 
 > 前序阶段（Phase 3 —— M002 编码开发，2026-09-08，Task-002/Task-003 并行）随 CR-003 调整：**M002 契约 v0.3.0 冻结面被打开**，**Task-002 = 部分冻结 + 定稿后增量改接**（PD-029，`ADR-014` 决议 5）；主线按 `ROADMAP.md` 功能域 **A + B + C**（**域 D 后置 V2**）+ CR-003 双层模型执行
 
@@ -41,6 +41,36 @@
 - **M002（作业图片采集与归属）契约 v0.3.0 Frozen → 随 CR-003 修订为 v0.4.0 Frozen（用户批准 2026-09-10）**：归属由**段级 1:N** 放开为**照片 ↔ 聚合子任务 N:N**（`photo_subject_links`）+ **窗口级门控** + `completion_analyses`；上传入口分「任务/作业」、**作业上传不填任何内容**；**Task-002 = 部分冻结 + 定稿后增量改接**（PD-029：冻结「归属/挂接」段，允许收尾与 CR-003 无关段——质检/归一/受控存储/受控取图/双主体 API）；M001 依赖侧接口已就绪；代码注释「M003」漂移已清理（**仅注释**）
 - **前端技术栈切换（2026-09-08，ADR-012/CHANGE-002/Task-003）**：前端统一 **Vue3 + Vite + TypeScript + Vant 4** 工程（零构建原生 H5 退役，FastAPI 托管 `dist/`，REST 契约零影响）；AGENT-M001 等价迁移 M001 现有 6 视图 + 托管切换；Task-002 前端基础 UI 后移接轨（后端并行不受阻）；**2026-09-10**：任务列表页 422 修复 + 同类 `try/finally` 隐患补齐，`vue-tsc` 通过
 - 跨模块开放项：见下方"跨模块开放项"（v0.9.0 精校 + v0.11.0 关闭 O-8；**v0.12.0 关闭 O-6** = 前端统一工程承载；**2026-09-10（CR-003）**：O-1/O-2 口径更新、O-3/O-5 收敛关闭；**2026-09-10（ADR-014）**：**O-4 → 后置 V2**、O-9 → 归 `AGENT-AI`（Task-006））
+
+## V1 验收结论（2026-09-10，用户委托 PM 执行）
+
+> 依据：`CHANGE-003` ④ 已判达成（`Task-014` 收口，2026-09-10）。本节为**在入库基线上独立复现的正式验收**，命令 + 原文输出全程留痕，**未采信任何执行方自述**（「症状在哪一层，证据就到哪一层」，构建级 / API 级 / 浏览器级 / 全量回归**逐层分域**）。
+
+**验收范围**：V1 有效域 **A + B + C**（`ROADMAP.md`）—— M001 作业任务管理（契约 v0.2.0 Frozen）/ M002 作业图片采集与归属（契约 v0.4.1 Frozen，`CR-004` Applied）/ 横切 AI 接入层 `app/core/ai/` / 前端「作业」域（Vue3 + Vite + TS + Vant 4）。
+
+**验收环境**：`backend/.venv` = Python 3.12.10 + pytest 9.1.1；Node v22.22.2（PATH 需手动注入）；`.e2e/node_modules/playwright-core` + 系统 Edge 通道（`msedge`）；验收服务 = `AT_DATABASE_URL='sqlite:///./data/acceptance.db'` + `AT_FRONTEND_DIR=<root>/frontend/dist` + `uvicorn app.main:app --port 8010`（独立库 + 真实服务 + dist 托管）。
+
+| # | 验收项（证据层级） | 命令 | 实测结果 | 判定 |
+| --- | --- | --- | --- | --- |
+| 1 | 前端构建 + 类型检查（构建级） | `npm run build`（= `vue-tsc --noEmit && vite build`） | `BUILD_EXIT=0`、`✓ built in 3.32s`（`frontend/dist` 由**已入库源码**重建，非复用旧产物） | **PASS** |
+| 2 | 验收种子数据（真实服务） | `backend/.venv/Scripts/python.exe .e2e/seed.py` | `SEED_OK`（4 任务 / 2 窗口 = day + weekend / 3 张作业照片，独立库 `acceptance.db`） | **PASS** |
+| 3 | 服务可用性与 dist 托管（API 级） | `GET http://127.0.0.1:8010/` | `200`、title「AI 作业智能评定 · 作业任务管理」；`/api/v1/schools` 无 token `401`（鉴权正常） | **PASS** |
+| 4 | 浏览器级验收剧本（浏览器级） | `node .e2e/acceptance.mjs`（`AT_BASE=http://127.0.0.1:8010`） | **`CHECKS total=18 pass=18 fail=0`**、`EXIT=0`、`EVIDENCE_WRITTEN` | **PASS** |
+| 5 | 全系统回归（服务/API 级） | `pytest -q --junitxml`（backend 根） | **`tests=237 failures=0 errors=0 skipped=0`**、`EXIT=0`（2 例 `X` = `BUG-003`/`BUG-004` 哨兵自然 XPASS） | **PASS** |
+
+**浏览器级 18 项覆盖明细**（原文：`.e2e/browser_evidence.json`，`base=http://127.0.0.1:8010`、`generated_at=2026-09-10T14:54:27.590Z`；截图 `.e2e/shots/01~04*.png`）：
+
+- **剧本 7 ×4**：`GET /api/v1/tasks?page=1&page_size=100` → `200`（非 422）、列表渲染 4 条任务、`&status=published` → `200`、家长登录 `POST /family/login` → `200`（空筛选 422 缺陷 `BUG-001` 回归防线）。
+- **剧本 1/2 ×3**：`day` 聚合 `group_key=2026-09-10` / 显示名「09-10 周四」；`weekend` 聚合 `group_key=W:2026-09-11` / 显示名「周末作业」（周五~周日合并）→ **窗口语义成立**。
+- **剧本 3 ×1**：聚合学科子任务携带 `policy_version = v1:Asia/Shanghai|2026-09-01||04:00` → **配置锁定快照成立**。
+- **剧本 5 ×8**：3 张作业照片经**真实 AI 装配路径**（`app/core/ai` → Mock Provider）产出建议（`status=suggested`，每张 2 条 ai link）→ UI 呈现 3 条「AI 建议」+ 3 个「采纳建议」入口 → 逐张采纳 6 次全 `200` → `status=assigned×3` → 窗口级门控 `total=3 / pending=0 / satisfied` ×2 → `POST /completion-analyses` **`201`**（`model:"mock-vision"`、`prompt_version:"v1"`、`status:"draft"`、`evidence_photo_ids` ×3）→ 家长确认 `POST .../confirmation` **`200`**。
+- **剧本 6 ×1**：手工挂接兜底入口仍可用（`manual=3`）→ **AI 建议与人工兜底双通路并存**。
+
+**验收结论：V1（域 A/B/C）正式验收 —— 通过。** 端到端主流程闭环（作业上传 → AI 挂接建议 → 逐张采纳/复核 → 窗口级门控 → 聚合子任务级完成分析草稿 → 家长确认）、双层模型窗口语义、两级主体隔离、前端 DoD 四类证据齐备且分层可追溯。
+
+**已知边界（不阻断验收，`ADR-011`）**：真实三方 AI Provider **无可用密钥**，全部 AI 通路证据为 **Mock Provider（`mock=True`，响应体 `model:"mock-vision"` 已显著标注）**，**非三方联调**；密钥就绪后须补「`real` + 禁兜底」三方联调用例，并同时 `cache_clear()` `get_ai_settings()` / `get_ai_service()` **双 `lru_cache`**（否则用例会静默退化为 Mock）。**遗留技术债**：`TD-001`（`get_group_subject` 全量扫描 N+1 放大）、`TD-002`（契约未暴露 `window_task_id`/`task_status`）；另有 **M001 无图片字节、`photo_id` 仅引用 → 图片源 OCR 通路不可达**，随 V2 处理。
+
+**留痕与入库**：证据目录 `.e2e/`（`browser_evidence.json` + 4 张截图）已入库（`ce5057c` 刷新）；V1 基线入库 = `aed4db1`（208 files）、记忆同步 = `b3bc0b3`，**已推送 `origin/main`**（`0c15832..b3bc0b3`）。
 
 ## 已完成模块
 
@@ -152,5 +182,6 @@
 13. ~~`CR-004`（Proposed）~~ → **已完成（用户批准 2026-09-10 → Applied；M002 契约 v0.4.0 → v0.4.1）**：`API-M002-007` 响应体以运行实现为准修订为 `{photo_id, status, suggestions[]}`（**仅文档**；前端零返工、后端零代码改动）
 14. ~~`Task-011`（阶段 ④ 验收）~~ → **已完成（PM 复核 2026-09-10）**：7 条剧本取证（剧本 7 **浏览器级**通过）+ 回归 `pytest` **227 passed / 0 failed** + `vue-tsc` **0 error** + `npm run build` **EXIT=0** + 只读边界成立（diff + **mtime 双重确认**）；**PM 裁决 = ④ 条件达成（不通过收口）**，缺口 = `BUG-004`（高）/ `BUG-003`（中）/ 真实三方无密钥（已知边界）
 15. ~~`Task-012`/`Task-013` 修复 + `Task-014` 去替身复审~~ → **已完成（2026-09-10，PM 复核成立）**：`Task-012`（AGENT-M001，`BUG-004`：关键字传参 + `SourceInput` 转换 + 降级 `logger.warning` + `ai_call_records` 真跑取证）与 `Task-013`（AGENT-AI，`BUG-003`：Mock 读 key 对齐 `candidates` + `Task-013-D1` API 面补证）**均收口 = `Fixed`**；**`Task-014`（AGENT-M002）去替身复审**：移除 `m002_ai_port` 端口替身（0 引用）、边界 2 例 + 剧本 4/5 走 `app/core/ai` 真实装配路径、`TD-003` `except TypeError` 垫片删除（死代码证明）、浏览器级剧本 5 **18/18 PASS**、全量 **237 tests / 0 failed**；**PM 亲手判别力复现**（关 Mock 兜底 → `FF`/`RED_EXIT=1`；还原 → 4 passed/`GREEN_EXIT=0`）→ **`BUG-003`/`BUG-004` → Verified → ④ 判达成 → `CHANGE-003` 关闭**
-16. **下一步（V1 收尾 / 非本 CHANGE）**：V1 剩余交付 = 真实三方 AI Provider 密钥联调（`ADR-011` 已知边界，需外部密钥）+ `TD-001`（N+1）/ `TD-002`（契约未暴露 `window_task_id`/`task_status`）按需排期；**V2 回归**：M005~M007 + `REQ-005`~`REQ-007` 恢复 Approved 状态、重评估 `ADR-014` 并走 CR/变更流程后启动（`RISK-012`）
-16. **V2 回归（不属当前阶段）**：M005~M007 + `REQ-005`~`REQ-007` 恢复 Approved 状态、重评估 `ADR-014` 并走 CR/变更流程后启动（`RISK-012`）
+16. ~~用户委托 PM 执行 V1 正式验收~~ → **已完成（2026-09-10）= 验收通过**：`npm run build` **`EXIT=0`** + 种子 **`SEED_OK`** + `GET /` **`200`** + 浏览器级 **`18/18 PASS`** + 全量 `pytest` **`237 / 0 failed / 0 errors / 0 skipped`**；证据分层留痕、基线入库并推送 `origin/main`（详见上节「V1 验收结论」）
+17. **下一步（V1 收尾 / 非本 CHANGE）**：V1 剩余交付 = 真实三方 AI Provider 密钥联调（`ADR-011` 已知边界，需外部密钥；须「`real` + 禁兜底」+ 双 `lru_cache` 清理）+ `TD-001`（N+1）/ `TD-002`（契约未暴露 `window_task_id`/`task_status`）按需排期
+18. **V2 回归（不属当前阶段）**：M005~M007 + `REQ-005`~`REQ-007` 恢复 Approved 状态、重评估 `ADR-014` 并走 CR/变更流程后启动（`RISK-012`）
