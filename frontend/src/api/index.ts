@@ -222,12 +222,22 @@ export function reviewPhotoLinks(
   return http.post(`/photos/${photo_id}/links`, payload);
 }
 
-/** 挂接建议查询 / 重试（API-M002-007；retry=true 触发幂等重试）。 */
+/**
+ * 挂接建议查询 / 重试（API-M002-007；`retry=true` 触发幂等重试）。
+ *
+ * `options.timeoutMs`：**单请求**超时覆盖（缺省沿用全局 15s）。
+ * 真实三方下 `retry=true` **同步**执行 AI（实测约 15.6s，见 `BUG-007`），
+ * 调用方若以「重试」为主路径，须显式放宽（如 60000），否则前端必然先超时。
+ */
 export function getLinkSuggestions(
   photo_id: string,
-  retry = false
+  retry = false,
+  options: { timeoutMs?: number } = {}
 ): Promise<LinkSuggestionResult> {
-  return http.get(`/photos/${photo_id}/link-suggestions`, { params: { retry } });
+  return http.get(`/photos/${photo_id}/link-suggestions`, {
+    params: { retry },
+    ...(options.timeoutMs ? { timeout: options.timeoutMs } : {}),
+  });
 }
 
 /** 窗口级门控状态（API-M002-008 GET /photo-gates）。 */

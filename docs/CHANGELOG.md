@@ -32,6 +32,14 @@
 - `backend/.env`（本地覆盖，**已 gitignore**）：演示环境质检放宽 `AT_M002_QUALITY_TILT_SEVERITY=warn` + `AT_M002_QUALITY_PAGE_CROP_ENABLED=false`（仅两条**近似启发式**；`blur`/亮度/遮挡等强规则**照常 reject**）；`.gitignore` 追加 `backend/.env`、`at_server*.log`。
 - **待办**：`docs/DATA_MODEL.md` 登记 `quota_exhausted` 取值；前端「AI 未解析，请手工补录」提示增强需另立任务；图片源 OCR 通路为既有已知遗留。
 
+**四、`REQ-011` 第一阶段（A2）交付（同日追加，2026-09-14）**
+
+- **需求**：新增 `docs/requirements/REQ-011.md`（**Approved**，8 轮 grill 定稿）：**任务详情页「AI 未识别的照片」只读卡片 + 单张重试**（大模型自动识别失败后的自助重试）；**零后端 / 零契约**（复用 `API-M002-003` + `API-M002-007`）。
+- **交付（`Task-017`，`AGENT-M001`，前端增量）**：`TaskDetailView.vue` 底部新增只读卡片（口径 = **该学生** `kind=homework` + `status=unassigned`，**非**本任务窗口 —— 未挂接照片无窗口归属，见 `TD-005`）；单张「重试建议」按 `suggestions` 空/非空分流提示（成功 → 去作业页采纳；失败 → 提示可能暂不可用 + 手工挂接）；**重试请求单独放宽 60s**（`api/index.ts` 的 `getLinkSuggestions` 增加**可选** `timeoutMs`，**全局 `http.ts` 15s 未动**）。
+- **顺带修复 `BUG-007`（中-高 → `Fixed`）**：全局 `timeout=15000` vs `API-M002-007` **同步** AI 调用实测 **15630ms** → 既有「重试建议」在真实模型下**必然前端超时（成功却报失败）**、Mock 毫秒级掩盖。修复含 **`Task-017 §3.3b` 最小扩权**（`PhotoListView.vue` **仅 1 行调用**同步放宽），使作业页同一失效路径一并闭环。
+- **验收证据**：`vue-tsc -p tsconfig.app.json` **0 error**；`npm run build` **EXIT=0**；**浏览器级失败分支 8/8 PASS**（AI 不可用时**不谎报成功**）+ **成功分支 6/6 PASS（真实三方 AI**：toast「已生成挂接建议，请到「作业」页采纳」→ 照片移出列表）；后端全量 `pytest` **251 / 0 / 0 / 0**（**用例数与基线一致 → 前端改动对后端零影响**）。
+- **登记后续（未立项）**：`TD-005`（未挂接照片无窗口归属）；CR 候选「AI 失败原因对用户可见」（消费 `DATA-009.error.code`）与「`API-M002-007` 异步化」；`REQ-011` 第二阶段（A1：布置单图片 → AI 解析）**需 CR/ACR** 后另立。
+
 ## v0.22.0 —— 2026-09-10
 
 ### ④ 验收收口：`Task-014` 去替身复审经 **PM 独立复核成立** → `BUG-003`/`BUG-004` **Verified** → `CHANGE-003` **关闭（Closed）**

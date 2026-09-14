@@ -561,7 +561,8 @@ async function rejectSuggestion(p: Photo): Promise<void> {
 async function retrySuggestion(p: Photo): Promise<void> {
   busy.value = true;
   try {
-    await getLinkSuggestions(p.photo_id, true);
+    // 单请求放宽超时：真实三方下 `retry=true` 同步等待 AI（实测约 15.6s），全局 15s 必然先超时（BUG-007）
+    await getLinkSuggestions(p.photo_id, true, { timeoutMs: 60000 });
     showToast("已重试挂接建议");
     await load();
   } catch (err) {

@@ -77,6 +77,55 @@
         </div>
       </div>
 
+      <!-- AI 未识别的作业照片（REQ-011 第一阶段：只读 + 单张重试；口径 = 该学生级，非本任务窗口） -->
+      <div class="card">
+        <h3 class="section-h">AI 未识别的照片（{{ pendingPhotos.length }}）</h3>
+        <div class="muted small">
+          该学生当前未能自动识别挂接目标的作业照片：可单张「重试建议」；采纳、手工挂接等完整处理请到「作业」页。
+        </div>
+
+        <van-loading v-if="photosLoading" class="photos-loading" size="18px">加载中…</van-loading>
+        <div v-else-if="photosError" class="muted small">{{ photosError }}</div>
+        <div v-else-if="!pendingPhotos.length" class="muted small">当前没有待 AI 识别的作业照片</div>
+
+        <div v-for="p in pendingPhotos" :key="p.photo_id" class="photo-row">
+          <img v-if="thumbs[p.photo_id]" :src="thumbs[p.photo_id]" class="thumb-img" alt="作业图" />
+          <div v-else class="thumb-img thumb-placeholder">📷</div>
+          <div class="photo-body">
+            <div class="photo-title">
+              第 {{ p.seq_no }} 张
+              <span class="badge draft">{{ PHOTO_STATUS_TEXT[p.status] ?? p.status }}</span>
+            </div>
+            <div class="muted small">上传于 {{ formatTime(p.created_at) }}</div>
+            <div class="muted small">
+              质检
+              <span :class="p.quality.passed ? 'ok-text' : 'warn-text'">
+                {{ p.quality.passed ? "通过" : "存在问题" }}
+              </span>
+            </div>
+            <div class="photo-actions">
+              <van-button
+                plain
+                type="primary"
+                size="small"
+                :loading="retrying === p.photo_id"
+                :disabled="Boolean(retrying)"
+                @click="retrySuggestion(p)"
+              >
+                重试建议
+              </van-button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="retrying" class="muted small">AI 分析中，约 15–30 秒，请稍候…</div>
+        <div v-if="pendingPhotos.length >= 50" class="muted small">更多照片请到「作业」页处理</div>
+
+        <div class="photos-foot">
+          <van-button plain size="small" @click="router.push('/photos')">去「作业」页处理</van-button>
+        </div>
+      </div>
+
       <BottomNav active="tasks" />
     </template>
 
@@ -96,14 +145,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { showConfirmDialog, showToast } from "vant";
 
-import { changeTaskBelongDate, changeTaskStatus, getTask } from "@/api";
-import type { TaskDetail } from "@/api/types";
+import {
+  changeTaskBelongDate,
+  changeTaskStatus,
+  fetchPhotoBlob,
+  getLinkSuggestions,
+  getTask,
+  listPhotos,
+} from "@/api";
+import { toastError } from "@/api/http";
+import type { Photo, TaskDetail } from "@/api/types";
 import BottomNav from "@/components/BottomNav.vue";
 import {
+  PHOTO_STATUS_TEXT,
   SPEC_STATUS_TEXT,
   STATUS_TEXT,
   WINDOW_TYPE_TEXT,
@@ -120,13 +178,87 @@ const belongOpen = ref(false);
 const belongDraft = ref("");
 const busy = ref(false);
 
+// ---- AI 未识别的照片（REQ-011 第一阶段：只读 + 单张重试）----
+/** 该学生 `kind=homework` + `status=unassigned` 的照片（**学生级**口径 —— 未挂接照片无窗口归属，见 TD-005）。 */
+const pendingPhotos = ref<Photo[]>([]);
+const thumbs = ref<Record<string, string>>({});
+const photosLoading = ref(false);
+const photosError = ref("");
+/** 正在重试的 photo_id（单张串行；非空时其余重试按钮禁用）。 */
+const retrying = ref("");
+/** 单请求超时覆盖：`retry=true` 同步等待真实模型（实测约 15.6s），全局 15s 必然超时（BUG-007）。 */
+const RETRY_TIMEOUT_MS = 60000;
+
 const canEdit = computed(() => task.value?.status === "draft" || task.value?.status === "published");
 
 async function load(): Promise<void> {
   task.value = await getTask(props.id);
 }
 
-onMounted(load);
+async function loadPendingPhotos(): Promise<void> {
+  const studentId = task.value?.student_id;
+  if (!studentId) return;
+  photosLoading.value = true;
+  photosError.value = "";
+  try {
+    const res = await listPhotos({
+      student_id: studentId,
+      kind: "homework",
+      status: "unassigned",
+      page: 1,
+      page_size: 50,
+    });
+    const items = res.items ?? [];
+    pendingPhotos.value = items;
+    await loadThumbs(items);
+  } catch (err) {
+    photosError.value = err instanceof Error ? err.message : "照片加载失败";
+  } finally {
+    photosLoading.value = false;
+  }
+}
+
+async function loadThumbs(items: Photo[]): Promise<void> {
+  await Promise.all(
+    items.map(async (p) => {
+      if (thumbs.value[p.photo_id]) return;
+      try {
+        thumbs.value[p.photo_id] = await fetchPhotoBlob(p.photo_id, "normalized");
+      } catch (_) {
+        /* 取图失败不阻塞列表 */
+      }
+    })
+  );
+}
+
+/** 单张重试 AI 挂接建议（`retry=true` 幂等；成败按 `suggestions` 是否为空区分，不谎报成功）。 */
+async function retrySuggestion(p: Photo): Promise<void> {
+  if (retrying.value) return;
+  retrying.value = p.photo_id;
+  try {
+    const res = await getLinkSuggestions(p.photo_id, true, { timeoutMs: RETRY_TIMEOUT_MS });
+    if (res.suggestions.length > 0) {
+      showToast("已生成挂接建议，请到「作业」页采纳");
+    } else {
+      showToast("AI 未返回建议（可能暂时不可用），可稍后重试，或到「作业」页手工挂接");
+    }
+  } catch (err) {
+    toastError(err);
+  } finally {
+    retrying.value = "";
+    await loadPendingPhotos(); // 成功 → 该照片变 suggested，自动移出本列表
+  }
+}
+
+onMounted(async () => {
+  await load();
+  await loadPendingPhotos();
+});
+
+onBeforeUnmount(() => {
+  for (const url of Object.values(thumbs.value)) URL.revokeObjectURL(url);
+  thumbs.value = {};
+});
 
 async function confirmAction(action: "publish" | "close" | "reopen", message: string): Promise<void> {
   try {
@@ -226,5 +358,53 @@ async function submitBelongDate(): Promise<void> {
   border: 1px solid var(--app-line);
   border-radius: 8px;
   font-size: 15px;
+}
+.photo-row {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--app-line);
+}
+.photo-body {
+  flex: 1;
+  min-width: 0;
+}
+.photo-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+.thumb-img {
+  width: 72px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--app-line);
+  flex: none;
+  background: #f2f4f9;
+}
+.thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.photo-actions {
+  margin-top: 8px;
+}
+.photos-loading {
+  padding: 12px 0;
+  justify-content: center;
+}
+.photos-foot {
+  margin-top: 12px;
+}
+.ok-text {
+  color: var(--app-success);
+}
+.warn-text {
+  color: #b07a12;
 }
 </style>

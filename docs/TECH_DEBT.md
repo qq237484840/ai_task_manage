@@ -3,7 +3,7 @@
 > 维护：Project Master。技术债（已知取舍 / 待优化项 / 契约缺口）在此登记：**不阻断当前阶段**，但须在规模化或对应契约修订时处理。
 > ID 规则：`TD-nnn`，仅 Project Master 分配（`docs/ID_GOVERNANCE.md`）。
 
-更新日期：2026-09-10
+更新日期：2026-09-14
 
 ## TD-001 —— `get_group_subject` 由直取退化为「按 family 全量扫描」（N+1 放大）
 
@@ -48,3 +48,21 @@
 - `list_groups` 的 `try/except TypeError` 回落分支**已删除**，改为按 `M001 v0.2.0 Frozen` 契约直调 `method(session, family_id, student_id=..., group_key=...)`（`clients/task_client.py`）。
 - 死代码证明：真机门控集成 10 例 + 边界 2 例 + 剧本 4/5 + 上层用例**全部直调该路径通过**（0 触发）→ 回落分支从不生效。PM 独立全量回归 **237 tests / 0 failed**。
 - **PM 裁决（关于同文件 `getattr(..., None) + raise M001UnavailableError` 探针）：不立项 `TD-004`** —— 该模式为**存在性探针**（缺方法 → 大声失败），与 `except TypeError` **签名兼容垫片**（存在但签名不符 → 静默改写调用）**语义不同**，不构成「掩盖契约缺口」风险（PM 铁律 ⑥ 针对的是后者）。故 Keep as-is，不清理、不立台账。
+
+## TD-005 —— 未挂接照片无窗口归属（无法按窗口过滤 / 展示）
+
+| 项 | 内容 |
+| --- | --- |
+| 来源 | 用户 2026-09-14 需求增补（`REQ-011`）grill 期间 PM 读码发现 |
+| 位置 | `backend/app/modules/m002/domain/models.py::Photo`（有窗口级 `task_id` + `created_at`，**无 `belong_date` / `group_key`**）；写入点 `m002/repository/photo_repository.py:150-155::set_window_task` |
+| 现状 | `photos.task_id` **仅在该照片「首条挂接确认」时写入**（`m002/services/link_service.py:376-388`，且 `if not photo.task_id`）；`unassigned` / `suggested` 照片的 `task_id` 为 `NULL`，照片表亦无归属日 → **未挂接照片在数据上不属于任何窗口** |
+| 影响 | ① `GET /photos?task_id=` 只能取到「已确认挂接」的照片（重试/待处理场景无意义）；② **「任务详情页按本窗口展示待重试照片」在现有模型下不可行** → `REQ-011` 因此退化为「学生级待识别」宽口径；③ 「作业」页亦只能把未挂接照片单列（`PhotoListView.vue:383` `unlinkedPhotos`） |
+| 触发条件 | 需要「按窗口聚合展示未处理照片」「窗口级统计/清理」「窗口级失败重试入口」等场景 |
+| 建议方案 | ① **推荐**：**上传时即解析并落窗口归属**（复用 M001 `WindowResolver` 的归属结果，落 `belong_date`（+ 可选 `group_key`）冗余列）→ 后续可按窗口过滤（**须走 CR**：`photos` 表加列 + M002 归属解析依赖 M001 归属服务）；② 或新增查询参数，由 M002 在**查询期**解析归属（不落库，但每次查询需调 M001）；③ 最快但**不推荐**：前端按 `created_at` + 已知窗口边界近似分组（跨凌晨 4 点日界 / 周末合并必然出错） |
+| 责任 / 时机 | Project Master（CR）+ `AGENT-M002`；`REQ-011` 第二阶段（A1）或出现窗口级统计需求时一并处理 |
+
+## 后续候选（**未立项**，仅登记，2026-09-14）
+
+- **CR 候选 1：AI 失败原因对用户可见** —— M002 暴露「最近一次 AI 调用状态」（读 `DATA-009.error.code`，如 `quota_exhausted` / `server_error` / `rate_limited`），供前端向用户展示真实失败原因；属 `REQ-011` R4 的增强，**直接消费 `BUG-005` 修复成果**。
+- **CR 候选 2：`API-M002-007` 异步化** —— 当前 `retry=true` **同步**在请求内跑 AI（实测 **15.6s**），与前端超时强耦合（`BUG-007`）；改为「触发即返回 + 前端轮询建议状态」以根治。
+- **第二阶段需求（A1）：布置单图片 → AI 解析内容项** —— M001 需转发布置单**图片源**，但图片字节 Owner = M002（M001 **禁 import M002**）→ 需 **CR/ACR** 决策「受控图片读取通道」+ M001 契约修订（新增解析重试端点）。详见 `docs/requirements/REQ-011.md`「后续」。

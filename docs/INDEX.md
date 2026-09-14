@@ -26,7 +26,7 @@ Contract → API → Data → 必要 Code
 | `ROADMAP.md` | L2 计划 | **V1 功能域主线（A~D 里程碑 + 验收 + 横切能力）** | **v0.9.0 基线**（2026-09-08，功能域主线重排）；**2026-09-10 随 ADR-014 收窄：V1 = 域 A/B/C，域 D 后置 V2** |
 | `SYSTEM_SUMMARY.md` | 系统摘要 | 几分钟理解整个系统 | V1 已填充 |
 | `ARCHITECTURE.md` | L1 系统 | 总体/技术/部署/数据/安全架构 | V1 高层草案 |
-| `REQUIREMENTS.md` | 需求 | 需求登记总表（权威源） | Approved（**REQ-001~010**）；**2026-09-10 CR-003 语义重构：REQ-001~007 已精校、REQ-010 新增**；**随 ADR-014：REQ-005~007 → Deferred（后置 V2）** |
+| `REQUIREMENTS.md` | 需求 | 需求登记总表（权威源） | Approved（**REQ-001~011**）；**2026-09-10 CR-003 语义重构：REQ-001~007 已精校、REQ-010 新增**；**2026-09-14 增补 REQ-011（任务详情 AI 未识别照片重试，零契约）**；**随 ADR-014：REQ-005~007 → Deferred（后置 V2）** |
 | `MODULE_REGISTRY.md` | L3 模块 | 模块导航总表 | V1 已登记（M001~M007）；**2026-09-10 随 CR-003/ADR-014 同步：M001/M002 契约修订已完成（PM 复核 APPROVED）；M003/M004 → Deferred（职责并入 M001/M002）；M005~M007 → Deferred（V2）** |
 | `API_REGISTRY.md` | L4 接口 | API 导航总表 | 启用（契约阶段登记） |
 | `DATA_MODEL.md` | L5 数据 | 核心数据/所有权 | V1 实体草案（**DATA-012~018 新增**，v0.13.0） |
@@ -36,10 +36,10 @@ Contract → API → Data → 必要 Code
 | `DEVELOPMENT_GUIDE.md` | 治理 | 开发流程/变更治理/评审 | 已启用 |
 | `ID_GOVERNANCE.md` | 治理 | ID 分配规则与唯一性约束 | 已启用 |
 | `PROJECT_STATUS.md` | 状态 | 当前阶段/风险/待决 | **v0.22.0**（④ 验收**收口** = `Task-014` 去替身复审经 PM 复核成立；`BUG-003`/`BUG-004` → **Verified**；`CHANGE-003` → **Closed**；M001/M002 均 **Stable**；`CR-004` Applied → M002 契约 **v0.4.1**；**V1（域 A/B/C）正式验收通过（2026-09-10，PM 执行：构建 `EXIT=0` / 浏览器级 18/18 / 全量 237-0-0-0）**） |
-| `CHANGELOG.md` | 记录 | 变更历史 | **v0.22.0** |
+| `CHANGELOG.md` | 记录 | 变更历史 | **v0.23.0** |
 | `ASSUMPTIONS.md` | 记录 | 假设登记 | ASM-001~011 |
 | `RISK_REGISTER.md` | 记录 | 风险登记 | 已启用（**RISK-001~012**；RISK-010/011 随 CR-003 新增；**RISK-012 随 ADR-014 新增**） |
-| `requirements/REQ-001~010.md` | 需求 | 单条需求详情 | Approved（REQ-010 随 CR-003，2026-09-10；REQ-001~007 已按 CR-003 精校）；**REQ-005~007 → Deferred（V2，随 ADR-014）** |
+| `requirements/REQ-001~011.md` | 需求 | 单条需求详情 | Approved（REQ-010 随 CR-003，2026-09-10；REQ-001~007 已按 CR-003 精校；**REQ-011 新增 2026-09-14：任务详情「AI 未识别照片」重试入口，零契约/前端增量**）；**REQ-005~007 → Deferred（V2，随 ADR-014）** |
 | `adr/ADR-001.md` | ADR | 架构决策记录 | 已启用 |
 | `adr/ADR-002.md` | ADR | V1 范围控制 | Accepted |
 | `adr/ADR-003.md` | ADR | AI 评价边界与原则 | Accepted |
@@ -106,10 +106,10 @@ Contract → API → Data → 必要 Code
 
 | 路径 | 存放内容 | 触发时机 |
 | --- | --- | --- |
-| `docs/requirements/REQ-*.md` | 单个需求详情 | 已启用（REQ-001~010，新增需求时继续建） |
+| `docs/requirements/REQ-*.md` | 单个需求详情 | 已启用（REQ-001~011，新增需求时继续建） |
 | `docs/domains/D0xx/` | 领域文档 | 系统规模扩大需要 Domain 层时 |
 | `docs/modules/Mxxx/` | 模块九件套 | 已启用（M001 **Stable v0.1.2**（契约 **v0.2.0 Frozen**，③ 实施完成 = Task-007）；M002 **Stable**（契约 **v0.4.1 Frozen（`CR-004` Applied）**，③ 实施完成 = Task-008，前端作业域 = Task-009 已完成；门控链路修复 = Task-010 已完成（`BUG-002` Verified）；**④ 验收收口 = Task-014 去替身复审经 PM 复核成立（`BUG-003` Verified，2026-09-10）**）；**M003~M007 → Deferred（V1 不创建，ADR-014）**） |
-| `docs/changes/` | CR/ACR/CHANGE/BUG 记录 | 已启用（CR-001/002、ACR-001/002 → **CHANGE-001 Applied**、**CHANGE-002 执行中**；**CR-003 Approved → CHANGE-003 执行中（② + ③ 后端/横切 + ③ 前端 + ③ 门控修复均已完成 = ③ 全部收口；④ 验收 = `Task-011` 已执行（PM 复核 = 条件达成，AI 通路缺陷修复后复审））**；**BUG-001 已修复**；**BUG-002 已 Verified（Task-010 修复并关闭）**；**CR-004 Applied（用户批准 2026-09-10；M002 契约 → v0.4.1）**；**`BUG-003`/`BUG-004` → Verified（`Task-012`/`Task-013` 修复 + `Task-014` 去替身复审，2026-09-10）**；**`CHANGE-003` → Closed（④ 判达成）**；**`TECH_DEBT.md` 启用（TD-001/TD-002；`TD-003` → Closed）**） |
+| `docs/changes/` | CR/ACR/CHANGE/BUG 记录 | 已启用（CR-001/002、ACR-001/002 → **CHANGE-001 Applied**、**CHANGE-002 执行中**；**CR-003 Approved → CHANGE-003 执行中（② + ③ 后端/横切 + ③ 前端 + ③ 门控修复均已完成 = ③ 全部收口；④ 验收 = `Task-011` 已执行（PM 复核 = 条件达成，AI 通路缺陷修复后复审））**；**BUG-001 已修复**；**BUG-002 已 Verified（Task-010 修复并关闭）**；**CR-004 Applied（用户批准 2026-09-10；M002 契约 → v0.4.1）**；**`BUG-003`/`BUG-004` → Verified（`Task-012`/`Task-013` 修复 + `Task-014` 去替身复审，2026-09-10）**；**`CHANGE-003` → Closed（④ 判达成）**；**`TECH_DEBT.md` 启用（TD-001/TD-002；`TD-003` → Closed；**`TD-005` 新增 2026-09-14**）**；**`BUG-005`/`BUG-006` → `Fixed`（2026-09-14，`Task-015`/`Task-016` 修复）；`BUG-007` → Confirmed（`REQ-011`/`Task-017` 待修）**） |
 | `docs/agents/` | Agent 任务单/过程记录 | 已启用（Task-002 已完成（随 Task-008 增量改接收口）/Task-003 Active；Task-004/Task-005 已完成（契约定稿）；**Task-006/Task-007/Task-008 已完成（PM 复核 APPROVED，2026-09-10）**；**Task-009 已完成（PM 复核 APPROVED，前端「作业」域迁移）**；**Task-010 已完成（门控链路修复 `BUG-002` → Verified）**；**Task-011 已完成（④ 条件达成，PM 复核）**；**`Task-012`（AGENT-M001）/ `Task-013`（AGENT-AI）/ `Task-014`（AGENT-M002）均已完成（PM 复核成立，2026-09-10；AI 通路缺陷修复 + 去替身复审）**） |
 | `docs/TECH_DEBT.md` | 技术债务 | **已启用**（TD-001 `get_group_subject` 全量扫描 N+1；TD-002 契约未暴露 `window_task_id`/`task_status`；**TD-003 签名兼容垫片 → Closed（`Task-014` 清理，2026-09-10）**；PM 裁决不立 TD-004） |
 | `docs/CONFIGURATION.md` | 配置项登记 | **已启用**（2026-09-10，CR-003 归属与窗口配置；评分权重 → **后置 V2**（ADR-014）；AI Provider 配置 → **已登记（§五 `AT_AI_*`，2026-09-10 随 Task-006 交付回填）**） |
