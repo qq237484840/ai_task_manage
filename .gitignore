@@ -4,6 +4,8 @@ __pycache__/
 .venv/
 backend/.venv/
 backend/data/*.db
+# 本地环境覆盖（如演示放宽 M002 质检；勿入库）
+backend/.env
 # M002 本地受控图片目录（运行时数据，MODULE_FILES.md 约定不入 git；备份随 data/ 整体处理）
 backend/data/images/
 .pytest_cache/
@@ -17,6 +19,9 @@ frontend/node_modules/.tmp/
 .e2e/node_modules/
 .e2e/*.xml
 .e2e/seed_state.json
+
+# 临时服务器日志（手动起服务排障时产生，勿入库）
+at_server*.log
 
 # OS
 .DS_Store

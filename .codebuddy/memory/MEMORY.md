@@ -4,54 +4,54 @@
 
 ## 项目一句话
 
-中小学生 AI 作业与学习成长综合评定系统 V1。**V1 有效模块 = M001 + M002 + 横切 `app/core/ai/`**（M003~M007 登记保留、**Deferred**，`ADR-014`）。形态：**FastAPI + SQLite 单体**（ADR-004）+ 移动优先 H5 **Vue3 + Vite + TS + Vant 4**（ADR-012，FastAPI 托管 `frontend/dist`）+ **两级主体** family/student（ADR-009/ACR-001：家庭级隔离 + 学生仅本人）+ **判定 = 聚合子任务(学科)级**（ADR-013）+ **真实三方 AI Provider 默认 / Mock 降级**（ADR-011）+ 学校字典全局只读 seed（ADR-008）。方法学：**文档驱动 + 多 Agent 治理**（ID 仅 Project Master 分配）。
+中小学生 AI 作业与学习成长综合评定系统 V1。**有效模块 = M001 + M002 + 横切 `app/core/ai/`**（M003~M007 Deferred，`ADR-014`）。形态：**FastAPI + SQLite 单体**（ADR-004）+ 移动优先 H5 **Vue3+Vite+TS+Vant4**（ADR-012，FastAPI 托管 `frontend/dist`）+ **两级主体** family/student（家庭级隔离）+ **判定 = 聚合子任务(学科)级**（ADR-013）+ **真实三方 AI 默认 / Mock 降级**（ADR-011）。方法学：**文档驱动 + 多 Agent 治理**（**ID 仅 PM 分配**）。
 
-## 当前状态（2026-09-10，顶层 v0.22.0）
+## 当前状态（截至 2026-09-14）
 
-- **V1（域 A/B/C）正式验收 = 通过（2026-09-10，用户委托 PM 执行）**：`npm run build` **`EXIT=0`** + 种子 **`SEED_OK`** + `GET /` **`200`** + 浏览器级 **`18/18 PASS`** + 全量 `pytest` **`237 / 0 failed / 0 errors / 0 skipped`**（分层留痕：构建级 / API 级 / 浏览器级 / 全量回归）。结论落 `docs/PROJECT_STATUS.md` **「V1 验收结论」** 独立章节。**基线已入库并推送 `origin/main`**：`aed4db1`（V1 收口基线 208 files）→ `ce5057c`（证据刷新）→ `b3bc0b3`（记忆同步）→ `ad7455c`（验收结论 + 证据刷新），`origin/main..HEAD` = **0**。**下一步 = V1 收尾遗留（真实三方密钥联调 + TD-001/TD-002）或 V2 回归（M005~M007，`RISK-012`）**。
-- **`CHANGE-003`**：**已关闭（Closed，2026-09-10，PM 复核 APPROVED = ④ 判达成）**。路径 = `Task-011` 取证（条件达成，3 缺口）→ `Task-012`/`Task-013` 修复 AI 通路缺陷（均 `Fixed`）→ **`Task-014`（AGENT-M002）去替身复审**（移除 `m002_ai_port` 端口替身 + `TD-003` 垫片清理 + 剧本 4/5 真机 + 浏览器级 18/18 PASS）→ **PM 亲手判别力复现**（关兜底 → 边界 2 例 `FF`/`RED_EXIT=1`；还原 → 4 passed/`GREEN_EXIT=0`）+ 全量 237/0 + 写区双证 → 双 BUG 置 **Verified** → **④ 判达成 → CHANGE-003 关闭**。**V1 域 A/B/C 交付完成**；已知边界 = 真实三方 AI 无密钥（Mock 证据显著标注 `mock=True`，非三方联调）。
-- **契约定稿**：M001 **v0.2.0 Frozen** ｜ M002 **v0.4.1 Frozen**（`CR-004` Applied：`API-M002-007` 响应体**以运行实现为准** = `{photo_id, status, suggestions[]}`；非破坏性、前端零返工、后端零代码改动）。
-- **③ 交付清单（均 APPROVED）**：`Task-006` 横切 AI 层（Vision/OCR/LLM 三协议 + Mock/真实配置化 + prompt 版本化 + schema 校验拦截 + 超时重试降级 + 三能力接口 `parse_task_spec`/`suggest_photo_links`/`analyze_completion` + DATA-009 `ai_call_records`）｜`Task-007` M001 双层模型（`WindowResolver` 4 点切日/周次/周末合并 + `task_groups`/`task_group_subjects` 聚合 + 链路 T + 端点 018~021）｜`Task-008` M002 v0.4.0（入口 `kind` → N:N 挂接 → 逐张复核 → 窗口级门控 → 完成分析）｜`Task-009` 前端「作业」域（**路由 `path` 仍 `/photos`**、`name=homework`）｜`Task-010` `BUG-002` 修复 **Verified**（门控默认路径改走契约内 `list_groups`，弃 `FakeGateway` 桩，新增真机集成 4 例）。
-- **实测基线**：全量 `pytest` = **237 tests / 0 failed / 0 errors / 0 skipped**（PM 实测 `--junitxml` + `EXIT=0`；`237 = 235 passed + 2 xpassed`，较 `Task-013` 首轮 236 增 1 = `Task-012` 新增用例；原 227 基线；**勿采信历史口述数字**）。缺陷双哨兵 `test_bug003_*` / `test_bug004_*`（`xfail(strict=False)`）**均已 XPASS**（回归即回落 xfailed）。
-- **缺陷台账**：`BUG-001` 已修复 ｜ `BUG-002` **Verified** ｜ **`BUG-003` = Verified（`Task-013` 修复 + `Task-014` 去替身复审）**（`core/ai/providers/mock.py` 读 `candidate_subjects` → `candidates`，与 `service.py:197` 注入及 prompt `$candidates` 对齐；**PM 两次亲手红→绿**：① service 面回退键名 `4 failed/1 passed` → 还原全绿；② `Task-013-D1` API 面 `test_scenario5_*` 断言回退后 `F`（实测 `unassigned` + `suggestions == []`）→ 还原 `.`；**③ `Task-014` 判别力复核：关 Mock 兜底 → 边界 2 例 `FF`（实测 `unassigned` + `[]`，`RED_EXIT=1`）→ 还原 4 passed（`GREEN_EXIT=0`）**；2026-09-10 **Verified**）｜ **`BUG-004` = Verified（`Task-012` 修复 + `Task-014` 真实装配路径复审成立）**（keyword 调用 `parser(session, sources=...)` + `SourceInput` 适配（**只转发文本源**，图片源保持 `placeholder` 防伪造）+ `_coerce_draft` 支持 `ParsedContentItem` + `logger.warning` 可观测；`session` 经 `task_service.py:178` **单行**下传（PM 2026-09-10 裁决「采纳 A」/最小扩权）→ `ai_call_records` 落条；`xfail` 自然 **XPASS**；`BUG-004.md §7.1` 修复记录由执行方追加 + PM 复核认可（状态已置 **`Verified`**，`Task-014` 复审通过）；PM 已**更正**其 §5.8.1「`Task-013` 并发抖动」归因 —— 真因 = `get_ai_settings` + `get_ai_service` **双 `lru_cache` 跨用例泄漏**）。详见 `docs/changes/BUG-003.md §7.1`、`docs/agents/Task-012.md` §3.5、`Task-013.md §5`/§5D。
-- **技术债**：`TD-001`（`get_group_subject` 全量扫描 N+1 放大）、`TD-002`（契约未暴露 `window_task_id`/`task_status`）；**`TD-003` → Closed**（`Task-014`：`clients/task_client.py` 的 `except TypeError` 签名兼容垫片删除，按 M001 v0.2.0 Frozen 契约直调；死代码证明 = 真机门控集成 10 例 + 上层 40+ 例 0 触发）；**PM 裁决不立 `TD-004`**（`getattr(...,None)+raise` 为存在性探针，与签名兼容垫片语义不同，不掩盖契约缺口）→ `docs/TECH_DEBT.md`；**无阻塞项**。
-- 历史批次（v0.9.0~v0.20.0）明细见 `.codebuddy/memory/2026-09-08.md` 与 `2026-09-10.md`（含各轮 PM 裁决与证据原文）。
+- **V1（域 A/B/C）验收通过**（2026-09-10）：构建 `EXIT=0` + 种子 `SEED_OK` + `GET /` 200 + 浏览器级 **18/18** + 全量 `pytest` **237/0/0/0**（`235 passed + 2 xpassed`）。`CHANGE-003` **Closed**（④ 判达成）；M001 v0.2.0 / M002 v0.4.1 契约 **Frozen Stable**；基线入库推送链 = `aed4db1→ce5057c→b3bc0b3→ad7455c`。
+- **缺陷台账**：`BUG-001`~`BUG-004` 均 **Verified** ｜ **`BUG-005` / `BUG-006` = `Fixed`（2026-09-14，`Task-015`/`Task-016` 修复；由 **PM 代执行** —— 本机无具备写权限的执行 subagent，不构成独立第三方复核，限制已标注任务书 §5）**：全量回归 **251/0/0/0** + 双**红→绿**（`BUG-006` 含 **API 面**：禁兜底→`placeholder`，回退→`parsed` 复现）+ 写区双证 + `read_lints=0`。
+- **技术债**：`TD-001`（`get_group_subject` N+1）、`TD-002`（契约未暴露 `window_task_id`/`task_status`）待排期；`TD-003` Closed；PM 裁决不立 `TD-004`。**无阻塞项**。
+- **任务队列**：`Task-006`~`Task-016` 均已完成（`Task-015`/`Task-016` 于 2026-09-14 签发并**当日修复收口**），**无 Active**。下一步候选 = 统一入库 + `docs/DATA_MODEL.md` 登记 `quota_exhausted` + 前端「AI 未解析请手工补录」提示（**需另立任务**）+ TD-001/002，或 **V2 域 D（M005~M007，`RISK-012`）**。
+
+## 真实三方 AI 联调（2026-09-14，PM 执行）
+
+- **密钥源**：IDE `~/.codebuddy/models.json`（OpenAI 兼容中转）。**规范做法 = 临时脚本读取后写入 `backend/.env`（已 gitignore，勿提交），密钥不落对话/仓库**。当前（用户第二次更新 models.json 后）：`https://www.hhhana.lol/v1`，LLM `glm-5.3` / Vision·OCR `qwen3.8-flash`（`deepseek-v4-pro` 不支持 `json_object`，已排除），`AT_AI_PROVIDER_MODE=real` + `AT_AI_ALLOW_MOCK_FALLBACK=false`。
+- **成果**：real 通路**真实出网并成功** —— DATA-009 记录 `provider=openai_compatible / mock=0`；完整业务 prompt（569 字符 + `response_format=json_object`）→ **HTTP 200 + 合规 JSON**。
+- **端到端真实验收已通过（2026-09-14 复验，用户确认此前为「接口限流」）**：① M001 `POST /tasks → 201/spec_status=parsed`，DATA-009 `task_spec_parse / glm-5.3 / mock=0 / status=ok`；② M002 上传含真实文字作业图 → `201`、照片 `status=suggested`、`links=[{subject:'math', source:'ai', confidence:1.0}]`，DATA-009 `photo_link_suggest / qwen3.8-flash / mock=0 / status=ok / 15.6s` → **真实 LLM + Vision 全链路打通并产出正确业务结果**。**中转可用性仍间或波动**（捕获 1 条 ~20s 超时 `status=error`，重试成功）→ 须保留重试容错；该波动正是 `BUG-006` 的现实触发条件。**复验要点：查 DATA-009 `mock=0 & status=ok`，勿只看 UI 的 `spec_status`**。
+- **派生缺陷（已立项）**：
+  - **`BUG-005`（中）**：三方 **403「余额/配额不足」被 `core/ai/errors.py:67-68` `from_http_status` 误映射为 `auth_error`「三方鉴权失败」**，且 401/403/429/5xx 分支**丢弃响应体** → DATA-009 留痕失真、排障方向被误导（本次排障多轮才定位到「配额」而非「鉴权」）。建议：新增 `AIErrorCode.QUOTA_EXHAUSTED`（**不可重试**）+ 三方响应摘要**脱敏截断**（剔 `sk-`、≤200 字）入 `message`。
+  - **`BUG-006`（高）**：`m001/services/task_parser.py:198-207` `default_parser` 在 AI 抛错/产物不合规后**无条件**回落 `mock_parse_sources`，**全程不读 `allow_mock_fallback`** → 在 real+禁兜底配置下 `POST /tasks` 仍返回 `201 / spec_status="parsed"`，而同期 DATA-009 为 `mock=0 / status=error` —— **「假成功」且 UI 无降级信号**。对照：M002 侧同配置行为正确（照片保持 `unassigned`、`links=[]`）→ 缺陷边界仅在 M001。**修复不得新增表字段/改契约**（推荐仅按配置语义返回 `None` → 保持 `placeholder`）。
+- **测试隔离铁律（重要）**：`Settings`/`AISettings`/`M002Settings` 均 `env_file=".env"` → **部署侧 `.env` 会污染回归**（实测 8 例失败：7 例 AI + `test_quality_rejects_page_crop`）。已由 `backend/tests/conftest.py` autouse fixture **`isolate_deploy_config`** 关闭 `env_file` + 清空 `AT_AI_*` 凭据 + 清 `get_ai_settings`/`get_ai_service`/`get_m002_settings` 三缓存 → 全量 **EXIT=0、基线 237 不减**。**改 `.env` 后必须重跑全量回归**。
 
 ## 架构定稿要点（ADR-013）
 
-- **双层模型**：**事实层按天**（`tasks` 唯一键 **`(student_id, category, belong_date)`**；`subject`/`content`/`task_items` 废弃停写）+ **聚合层跨天**（`task_groups` → `task_group_subjects` **★判定单元** → `photo_subject_links` **N:N** → `completion_analyses`）；**挂接与判定落聚合层**。
-- **窗口语义**：日界 **凌晨 4 点**（`AT_DAY_CUTOFF`，`Asia/Shanghai`）；`week_index` = `AT_TERM_START` 所在周周一起算；**周五~周日合并「周末作业」**；每个 `belong_date` 至少一个聚合（最小 1 天）。
-- **配置锁定**：变更只影响未聚合对象；已聚合按生成时 `policy_version`；锁定粒度 = 每个 `(学生, 聚合对象)`；**写入触发锁定，纯浏览不锁**；`belong_date` 上传即固化、不回算历史。
-- **输入源**：图片 / 文本 / 聊天记录（只支持**粘贴文本**）；`kind` 由**菜单入口**决定（「任务」→ `task_spec`，「作业」→ `homework`）；作业上传**不填内容**。
+- **双层模型**：事实层按天（`tasks` 唯一键 `(student_id, category, belong_date)`）+ 聚合层跨天（`task_groups` → `task_group_subjects` ★判定单元 → `photo_subject_links` N:N → `completion_analyses`）；**挂接与判定落聚合层**。
+- **窗口语义**：日界**凌晨 4 点**（`AT_DAY_CUTOFF`，Asia/Shanghai）；`week_index` 自 `AT_TERM_START` 周一起算；**周五~周日合并周末作业**；每个 `belong_date` 至少一个聚合。
+- **配置锁定**：写入触发锁定、纯浏览不锁；已聚合按生成时 `policy_version`；`belong_date` 上传即固化。
+- **输入源**：图片 / 文本 / 聊天记录（**仅支持粘贴文本**）；`kind` 由菜单入口决定（「任务」→ `task_spec`，「作业」→ `homework`）。
+- **分层约束**：M001 **禁止 import M002**；跨模块唯一通道 = 回调注册（`register_links_migration_hook` + `main.py` 启动期幂等自愈）。
 
-## 用户偏好与稳定约定
+## 用户偏好与 PM 铁律
 
-- 中文文档、代码/API 标识符英文；README 只做入口；模块九件套按真实需要生成、勿建空模板；后端改动同步回填 docs 与测试。
-- 单条需求详情入 `docs/requirements/`；需变更先 CR/ACR 登记；普通增量记 `CHANGELOG.md`；禁止知识重复；治理模板包 `ai-governance-template/` 改进须回同步并递增版本。
-- 确认交互：一次 `ask_followup` ≤4 题、选项带推荐标注，用户逐项答复后落库。
-- **PM 复核铁律**：不采信执行方自述 —— 须**可复现命令 + 原文输出**；「零改动」以 `git diff` + **mtime 审计**双证；用例真实性须**审读测试代码**（警惕 `FakeGateway` / 端口替身掩盖真机缺口）。
-- **流程教训（`BUG-002`）**：跨模块消费链**至少一条真机集成用例**；**契约外接口不得作为唯一来源**，消费面须与 `MODULE_API.md` 内部服务接口表逐条对齐。
-- **验收/复核铁律（v0.21.0 起累积）**：① 替身/桩**须在 docstring 显式标注并向 PM 报备**，PM 核验「证据是否经**真实装配路径**」；② `xfail` **不得删除或放宽**，修复后须自然 **XPASS**（**红→绿**取证，PM 应亲手复现）；③ 证据**逐条分域标注**（浏览器级 / API 级 / 服务级**不得混同**）；④ 「零改动」双证；⑤ **DoD × 写区冲突裁决判据**：先读码核实物理可行性 → 证据**可经真实生产路径获得**则**最小扩权**（限定文件/行/语义，写入任务书 §3.5 并附硬约束），否则降级口径并显式标注；⑥ 修复类任务**禁止用 `try/except TypeError` 兼容旧签名**（`BUG-004` 教训）；⑦ **症状在哪一层，证据就必须到哪一层**（症状在 API 面 → 仅 service 面证据不足）；⑧ 任务书**自检「交付物 ⊆ 写区」**（`Task-013` §5A/§8 冲突教训）。
+- 中文文档、英文标识符；README 只做入口；模块九件套按真实需要生成、**禁空模板**；后端改动须**同步回填 docs 与测试**。
+- 需求详情入 `docs/requirements/`；变更先 **CR/ACR** 登记；普通增量记 `CHANGELOG.md`；**禁止知识重复**；治理模板包改进须回同步并递增版本；一次 `ask_followup` ≤4 题且选项带推荐标注。
+- **复核铁律**：不采信自述 —— 须**可复现命令 + 原文输出**；「零改动」须 `git diff` + **mtime** 双证；证据**逐域标注**（构建/API/服务/浏览器级不得混同）；**症状在哪一层，证据就必须到哪一层**。
+- **测试铁律**：替身/桩须在 docstring 标注并向 PM 报备；`xfail` **不得删除或放宽**，修复后须自然 **XPASS**（PM 亲手红→绿）；改 AI 配置或重跑必须 **`cache_clear()` 双 `lru_cache`**（历史踩坑：`BUG-004` 归因「并发抖动」实为缓存泄漏）；跨模块消费链至少一条真机集成用例；契约外接口不得作为唯一来源。
+- **修复类禁止** `try/except TypeError` 兼容旧签名（`BUG-004` 教训）；DoD × 写区冲突时先读码核实物理可行性 → 证据可经真实生产路径取得则**最小扩权**（写入任务书并附硬约束）。
 
 ## 关键索引
 
-- 入口 `docs/INDEX.md`；状态 `docs/PROJECT_STATUS.md`（**v0.22.0**；M001/M002 均 **Stable**）；主线 `docs/ROADMAP.md`（**V1 域 = A+B+C 已交付完成（`CHANGE-003` Closed，2026-09-10），域 D 后置 V2**）。
-- 权威源 `docs/requirements/CLARIFICATION-2026-09-10.md`；配置 `docs/CONFIGURATION.md`（`AT_*` + §五 `AT_AI_*` 全表）；数据 `docs/DATA_MODEL.md`（DATA-001/003 修订 + DATA-012~018；DATA-009 = 物理表 `ai_call_records`）。
-- 决策 `docs/adr/ADR-001~014.md`（ADR-006/007/010 Superseded；关键 = ADR-013 双层模型、ADR-014 范围收窄 + AI 层执行方、ADR-011 AI Provider/Mock、ADR-012 前端栈）。
-- 模块 `docs/MODULE_REGISTRY.md`（M001 v0.2.0 Frozen **Stable** / M002 **v0.4.1 Frozen Stable** / M003~M007 Deferred）；API `docs/API_REGISTRY.md`（`API-M001-018~021`、`API-M002-007~011` Active）。
-- 变更 `docs/changes/`：CHANGE-001 Applied、CHANGE-002 Executing、**CHANGE-003 **Closed**（PM 复核 APPROVED = ④ 判达成，2026-09-10）**、`CR-004` **Applied**、`BUG-001` 已修复、`BUG-002` **Verified**、**`BUG-003` Verified**、**`BUG-004` Verified**；任务书 `docs/agents/Task-00x.md`（Task-006~011 已完成；**`Task-012`/`Task-013`/`Task-014` 均已完成（PM 复核成立，2026-09-10）**；**任务队列无 Active**）。
-- 技术债 `docs/TECH_DEBT.md`（TD-001/TD-002；**TD-003 → Closed**；PM 裁决**不立 TD-004**）。
+- 入口 `docs/INDEX.md`；状态 `docs/PROJECT_STATUS.md`；主线 `docs/ROADMAP.md`；需求 `docs/requirements/CLARIFICATION-2026-09-10.md`；配置 `docs/CONFIGURATION.md`（`docs` 侧尚未登记 `AT_M002_QUALITY_*`）；数据 `docs/DATA_MODEL.md`（DATA-009 = 物理表 `ai_call_records`）。
+- ADR `docs/adr/ADR-001~014`（关键 = 011/012/013/014）｜模块 `MODULE_REGISTRY.md`｜API `API_REGISTRY.md`｜变更 `docs/changes/`（`CHANGE-001` Applied、`002` Executing、`003` **Closed**、`CR-004` Applied、`BUG-001`~`004` Verified、**`BUG-005`/`BUG-006` Confirmed**）｜任务书 `docs/agents/Task-00x.md`｜技术债 `docs/TECH_DEBT.md`。
 
 ## 环境与实况备忘
 
-- 后端 venv = `backend/.venv`（Python 3.12）；**pytest 基线 = 237**。代码基线：M001 v0.2.0、M002 v0.4.1、横切 `app/core/ai/` 均已实施。
-- **浏览器级验收环境**（`Task-011` 固化）：`.e2e/`（`package.json` + `playwright-core`）+ 系统 Edge 通道（`channel: 'msedge'`）；种子 `.e2e/seed.py`（**会先删库重建** `backend/data/acceptance.db`）建独立库；**端口以脚本为准 = `8010`**（`.e2e/acceptance.mjs` 默认 `AT_BASE=http://127.0.0.1:8010`，非 8011 —— 2026-09-10 实机核对更正）。
-- **验收 runbook（2026-09-10 实机预检通过，18/18）**：① `cd <root>; & backend/.venv/Scripts/python.exe .e2e/seed.py` → `SEED_OK`；② `cd backend; $env:AT_DATABASE_URL='sqlite:///./data/acceptance.db'; $env:AT_FRONTEND_DIR='<root>/frontend/dist'; uvicorn app.main:app --port 8010`（`GET /` 返回 dist 首页 200、`/api/v1/schools` 无 token 401 = 正常）；③ `$env:Path="C:\Users\Administrator\.workbuddy\binaries\node\versions\22.22.2-2;"+$env:Path; node .e2e/acceptance.mjs` → `CHECKS total=18 pass=18 fail=0`、`EXIT=0`。**注意**：跑一次会重写 `.e2e/browser_evidence.json` 与 `shots/*.png`（已入库 → 会产生 4 条 `M`，需决定是否追加提交）；`node` **不在 PATH**，必须手动加。
-- **端口 8000 被系统占用（2026-09-10 实况）**：`wslrelay.exe`（WSL 端口代理）常驻监听 8000 → 本地起 uvicorn/Vite dev 选 8000 会冲突，验收统一用 **8010**，dev proxy 指向 `127.0.0.1:8000`。
-- **分层约束**：M001 **禁止 import M002**（实测 `grep -rn "modules.m002" backend/app/modules/m001` = 0）；跨模块唯一通道 = **回调注册**（`m001.services.aggregation_service.register_links_migration_hook`，M002 导入期注册；`main.py` 启动期 `ensure_links_migration_hook_registered()` 幂等自愈已接线）。
-- **`tzdata` 已解决**：`backend/requirements.txt` 含 `tzdata>=2024.1`；`WindowResolver` 固定 UTC+8 回退保留为最后防线。
-- 前端 `frontend/`：托管 = `backend/app/main.py` StaticFiles → `frontend/dist`（`core/config.py` `frontend_dir` 可覆盖）；dev = Vite proxy `/api/v1` → `127.0.0.1:8000`；**Vant 4 已全局注册**（`src/main.ts`）。
-- **前端类型检查必须显式指定工程**：`npx vue-tsc --noEmit -p tsconfig.app.json; "EXIT=$LASTEXITCODE"`（走根 `tsconfig.json` 引用工程会漏检 `src/**`；PowerShell 管道会吞退出码）。Node 22.22.2 实机路径 = `C:\Users\Administrator\.workbuddy\binaries\node\versions\22.22.2-2`（带 `-2` 后缀，PATH 需自加）。
-- **git 跟踪现状**：`backend/app/core/ai/`、`backend/tests/e2e/`、`frontend/src/` 等**已在 2026-09-10 入库**（此后写区核验仍建议用 `git status --porcelain`）。**V1 入库链** = `aed4db1`（V1 域 A/B/C 交付收口，208 files）→ `ce5057c`（证据刷新）→ `b3bc0b3`（记忆同步）→ `ad7455c`（正式验收结论 + 证据刷新）→ **已推送 `origin/main`**，`origin/main..HEAD` = **0**、工作区干净。
-- **推送须绕开失效代理（重要）**：仓库 config 写死 `http.proxy=http://127.0.0.1:1080` / `https.proxy=https://127.0.0.1:1080`，而该端口**无监听** → 裸 `git push` 必 `Connection refused`；**不得改 git config**，改用单次覆盖 `git -c http.proxy= -c https.proxy= push origin main` 即可直连成功。※ PowerShell 会把 git 的 stderr 进度包装成 error record，**退出码 0 即成功**，勿据 stderr 误判。
-- **`.gitignore` 已加固（2026-09-10 收口体检）**：忽略 `.e2e/node_modules/`、`.e2e/*.xml`、`.e2e/seed_state.json`（此前 `.e2e/node_modules` **未被忽略**，误 `git add` 会引入 playwright-core 全量依赖）；`.e2e/shots/*.png` 与 `.e2e/browser_evidence.json` **保留为浏览器级证据**，故意不忽略。
+- **venv** = `backend/.venv`（Python 3.12）；**pytest 基线 = 251**（2026-09-14 起；此前 237 —— `Task-015` +9 例、`Task-016` +5 例）；端口统一 **8010**（8000 被 `wslrelay.exe` 常占）。
+- **一键启动脚本**（2026-09-11；双击用根目录 `start_server.bat`）：`start_server.ps1` 自动清理同端口旧 uvicorn（**只杀命令行含 `uvicorn`+`app.main` 的 python，绝不误杀其它进程**）+ 强制 venv + 设 `AT_DATABASE_URL`/`AT_FRONTEND_DIR` + 单实例 + 健康自检；日志 `at_server*.log`（已忽略）。参数 `[-Port][-Db acceptance|app][-Seed][-Reload][-Stop]`。**背景**：曾因「系统 Python + venv 双 `--reload` 抢 8010」表現为「内部服务器报错」。※ 本机 shell 对复杂 PS 命令偶发路由到 cmd 报错，执行脚本宜用 `powershell -NoProfile -ExecutionPolicy Bypass -File <abs>`（`start_server.ps1` 输出全英文以回避 PS5.1 中文乱码）。
+- **演示质检放宽**（2026-09-14）：`backend/.env` 设 `AT_M002_QUALITY_TILT_SEVERITY=warn` + `AT_M002_QUALITY_PAGE_CROP_ENABLED=false`（**仅**降级 `tilt`/`page_crop` 两条近似启发式；`blur`/亮度/遮挡照常 reject，实测模糊图仍 422）。**改动须重启**（`lru_cache`）；恢复严格 = 删/注释该两行后重启。质检实现 `m002/services/quality.py`、阈值 `m002/config.py`（`AT_M002_` 前缀）、抛错 `upload_service.py:155-160`（422 `image_quality_rejected`，message 含 `{id}(value=…)` 逐项原因，不合格不入库）。
+- **浏览器级验收**（`.e2e/`，18/18）：① `& backend/.venv/Scripts/python.exe .e2e/seed.py`（**先删库重建** `backend/data/acceptance.db`）→ ② venv uvicorn 8010（带 `AT_DATABASE_URL`/`AT_FRONTEND_DIR`）→ ③ **node 不在 PATH**，须加 `C:\Users\Administrator\.workbuddy\binaries\node\versions\22.22.2-2`（带 `-2` 后缀），再 `node .e2e/acceptance.mjs` → `total=18 pass=18`。跑一次会重写 `shots/` + `browser_evidence.json`（已入库 → 产生 `M`）。
+- **前端类型检查必须显式指定工程**：`npx vue-tsc --noEmit -p tsconfig.app.json; "EXIT=$LASTEXITCODE"`（根 `tsconfig.json` 会漏检 `src/**`；PowerShell 管道吞退出码）。
+- **git push 须绕开失效代理**：仓库 config 写死 `127.0.0.1:1080` 且该端口无监听 → **不得改 git config**，改用 `git -c http.proxy= -c https.proxy= push origin main`（PowerShell 会把 git stderr 包成 error record，**看退出码 0 即成功**）。
+- `.gitignore` 已忽略：`.e2e/node_modules/`、`.e2e/*.xml`、`.e2e/seed_state.json`、`at_server*.log`、`backend/.env`；**故意保留** `.e2e/shots/*.png` + `.e2e/browser_evidence.json` 作为浏览器级证据。
+- `tzdata>=2024.1` 已入 `backend/requirements.txt`；Vant 4 全局注册（`src/main.ts`）。
+- 历史批次明细（v0.9.0~v0.20.0 各轮 PM 裁决与证据原文）见 `.codebuddy/memory/2026-09-08.md`、`2026-09-10.md`。

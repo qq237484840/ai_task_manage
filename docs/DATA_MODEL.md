@@ -51,7 +51,7 @@
 | DATA-006 质量评价 | 评价ID/提交ID/六维度分+权重版本/大模型综合评判(逐题结论+依据)/综合分/置信度/规则版本 —— **AI 评判为核（q2-3/PD-023）** |
 | DATA-007 教师评价 | 评价ID/质量评价ID/评语文案/分级重写建议/依据/置信度/prompt 版本 |
 | DATA-008 今日报告 | 报告ID/学生ID/日期/任务评价聚合/报告快照 |
-| DATA-009 AI 调用记录 | 调用ID(`call_id`)/`request_id`/`family_id`/`capability`(任务解析\|挂接建议\|完成分析\|OCR)/`provider_kind`/`provider_name`/`model`/`prompt_key`/`prompt_version`/`attempt`/`latency_ms`/`token_usage`/`result`/`confidence`/`status`/`mock`/`error`/`input_ref`/`created_at`（**`Task-006` 已实施回填，物理表 `ai_call_records`**） |
+| DATA-009 AI 调用记录 | 调用ID(`call_id`)/`request_id`/`family_id`/`capability`(任务解析\|挂接建议\|完成分析\|OCR)/`provider_kind`/`provider_name`/`model`/`prompt_key`/`prompt_version`/`attempt`/`latency_ms`/`token_usage`/`result`/`confidence`/`status`/`mock`/`error`/`input_ref`/`created_at`（**`Task-006` 已实施回填，物理表 `ai_call_records`**）；**`error.code` 取值**：`provider_unavailable` \| `timeout` \| `rate_limited` \| `content_refused` \| `auth_error` \| **`quota_exhausted`**（2026-09-14 `Task-015`/`BUG-005` 新增：账户余额/配额不足，**不可重试**，需人工充值）\| `invalid_output` \| `config_error` \| `server_error` \| `internal_error`；**`error.message`** 自 2026-09-14 起附**脱敏 + ≤200 字符**的三方响应摘要（禁携带密钥） |
 | DATA-010 评分配置 | 维度/权重/版本/生效范围 |
 | DATA-011 学校字典 | school_id/name/stage(学段 primary\|junior\|senior)/seed 预置；全局共享只读（ADR-008） |
 | DATA-012 聚合任务 | group_id/学生ID/聚合键(`belong_date` 或 周末/假期周标识)/展示名("周末作业"/"第 N 周")/成员天任务集合/**`policy_version`**/生成时间 |

@@ -186,8 +186,36 @@ def _to_ai_sources(sources: list[dict]) -> list[Any]:
     return out
 
 
+def _mock_fallback_allowed() -> bool:
+    """AI 解析失败时是否允许回落本地启发式（服从部署侧配置语义，`BUG-006` / `Task-016`）。
+
+    判定顺序：
+    1. `provider_mode=mock`（**显式 Mock = 非降级**）→ 允许；
+    2. 否则取 `allow_mock_fallback`（`real` + 禁兜底 → **不允许**，须如实失败）；
+    3. 配置层不可读（`app/core/ai` 未就绪）→ **保守允许** + `logger.warning`（向后兼容；
+       配置不可用时无从得知部署意图，不新增静默失败面）。
+
+    延迟 import 遵循本文件既有约定（见 `_ai_parser`）。
+    """
+    try:
+        from app.core.ai.config import PROVIDER_MODE_MOCK, get_ai_settings
+
+        settings = get_ai_settings()
+        mode = (settings.provider_mode or "").strip().lower()
+        if mode == PROVIDER_MODE_MOCK:
+            return True  # 显式 Mock：本地启发式即预期路径，非降级
+        return bool(settings.allow_mock_fallback)
+    except Exception as exc:  # noqa: BLE001 - 配置层不可用不阻断事实层
+        logger.warning("task_parser: 无法读取 AI 配置（%s）→ 按允许 Mock 兜底处理", exc)
+        return True
+
+
 def default_parser(sources: list[dict], *, session: "Session | None" = None) -> list[ContentDraft] | None:
-    """默认解析器：优先 `app/core/ai/`，失败/未就绪回退 Mock（降级可观测）。
+    """默认解析器：优先 `app/core/ai/`；失败/未就绪时**按配置**决定是否回退 Mock（降级可观测）。
+
+    `BUG-006` 修复：是否回落本地启发式由 `_mock_fallback_allowed()` 决定 ——
+    `real` + `AT_AI_ALLOW_MOCK_FALLBACK=false` 时返回 `None`（上层保持 `placeholder`），
+    不再以本地草稿冒充 AI 解析结果（`provider_mode=mock` / 允许兜底时行为不变）。
 
     `session` 为可选 `app/core/database` 会话：传入时 AI 调用记录（DATA-009）落条，
     便于「证明 AI 真跑」；不传（默认 `None`）则纯计算调用、不落库。
@@ -204,4 +232,10 @@ def default_parser(sources: list[dict], *, session: "Session | None" = None) -> 
                 return coerced
         except Exception as exc:  # noqa: BLE001 - 解析异常不阻断事实层（契约 Failure Behavior）
             logger.warning("task_parser: 核心 AI 解析降级（%s）", exc)
+
+    if not _mock_fallback_allowed():
+        logger.warning(
+            "task_parser: AI 解析不可用且 Mock 兜底已禁用（allow_mock_fallback=false）→ 保持 placeholder"
+        )
+        return None
     return mock_parse_sources(sources)

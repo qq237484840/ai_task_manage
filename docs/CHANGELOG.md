@@ -3,6 +3,35 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.23.0 —— 2026-09-14
+
+### 真实三方 AI 联调打通 + `BUG-005` / `BUG-006` 登记并修复（`Task-015` / `Task-016`）
+
+**一、真实三方 AI 联调（`ADR-011` 真实 Provider 首次真实出网）**
+
+- 密钥源 = IDE `~/.codebuddy/models.json`（OpenAI 兼容中转）；由一次性脚本读取后写入 `backend/.env`（**已 gitignore，不入库** —— 密钥不落对话、不入仓库）：`AT_AI_PROVIDER_MODE=real` + `AT_AI_ALLOW_MOCK_FALLBACK=false` + LLM `glm-5.3` / Vision·OCR `qwen3.8-flash`（`deepseek-v4-pro` 不支持 `json_object`，已排除）。
+- **端到端真实验收通过**：① M001 `POST /api/v1/tasks → 201 / spec_status=parsed`（真实解析出 `math` + `chinese`），DATA-009 = `task_spec_parse / openai_compatible / glm-5.3 / mock=0 / status=ok`；② M002 上传含真实文字的作业图 → `201`、照片 `status=suggested`、`links=[{subject:'math', source:'ai', confidence:1.0}]`，DATA-009 = `photo_link_suggest / qwen3.8-flash / mock=0 / status=ok / 15.6s`。
+- 残余风险：**外部中转可用性波动**（期间出现全站 502 / Cloudflare 错误页与约 20s 超时，重试后成功）→ 保留重试容错。
+- **测试隔离铁律（新增基建）**：`Settings` / `AISettings` / `M002Settings` 均 `env_file=".env"` → 部署侧配置会污染回归（实测 8 例失败）。新增 `backend/tests/conftest.py` autouse fixture **`isolate_deploy_config`**（关闭 dotenv 读取 + 清空 `AT_AI_*` 凭据 + 清 `get_ai_settings` / `get_ai_service` / `get_m002_settings` 三处 `lru_cache`）→ 全量回归恢复 `EXIT=0`。
+
+**二、缺陷登记与修复**
+
+| 缺陷 | 级别 | 问题 | 修复（任务） |
+| --- | --- | --- | --- |
+| `BUG-005` | 中 | 三方 `403`「余额/配额不足」被 `from_http_status` 误映射为 `auth_error`「三方鉴权失败」，且 401/403/429/5xx 分支**丢弃响应体** → DATA-009 留痕失真、排障方向被误导 | **`Task-015`**（`AGENT-AI`）：新增 `AIErrorCode.QUOTA_EXHAUSTED`（**不可重试**）+ 403 配额线索（`quota`/`insufficient_quota`/`balance`/`pre_consume`/`余额`/`额度`）精细化 + 三方摘要**脱敏 + ≤200 字符**入 `message`；新增 `tests/unit/test_ai_errors.py` **9 例** |
+| `BUG-006` | **高** | `m001/services/task_parser.py::default_parser` 在 AI 失败后**无条件**回落 `mock_parse_sources`，**不读** `allow_mock_fallback` → `real` + 禁兜底仍产出 `spec_status=parsed`（**「假成功」**，UI 无降级信号） | **`Task-016`**（`AGENT-M001`）：新增 `_mock_fallback_allowed()`（显式 `mock` 模式放行；否则取 `allow_mock_fallback`；配置不可读 → 保守放行 + warning），禁用时 `logger.warning` + 返回 `None` → 保持 `placeholder`；新增单测 **4 例** + **API 级 1 例** |
+
+- **行为面变更（Release Note）**：`provider_mode=real`（或 `auto` 无真实配置）**且** `allow_mock_fallback=false` 时，AI 失败任务的 `spec_status` 由 `parsed` 变为 **`placeholder`**（此即配置意图；家长可手工补录）。**无表结构 / API 响应结构变更**。
+- **验收证据**：全量回归 **251 / 0 failed / 0 errors / 0 skipped**（基线 237 + 新增 14 例，`GREEN_EXIT=0`）；两处**红→绿判别力**成立（`BUG-006` 含 **API 面**：禁兜底 → `placeholder`；回退 → `parsed`「假成功」复现，`RED_EXIT=1`）；写区双证（`git status` + mtime 审计）+ `read_lints=0`。
+- **写区最小扩权（PM 铁律 ⑤）**：`tests/e2e/test_acceptance_scenarios.py::test_scenario6_*` 原**依赖 `BUG-006` 的错误行为**播种学科子任务（修复后 `IndexError`）→ 裁决**仅后移 env 切换时机**（断言集合与强度逐字不变），记录于 `Task-016 §3.6`。
+- **执行方式说明**：本机 IDE 无具备写权限的执行 subagent（仅有只读 `code-explorer`）→ 两任务由 **PM 代执行**，**不构成独立第三方复核**（该限制已如实标注于 `Task-015 §5` / `Task-016 §5`）。
+
+**三、配套基建**
+
+- 新增一键启动脚本 `start_server.ps1` + 双击入口 `start_server.bat`（自动清理同端口旧 uvicorn —— 仅认命令行含 `uvicorn` + `app.main` 的 python 进程、强制项目 venv、设 `AT_DATABASE_URL`/`AT_FRONTEND_DIR`、单实例、启动后健康自检）。
+- `backend/.env`（本地覆盖，**已 gitignore**）：演示环境质检放宽 `AT_M002_QUALITY_TILT_SEVERITY=warn` + `AT_M002_QUALITY_PAGE_CROP_ENABLED=false`（仅两条**近似启发式**；`blur`/亮度/遮挡等强规则**照常 reject**）；`.gitignore` 追加 `backend/.env`、`at_server*.log`。
+- **待办**：`docs/DATA_MODEL.md` 登记 `quota_exhausted` 取值；前端「AI 未解析，请手工补录」提示增强需另立任务；图片源 OCR 通路为既有已知遗留。
+
 ## v0.22.0 —— 2026-09-10
 
 ### ④ 验收收口：`Task-014` 去替身复审经 **PM 独立复核成立** → `BUG-003`/`BUG-004` **Verified** → `CHANGE-003` **关闭（Closed）**

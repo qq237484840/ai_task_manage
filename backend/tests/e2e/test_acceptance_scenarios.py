@@ -372,16 +372,19 @@ def test_scenario6_llm_unavailable_keeps_unassigned_then_manual_link_api_level(
     world, real_stack, monkeypatch
 ):
     """【API 级】剧本 6：停用 LLM（real 模式 + 禁止 Mock 兜底）→ 照片 unassigned → 手工挂接可行。"""
+    c, ha = world["client"], world["ha"]
+    stu = _student(world)
+    # 前置数据（学科子任务）先以默认配置播种：`BUG-006`/`Task-016` 修复后，`real` + 禁兜底下
+    # 任务解析会**如实**保持 `placeholder`（不再静默 Mock 兜底），无 contents 即无学科子任务；
+    # 本用例的验证对象是「照片挂接」降级，任务解析降级不在其范围内。
+    gs = _seed_window_day(world, student_id=stu["student_id"])
+
     monkeypatch.setenv("AT_AI_PROVIDER_MODE", "real")
     monkeypatch.setenv("AT_AI_ALLOW_MOCK_FALLBACK", "false")
     # 必须同时清 settings 缓存：否则 `get_ai_settings()` 沿用前序用例缓存的 auto（Mock 兜底）
     # 配置，本用例不再真正走「real + 禁兜底」路径（BUG-003 修复前因 Mock 恒返回空建议而假通过）。
     get_ai_settings.cache_clear()
     get_ai_service.cache_clear()
-
-    c, ha = world["client"], world["ha"]
-    stu = _student(world)
-    gs = _seed_window_day(world, student_id=stu["student_id"])
 
     batch = _batch(c, ha, stu["student_id"])
     photo = _upload(c, ha, batch["batch_id"])

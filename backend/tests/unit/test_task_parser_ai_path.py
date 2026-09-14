@@ -99,3 +99,68 @@ def test_default_parser_warns_and_falls_back_on_ai_error(monkeypatch, caplog):
 def test_default_parser_image_source_keeps_placeholder():
     """图片源不伪造草稿：M001 无图片字节（`photo_id` 仅引用）→ `None`（上层维持 placeholder）。"""
     assert task_parser.default_parser(_IMAGE_SOURCE) is None
+
+
+# ---------------------------------------------------------------------------
+# BUG-006 / Task-016：降级必须服从配置语义（`provider_mode` + `allow_mock_fallback`）
+# ---------------------------------------------------------------------------
+
+
+def _set_ai_env(monkeypatch, *, mode: str, allow: str) -> None:
+    """切换 AI 配置并清理双缓存（`get_ai_settings` / `get_ai_service` 均带 `lru_cache`）。"""
+    from app.core.ai.config import get_ai_settings
+    from app.core.ai.service import get_ai_service
+
+    monkeypatch.setenv("AT_AI_PROVIDER_MODE", mode)
+    monkeypatch.setenv("AT_AI_ALLOW_MOCK_FALLBACK", allow)
+    get_ai_settings.cache_clear()
+    get_ai_service.cache_clear()
+
+
+def test_bug006_no_mock_fallback_when_disabled(monkeypatch):
+    """`real` + 禁兜底：AI 抛错 → 返回 `None`（不产出本地草稿，不冒充 AI 结果）。"""
+    _set_ai_env(monkeypatch, mode="real", allow="false")
+
+    def boom(session, **kwargs):
+        raise RuntimeError("core-ai-down")
+
+    monkeypatch.setattr(task_parser, "_ai_parser", lambda: boom)
+
+    assert task_parser._mock_fallback_allowed() is False
+    assert task_parser.default_parser(_TEXT_SOURCE) is None
+
+
+def test_bug006_no_mock_fallback_when_ai_output_invalid(monkeypatch):
+    """AI 返回不合规（无可用产物）同样不得兜底。"""
+    _set_ai_env(monkeypatch, mode="real", allow="false")
+    monkeypatch.setattr(task_parser, "_ai_parser", lambda: (lambda session, **kwargs: None))
+
+    assert task_parser.default_parser(_TEXT_SOURCE) is None
+
+
+def test_bug006_explicit_mock_mode_still_falls_back(monkeypatch):
+    """`provider_mode=mock`（显式 Mock = 非降级）→ 仍走本地启发式（离线演示路径不失效）。"""
+    _set_ai_env(monkeypatch, mode="mock", allow="false")
+
+    def boom(session, **kwargs):
+        raise RuntimeError("core-ai-down")
+
+    monkeypatch.setattr(task_parser, "_ai_parser", lambda: boom)
+
+    assert task_parser._mock_fallback_allowed() is True
+    assert task_parser.default_parser(_TEXT_SOURCE) == task_parser.mock_parse_sources(_TEXT_SOURCE)
+
+
+def test_bug006_default_config_keeps_fallback(monkeypatch, caplog):
+    """默认配置（`auto` + 允许兜底）行为不变 —— 既有语义零回归哨兵。"""
+    _set_ai_env(monkeypatch, mode="auto", allow="true")
+
+    def boom(session, **kwargs):
+        raise RuntimeError("core-ai-down")
+
+    monkeypatch.setattr(task_parser, "_ai_parser", lambda: boom)
+    with caplog.at_level(logging.WARNING, logger="app.modules.m001.services.task_parser"):
+        drafts = task_parser.default_parser(_TEXT_SOURCE)
+
+    assert "核心 AI 解析降级" in caplog.text
+    assert drafts == task_parser.mock_parse_sources(_TEXT_SOURCE)

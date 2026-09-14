@@ -13,6 +13,49 @@ from app.main import create_app
 
 PW = "Passw0rd1"
 
+# 部署侧 backend/.env 可能写入真实三方 AI 密钥（联调）。测试必须与其隔离：
+# 始终按「无凭据 + auto + 允许兜底」解析 → 离线 Mock，保证确定性与可重复（Mock 为最低验收线）。
+_AI_CREDENTIAL_KEYS = (
+    "AT_AI_LLM_MODEL",
+    "AT_AI_LLM_API_KEY",
+    "AT_AI_LLM_BASE_URL",
+    "AT_AI_VISION_MODEL",
+    "AT_AI_VISION_API_KEY",
+    "AT_AI_VISION_BASE_URL",
+    "AT_AI_OCR_MODEL",
+    "AT_AI_OCR_API_KEY",
+    "AT_AI_OCR_BASE_URL",
+)
+
+
+@pytest.fixture(autouse=True)
+def isolate_deploy_config(monkeypatch):
+    """隔离部署侧 backend/.env（真实 AI 密钥 / 质检放宽项）。
+
+    - 关闭 dotenv 读取 → 测试始终用契约默认值（如质检默认阈值）；
+    - 清空 OS 级 AI 凭据兜底 → 始终离线 Mock；
+    - 清理 Provider/设置缓存；用例后复原。
+    """
+    from app.core.ai.config import AISettings, get_ai_settings
+    from app.core.ai.service import get_ai_service
+    from app.core.config import Settings
+    from app.modules.m002.config import M002Settings, get_m002_settings
+
+    for cls in (Settings, AISettings, M002Settings):
+        cls.model_config["env_file"] = None
+
+    monkeypatch.setenv("AT_AI_PROVIDER_MODE", "auto")
+    monkeypatch.setenv("AT_AI_ALLOW_MOCK_FALLBACK", "true")
+    for key in _AI_CREDENTIAL_KEYS:
+        monkeypatch.setenv(key, "")
+    get_ai_settings.cache_clear()
+    get_ai_service.cache_clear()
+    get_m002_settings.cache_clear()
+    yield
+    get_ai_settings.cache_clear()
+    get_ai_service.cache_clear()
+    get_m002_settings.cache_clear()
+
 
 def _make_settings(tmp_path) -> Settings:
     return Settings(
