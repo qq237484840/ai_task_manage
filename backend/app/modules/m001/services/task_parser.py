@@ -56,11 +56,17 @@ class Parser(Protocol):
     """解析器调用约定（`Task-012` §3.5：调用方式统一，**禁止**按旧签名静默兼容）。
 
     - 位置参数：`sources: list[dict]`（M001 输入源）；
-    - 关键字参数：`session: Session | None = None`（传请求会话 → 落 DATA-009 `ai_call_records`）。
+    - 关键字参数：`session: Session | None = None`（传请求会话 → 落 DATA-009 `ai_call_records`）；
+      `family_id: str | None = None`（`CR-005`：图片源经回调槽读取时的家庭上下文；
+      缺省 `None` 不影响文本源路径）。
     """
 
     def __call__(
-        self, sources: list[dict], *, session: "Session | None" = None
+        self,
+        sources: list[dict],
+        *,
+        session: "Session | None" = None,
+        family_id: str | None = None,
     ) -> "list[ContentDraft] | None": ...
 
 
@@ -164,25 +170,63 @@ def _ai_parser() -> Any:
     return parser
 
 
-def _to_ai_sources(sources: list[dict]) -> list[Any]:
+def _vision_is_real() -> bool:
+    """Vision Provider 是否为**真实**（非 Mock / 非 degraded）—— 图片源转发的前置判据。
+
+    `CR-005` 硬约束：Mock / degraded 下**不转发图片源**（Mock 无视觉能力，会产出占位草稿
+    冒充解析结果 —— `BUG-004` 教训）。判据取自 `app/core/ai` 的**装配结果**
+    （`ResolvedProvider.reason == "real"`），**禁止硬编码模型名**；
+    AI 层不可读 → `False`（保守不转发）。
+    """
+    try:
+        from app.core.ai.service import get_ai_service
+
+        vision = get_ai_service().providers.vision
+        return bool(vision.reason == "real") and not vision.mock and not vision.degraded
+    except Exception as exc:  # noqa: BLE001 - 判定不了就不转发（保守）
+        logger.warning("task_parser: 无法判定 Vision Provider 真实性（%s）→ 不转发图片源", exc)
+        return False
+
+
+def _to_ai_sources(
+    sources: list[dict], *, session: Any = None, family_id: str | None = None
+) -> list[Any]:
     """把 M001 输入源（`list[dict]`）适配为 `app/core/ai` 的 `SourceInput`。
 
-    - **只转发文本源**：`SourceInput.text_of(...)`；空文本不转发；
-    - **图片源不转发**：M001 的 `photo_id` 仅存引用（照片实体 Owner = M002，本层无字节/路径可读），
-      无法构造可用的 `ImageInput`；若硬转发会在 Mock 无视觉密钥时产出占位草稿（伪造），
-      故保持现状 —— 图片源由 `mock_parse_sources` 兜底为 `None` → 上层维持 `placeholder` / `contents == []`。
+    - **文本源**：`SourceInput.text_of(...)`；空文本不转发（行为与既有版本一致）；
+    - **图片源**（`CR-005`）：仅当 ① **Vision Provider 为真实**（`_vision_is_real()`）
+      ② `session` 与 `family_id` 可用 ③ M002 已注册回调槽时，经 `get_task_source_image(...)`
+      取受控 `abs_path` → `SourceInput.image_of(ImageInput(mime, path, image_id=photo_id))`；
+    - **任一条件不满足或取图失败 → 不转发该源**（保持 `placeholder`，**绝不伪造草稿**）。
 
     延迟 import（`app/core/ai/` 可能未就绪），失败由调用方兜底。
     """
-    from app.core.ai.types import SourceInput
+    from app.core.ai.types import ImageInput, SourceInput
+    from app.modules.m001.services.image_provider import get_task_source_image
 
-    out: list[SourceInput] = []
+    out: list[Any] = []
     for src in sources:
-        if src.get("kind") != "text":
+        kind = src.get("kind")
+        if kind == "text":
+            text = (src.get("text_content") or "").strip()
+            if text:
+                out.append(SourceInput.text_of(text))
             continue
-        text = (src.get("text_content") or "").strip()
-        if text:
-            out.append(SourceInput.text_of(text))
+        if kind != "image":
+            continue
+        photo_id = src.get("photo_id")
+        if not photo_id or session is None or not family_id:
+            continue  # 无上下文/无引用 → 不转发（不伪造）
+        if not _vision_is_real():
+            continue  # Mock / degraded → 不转发（CR-005 硬约束）
+        ref = get_task_source_image(session, family_id, str(photo_id))
+        if ref is None:
+            continue  # 槽未注册 / 取图失败 → 不转发
+        out.append(
+            SourceInput.image_of(
+                ImageInput(mime=ref.mime, path=ref.abs_path, image_id=str(photo_id))
+            )
+        )
     return out
 
 
@@ -210,7 +254,12 @@ def _mock_fallback_allowed() -> bool:
         return True
 
 
-def default_parser(sources: list[dict], *, session: "Session | None" = None) -> list[ContentDraft] | None:
+def default_parser(
+    sources: list[dict],
+    *,
+    session: "Session | None" = None,
+    family_id: str | None = None,
+) -> list[ContentDraft] | None:
     """默认解析器：优先 `app/core/ai/`；失败/未就绪时**按配置**决定是否回退 Mock（降级可观测）。
 
     `BUG-006` 修复：是否回落本地启发式由 `_mock_fallback_allowed()` 决定 ——
@@ -219,8 +268,11 @@ def default_parser(sources: list[dict], *, session: "Session | None" = None) -> 
 
     `session` 为可选 `app/core/database` 会话：传入时 AI 调用记录（DATA-009）落条，
     便于「证明 AI 真跑」；不传（默认 `None`）则纯计算调用、不落库。
+
+    `family_id`（`CR-005`）：图片源经回调槽受控读取所需的家庭上下文；缺省 `None` 时
+    **图片源不转发**（文本源路径不受影响）。
     """
-    ai_sources = _to_ai_sources(sources)
+    ai_sources = _to_ai_sources(sources, session=session, family_id=family_id)
     parser = _ai_parser() if ai_sources else None
     if parser is not None:
         try:

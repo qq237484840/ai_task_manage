@@ -6,6 +6,7 @@
 - API-M001-011 `POST /api/v1/tasks/{task_id}/status`（状态推进）
 - API-M001-018 `POST /api/v1/tasks/{task_id}/parse-confirmation`（解析结果确认，显式/隐式）
 - API-M001-021 `POST /api/v1/tasks/{task_id}/belong-date`（手工改归属日）
+- API-M001-022 `POST /api/v1/tasks/{task_id}/reparse`（任务重新解析；`CR-005`，未确认任务重跑链路 T）
 
 薄端点：参数与 DTO 映射，业务全部下沉 Service（Router 不做业务逻辑）。
 """
@@ -141,4 +142,17 @@ def change_belong_date(
         operator="student" if ctx.is_student else "family",
         scope_student_id=_scope(ctx),
         resolver=resolver,
+    )
+
+
+@router.post("/{task_id}/reparse", response_model=TaskDTO)
+def reparse_task(
+    task_id: str,
+    ctx: AuthContext = Depends(current_context),
+    session: Session = Depends(get_session),
+    resolver: DefaultWindowResolver = Depends(get_window_resolver),
+):
+    """重新解析（`API-M001-022` / `CR-005`）：未确认任务重跑链路 T；`confirmed` → 409。"""
+    return TaskService.reparse(
+        session, ctx.family_id, task_id, scope_student_id=_scope(ctx), resolver=resolver
     )

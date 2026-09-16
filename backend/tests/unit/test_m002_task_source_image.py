@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import sys
-import types
 from pathlib import Path
 
 import pytest
@@ -124,33 +123,24 @@ def test_provide_missing_file_returns_none(world, factory, image_root):
         assert provide_task_source_image(s, world["family_id_a"], PHOTO_ID) is None
 
 
-# ---------------------------------------------------------------- 注册契约（假 M001 模块）
-def _install_fake_m001_provider(monkeypatch):
-    """注入假的 M001 `image_provider` 模块（仅验证回调注册契约；无业务逻辑）。"""
-    mod = types.ModuleType("app.modules.m001.services.image_provider")
-    mod._task_spec_image_provider = None  # type: ignore[attr-defined]
+# ---------------------------------------------------------------- 注册契约（真实 M001 槽）
+def test_register_is_idempotent_and_self_healing():
+    """注册：首次成功 → 幂等短路 → 槽位清空后**可自愈**（用**真实** M001 槽位断言，无桩）。"""
+    from app.modules.m001.services import image_provider as m001_ip
 
-    def register_task_spec_image_provider(fn):  # noqa: ANN001 - 契约签名占位
-        mod._task_spec_image_provider = fn  # type: ignore[attr-defined]
+    original = m001_ip._task_spec_image_provider  # noqa: SLF001 - 契约槽位断言
+    try:
+        assert ensure_task_spec_image_provider_registered() is True
+        assert m001_ip._task_spec_image_provider is provide_task_source_image  # noqa: SLF001
 
-    mod.register_task_spec_image_provider = register_task_spec_image_provider  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "app.modules.m001.services.image_provider", mod)
-    return mod
+        assert ensure_task_spec_image_provider_registered() is True  # 幂等短路（不重复写）
+        assert m001_ip._task_spec_image_provider is provide_task_source_image  # noqa: SLF001
 
-
-def test_register_is_idempotent_and_self_healing(monkeypatch):
-    """注册：首次成功 → 幂等短路 → 槽位清空后可自愈。"""
-    mod = _install_fake_m001_provider(monkeypatch)
-
-    assert ensure_task_spec_image_provider_registered() is True
-    assert mod._task_spec_image_provider is provide_task_source_image  # type: ignore[attr-defined]
-
-    assert ensure_task_spec_image_provider_registered() is True  # 幂等短路
-    assert mod._task_spec_image_provider is provide_task_source_image  # type: ignore[attr-defined]
-
-    mod._task_spec_image_provider = None  # type: ignore[attr-defined]  # 模拟首次导入时 M001 未就绪
-    assert ensure_task_spec_image_provider_registered() is True  # 启动期自愈
-    assert mod._task_spec_image_provider is provide_task_source_image  # type: ignore[attr-defined]
+        m001_ip.register_task_spec_image_provider(None)  # 模拟「首次导入时 M001 侧未就绪」
+        assert ensure_task_spec_image_provider_registered() is True  # 启动期自愈
+        assert m001_ip._task_spec_image_provider is provide_task_source_image  # noqa: SLF001
+    finally:
+        m001_ip.register_task_spec_image_provider(original)  # 恢复现场，避免污染其它用例
 
 
 def test_register_skips_when_m001_unavailable(monkeypatch):

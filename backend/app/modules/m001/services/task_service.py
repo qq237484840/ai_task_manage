@@ -175,7 +175,7 @@ class TaskService:
         TaskRepo.add_sources(session, task.task_id, norm_sources)
         # 5) 链路 T 解析（失败/不可用 → 保持 placeholder，不阻断事实层）
         parser_fn = parser or default_parser
-        drafts = parser_fn(norm_sources, session=session)
+        drafts = parser_fn(norm_sources, session=session, family_id=family_id)
         if drafts:
             TaskRepo.append_contents(session, task.task_id, _group_by_subject(drafts))
             if task.spec_status == "placeholder":
@@ -315,6 +315,55 @@ class TaskService:
             student_id=task.student_id,
             task_id=task.task_id,
             detail=f"source={source}",
+        )
+        return build_detail(session, task)
+
+    @staticmethod
+    def reparse(
+        session: Session,
+        family_id: str,
+        task_id: str,
+        *,
+        scope_student_id: str | None = None,
+        resolver: DefaultWindowResolver | None = None,
+        parser: Parser | None = None,
+    ) -> TaskDTO:
+        """重跑链路 T（`API-M001-022` / `CR-005`；契约 §2.4 **逐字实现**）。
+
+        - `confirmed` → `409 spec_confirmed`（不执行）；
+        - 解析成功：`placeholder` → 写入内容项 → `parsed`；`parsed`（未确认）→ **整体替换**既有内容项；
+        - 解析无草稿 / AI 不可用 → **不改动**既有内容项与 `spec_status`（**不清空**、不报错）；
+        - 图片源转发受 `CR-005` 硬约束（**仅真实 Vision**；见 `task_parser._vision_is_real`）。
+        """
+        task = _resolve_scope_task(session, family_id, task_id, scope_student_id)
+        if task.spec_status == "confirmed":
+            raise ConflictError("任务解析已确认（spec_confirmed）")
+        sources = [
+            {"kind": s.kind, "text_content": s.text_content, "photo_id": s.photo_id}
+            for s in TaskRepo.list_sources(session, task.task_id)
+        ]
+        parser_fn = parser or default_parser
+        drafts = parser_fn(sources, session=session, family_id=family_id)
+        replaced = False
+        if drafts:
+            items = _group_by_subject(drafts)
+            if task.spec_status == "parsed":
+                TaskRepo.replace_contents(session, task.task_id, items)  # 未确认 → 整体替换
+                replaced = True
+            else:
+                TaskRepo.append_contents(session, task.task_id, items)
+            if task.spec_status == "placeholder":
+                TaskRepo.set_spec_status(session, task, "parsed")
+        resolver = resolver or get_default_resolver()
+        TaskAggregationService.ensure_group(
+            session, family_id, task.student_id, task.category, task.belong_date, resolver=resolver
+        )
+        audit_event(
+            "task_reparsed",
+            family_id=family_id,
+            student_id=task.student_id,
+            task_id=task.task_id,
+            detail=f"parsed={bool(drafts)} replaced={replaced} spec_status={task.spec_status}",
         )
         return build_detail(session, task)
 

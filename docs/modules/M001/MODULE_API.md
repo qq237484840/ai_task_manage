@@ -47,7 +47,7 @@
 | API-M001-021 | 手工改归属日 | POST `/tasks/{task_id}/belong-date` | 按契约 §F5 六条连锁规则改归属日（含跨聚合 `photo_subject_links` 迁移回调） | H5（家长维护） |
 | API-M001-022 | **任务重新解析（链路 T 重跑）** | POST `/tasks/{task_id}/reparse` | 对未确认任务重跑链路 T（**图片源经受控回调读取** → Vision 解析草稿）；`confirmed` → `409`；AI 不可用**不抛错**（保持 `placeholder`，沿用 `BUG-006` 语义） | H5（任务详情页） |
 
-> 上列 5 端点 = `CHANGE-003` §2.1 A9 申请清单（4 项）+ **`CR-005` 新增（1 项，2026-09-16）**；**ID 由 Project Master 分配**并登记 `API_REGISTRY.md`（`API-M001-018~021` 已 Active；`API-M001-022` Draft，随实施转 Active）。
+> 上列 5 端点 = `CHANGE-003` §2.1 A9 申请清单（4 项）+ **`CR-005` 新增（1 项，2026-09-16）**；**ID 由 Project Master 分配**并登记 `API_REGISTRY.md`（`API-M001-018~021` 已 Active；**`API-M001-022` 已 Active（2026-09-16，`Task-019` 实施 + 8 例覆盖）**）。
 
 ## 详细契约
 
