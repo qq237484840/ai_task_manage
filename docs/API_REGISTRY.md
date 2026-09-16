@@ -11,6 +11,8 @@
 
 ## API 登记表
 
+> **2026-09-16（`CR-005` Approved）**：M001 契约 **v0.2.0 → v0.3.0** —— 新增 **`API-M001-022`（任务重新解析，`POST /api/v1/tasks/{task_id}/reparse`）**（状态 **Draft**，随实施转 Active）；M002 契约 **v0.4.1 → v0.4.2** —— **内部服务接口 +1**（`provide_task_source_image`，**不新增对外 API ID**）。均**非破坏性**。
+
 | API ID | 名称 | Owner 模块 | 版本 | 状态 | 方法/路径(摘要) | 详细定义位置 |
 | --- | --- | --- | --- | --- | --- | --- |
 | API-M001-001 | 注册家庭账号 | M001 | v0.1 | Frozen | POST `/api/v1/family/register` | `docs/modules/M001/MODULE_API.md` |
@@ -34,6 +36,7 @@
 | API-M001-019 | 聚合任务列表 | M001 | v0.2.0 | Active | GET `/api/v1/task-groups` | `docs/modules/M001/MODULE_API.md` |
 | API-M001-020 | 聚合任务详情 | M001 | v0.2.0 | Active | GET `/api/v1/task-groups/{group_id}` | `docs/modules/M001/MODULE_API.md` |
 | API-M001-021 | 手工改归属日 | M001 | v0.2.0 | Active | POST `/api/v1/tasks/{task_id}/belong-date` | `docs/modules/M001/MODULE_API.md` |
+| API-M001-022 | **任务重新解析（链路 T 重跑）** | M001 | v0.3.0 | **Draft**（随实施转 Active） | POST `/api/v1/tasks/{task_id}/reparse` | `docs/modules/M001/MODULE_API.md` |
 | API-M002-001 | 创建上传批次 | M002 | v0.3.0 | Frozen | POST `/api/v1/upload-batches` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-002 | 上传作业照片 | M002 | v0.3.0 | Frozen | POST `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-003 | 照片列表/待处理队列 | M002 | v0.3.0 | Frozen | GET `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |

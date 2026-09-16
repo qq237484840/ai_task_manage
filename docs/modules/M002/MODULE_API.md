@@ -1,6 +1,6 @@
 # M002 模块 API（权威源）—— 作业图片采集与归属
 
-- **状态**：**v0.4.1（Frozen，用户批准 2026-09-10；v0.4.1 = `CR-004` Applied，仅 `API-M002-007` 响应体收敛，非破坏性）** —— v0.4.0 按 `CR-003`/`ADR-013`/`ADR-014` 修订（入口 `kind`、N:N 挂接、逐张复核、门控、完成分析）。既有 `API-M002-001/002/003/005` 修订；新增端点 API ID **已由 PM 分配 = `API-M002-007~011`**（`API_REGISTRY.md`；**已 Active**，`Task-008` 实施 + PM 复验）；前版 v0.4.0 Frozen（2026-09-10）、v0.3.0 Frozen（2026-09-08）
+- **状态**：**v0.4.2（`CR-005` Approved，用户批准 2026-09-16）** —— **v0.4.2 = 内部服务接口 +1（`provide_task_source_image`，受控提供布置单/作业图片供 M001 链路 T 解析）；非破坏性，对外端点不变**；v0.4.1（Frozen，用户批准 2026-09-10；= `CR-004` Applied，仅 `API-M002-007` 响应体收敛，非破坏性） —— v0.4.0 按 `CR-003`/`ADR-013`/`ADR-014` 修订（入口 `kind`、N:N 挂接、逐张复核、门控、完成分析）。既有 `API-M002-001/002/003/005` 修订；新增端点 API ID **已由 PM 分配 = `API-M002-007~011`**（`API_REGISTRY.md`；**已 Active**，`Task-008` 实施 + PM 复验）；前版 v0.4.0 Frozen（2026-09-10）、v0.3.0 Frozen（2026-09-08）
 - **REST 前缀**：`/api/v1`；**认证**：全部接口需 `Authorization: Bearer <token>`
 - **主体**（ADR-009/ACR-001）：`family`（家长，可代传任一本家学生，带 `student_id`）；`student`（仅本人，`student_id` 忽略/强制本人）
 - **错误体统一**：`ErrorResponse { "code", "message", "request_id" }`（HTTP 映射见契约 Failure Behavior）
@@ -174,6 +174,7 @@
 | `PhotoQueryService` | `list_confirmed_links(family_id, group_subject_id) -> list[PhotoDTO]` | 某聚合子任务的已确认挂接照片（分析取图） | M002 内部、M001（计数） |
 | `PhotoQueryService` | `count_confirmed_links(family_id, group_subject_id) -> int` | 子任务已确认挂接照片数（上限校验 / 证据齐备判断） | M001、M002 |
 | `PhotoLinkService` | `migrate_links(family_id, task_id, old_group_key, new_group_key) -> None` | **改归属日时迁移挂接目标**（M001 在事务中回调，A8/R6） | M001（反向调用） |
+| `provide_task_source_image` | `provide_task_source_image(family_id: str, photo_id: str) -> TaskSourceImage \| None`（`TaskSourceImage = {mime: str, abs_path: str}`） | **受控提供布置单/作业图片**供 M001 链路 T 解析（`API-M001-022`）；按 `family_id` 校验归属（查无 → `None`）；**路径仅限同机进程内消费，不外发任何 API 响应**（`CR-005`，v0.4.2） | M001（反向消费：经 M001 回调槽 `register_task_spec_image_provider` 注册） |
 
 > 说明：
 > - `PhotoDTO` 含本地文件路径（original_path/normalized_path）——**仅限同机进程内消费**；对外一律 API-M002-004，禁止外发路径

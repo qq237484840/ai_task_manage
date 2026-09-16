@@ -1,6 +1,6 @@
 # M001 模块 API（权威源）—— 作业任务管理
 
-- **状态**：**v0.2.0（Frozen，用户批准 2026-09-10）** —— 按 `CR-003`/`ADR-013` 修订（任务创建改输入源解析、新增聚合查询端点）。API-M001-001~006/012 保持既有契约；**任务相关端点（007~011）与新增端点为本次修订面**；新增端点 API ID **已由 PM 分配 = `API-M001-018~021`**（`API_REGISTRY.md`，Draft，随 `Task-007` 实施转 Active）；前版 v0.1.2 定稿（2026-09-08）
+- **状态**：**v0.3.0（`CR-005` Approved，用户批准 2026-09-16；v0.2.0 为用户批准基线）** —— **v0.3.0 新增 `API-M001-022`（任务重新解析）+ 内部回调槽「布置单图片源读取」（`CR-005`，非破坏性；既有端点语义不变）**；按 `CR-003`/`ADR-013` 修订（任务创建改输入源解析、新增聚合查询端点）。API-M001-001~006/012 保持既有契约；**任务相关端点（007~011）与新增端点为本次修订面**；新增端点 API ID **已由 PM 分配 = `API-M001-018~021`**（`API_REGISTRY.md`，Draft，随 `Task-007` 实施转 Active）；前版 v0.1.2 定稿（2026-09-08）
 - **REST 前缀**：`/api/v1`；**认证**：除注册/登录外均需 `Authorization: Bearer <token>`
 - **两级主体（ACR-001/ADR-009）**：`family`（家长，Bearer 来自 `/family/login`）= 本家任意学生可操作 + 兜底；`student`（学生子账号，Bearer 来自 `/student/login`）= **仅本人数据**（URL 传参他人 → 404 防探测；管理类家长专属操作 → 403）。两类 token 均可被既有资源端点识别，`family_id` 为过滤底线
 - **错误体统一**：`ErrorResponse { "code": string, "message": string, "request_id": string }`（HTTP 状态映射见契约 Failure Behavior）
@@ -45,8 +45,9 @@
 | API-M001-019 | 聚合任务列表 | GET `/task-groups` | 按 `week_index`/`student_id`/`window_type` 查询聚合（「作业」列表：周次分组 + 周末聚合展示） | H5（M002 作业列表） |
 | API-M001-020 | 聚合任务详情 | GET `/task-groups/{group_id}` | 聚合任务 + 聚合学科子任务（**★判定单元**）详情 | H5 / M002 |
 | API-M001-021 | 手工改归属日 | POST `/tasks/{task_id}/belong-date` | 按契约 §F5 六条连锁规则改归属日（含跨聚合 `photo_subject_links` 迁移回调） | H5（家长维护） |
+| API-M001-022 | **任务重新解析（链路 T 重跑）** | POST `/tasks/{task_id}/reparse` | 对未确认任务重跑链路 T（**图片源经受控回调读取** → Vision 解析草稿）；`confirmed` → `409`；AI 不可用**不抛错**（保持 `placeholder`，沿用 `BUG-006` 语义） | H5（任务详情页） |
 
-> 上列 4 端点 = `CHANGE-003` §2.1 A9 申请清单；**ID 由 Project Master 于 2026-09-10 分配**并登记 `API_REGISTRY.md`（状态 Draft，随实施转 Active）。
+> 上列 5 端点 = `CHANGE-003` §2.1 A9 申请清单（4 项）+ **`CR-005` 新增（1 项，2026-09-16）**；**ID 由 Project Master 分配**并登记 `API_REGISTRY.md`（`API-M001-018~021` 已 Active；`API-M001-022` Draft，随实施转 Active）。
 
 ## 详细契约
 
@@ -167,6 +168,19 @@
 - 语义：按契约 §F5 六条连锁规则执行（单事务）：重算快照 → 迁移聚合 FK（目标无则建）→ 源聚合空则删 → **`conclusion_status=confirmed` 拒绝（409）** → 审计 → **跨聚合迁移同步 `photo_subject_links` 挂接目标**（M002 内部接口回调）
 - Response `200 TaskDTO`（含新 `belong_date`/`week_index`/`window_type`）
 - 副作用：可能创建/删除聚合、触发 M002 挂接迁移；审计留痕
+
+### API-M001-022 任务重新解析（**`CR-005` 新增，v0.3.0**）
+- `POST /api/v1/tasks/{task_id}/reparse`（Bearer；family = 本家任意学生，student = 仅本人）
+- 语义：对 `spec_status != confirmed` 的任务**重跑链路 T**；**与任务状态（`draft`/`published`/`closed`）无关**（仅可能写 `task_contents` / `spec_status`）
+- **内容项处理（幂等，必须逐字实现）**：
+  - `placeholder` + 解析成功 → 写入内容项 → `spec_status=parsed`
+  - `parsed`（未确认）+ 解析成功 → **整体替换**既有内容项（以本次结果为准）+ 审计
+  - 解析**无草稿 / AI 不可用** → **不改动**既有内容项与 `spec_status`（**不得清空**、不报错）
+  - `confirmed` → **`409 spec_confirmed`**（不执行）
+- **图片源读取**：M001 经内部回调槽（见下）向 M002 受控取图（`abs_path`）；**仅当 Vision Provider 为真实（非 Mock / 非 degraded）时**才转发图片源，否则不转发（防伪造草稿）
+- Response `200 TaskDTO`（与 `GET /tasks/{task_id}` 同构的当前态）
+- Errors：`401`；`404`（任务不存在 / 越权，对外 404）；`409 spec_confirmed`；`500`
+- 副作用：可能写入/替换 `task_contents`、置 `spec_status`、`ensure_group`（既有幂等聚合）、**DATA-009 落条**（`capability=task_spec_parse`）
 - Errors：`409`（已被完成分析消费 / 非法目标日）；`404` 任务不属本家；`422` 校验失败
 
 ## ACR-001 新增端点详细契约（API-M001-013~017）
@@ -204,6 +218,12 @@
 ## 内部服务接口（进程内 Python Interface，供同进程模块）
 
 > 供 M002/M004/M005/M007 引用；实现由 AGENT-M001 提供，方法签名在契约批准后冻结。所有方法须传 `family_id` 上下文，越权抛 `PermissionDenied`。
+>
+> **`CR-005` 新增（v0.3.0，2026-09-16）—— 布置单图片源读取（回调槽；M001 定义 / M002 注册实现）**：
+> - `register_task_spec_image_provider(fn)`：M001 侧注册入口（槽 `_task_spec_image_provider`）；**与 `register_links_migration_hook` 同模式**（M001 定义槽 → M002 **导入期**注册 → `main.py` **启动期**幂等自愈）。
+> - `fn(family_id: str, photo_id: str) -> TaskSourceImage | None`，其中 `TaskSourceImage = {mime: str, abs_path: str}`（**受控本地路径：仅限同机进程内读取，不外发任何 API 响应**）。
+> - M001 调用前置：**仅当 Vision Provider 为真实（非 Mock / 非 degraded）**时才转发图片源；provider 未注册 / 返回 `None` / 归属校验失败 → **不转发该源**（保持 `placeholder`，**不伪造草稿**）。
+> - 实现方：`AGENT-M002`（`provide_task_source_image`，按 `family_id` 校验归属）。
 
 | 接口 | 方法 | 说明 | 消费者 |
 | --- | --- | --- | --- |
@@ -230,6 +250,7 @@
 | M001-A2 | 聚合任务列表 | GET `/api/v1/task-groups` | 「作业」列表（周次分组 + 周末聚合） | **API-M001-019** |
 | M001-A3 | 聚合任务详情 | GET `/api/v1/task-groups/{group_id}` | 聚合 + 判定单元详情 | **API-M001-020** |
 | M001-A4 | 手工改归属日 | POST `/api/v1/tasks/{task_id}/belong-date` | §F5 连锁规则改归属日 | **API-M001-021** |
+| M001-A5 | 任务重新解析（链路 T 重跑） | POST `/api/v1/tasks/{task_id}/reparse` | 未确认任务重跑解析（**图片源经受控回调 → Vision**；失败不抛错、不清空内容项） | **API-M001-022**（`CR-005` Approved 2026-09-16；Draft，随实施转 Active） |
 
 **既有端点修订（不新增 ID）**：`API-M001-007`（POST `/tasks` → 上传输入源 + AI 解析）、`API-M001-008`（列表按 `belong_date`/`week_index`）、`API-M001-009`（详情返回内容项/输入源，去掉 `items`）、`API-M001-010`（更新面收窄，归属字段改走 M001-A4）。`API-M001-001~006`、`API-M001-011~017` 语义不变。
 
