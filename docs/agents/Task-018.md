@@ -37,7 +37,7 @@ class TaskSourceImage:
     mime: str
     abs_path: str
 
-def provide_task_source_image(family_id: str, photo_id: str) -> TaskSourceImage | None
+def provide_task_source_image(session, family_id: str, photo_id: str) -> TaskSourceImage | None
 ```
 
 - 语义：按 `family_id` 查照片（**归属校验**：不属于该家庭 / 不存在 → `None`）；解析 `normalized_path` 的绝对路径（复用 `ImageStore(settings.image_root).abs_path(...)`，`get_m002_settings()`）；
@@ -70,9 +70,60 @@ def provide_task_source_image(family_id: str, photo_id: str) -> TaskSourceImage 
 - [ ] §5 七段式报告完成
 - [ ] **不伪造**：不可得证据须停下回报并标注
 
-## 5. 执行方报告（七段式，执行后填写）
+## 5. 执行方报告（七段式）
 
-> ① 状态 ｜ ② 改动文件清单 + diff 摘要 ｜ ③ 用例证据原文（归属校验 / 幂等自愈 / 不阻断）｜ ④ 全量回归与用例数 ｜ ⑤ 写区合规自证（双证）｜ ⑥ 契约核对（内部接口签名与 `MODULE_API.md` 逐字对齐）｜ ⑦ 遗留 + 需 PM 裁决项
+> **执行者说明**：本任务由 **PM 代执行**（当前 IDE 无具备写权限的执行 subagent）→ 不构成独立第三方复核，限制如实标注；证据均为可复现命令 + 原文输出。
+
+### ① 状态
+
+**完成**。`provide_task_source_image`（含**归属校验 / 复用调用方 `session` / 只读 / 失败返回 `None`**）、`ensure_task_spec_image_provider_registered`（幂等 + 自愈 + 不阻断）、导入期注册与 `main.py` 启动期自愈（1 行）全部落地；**实施期发现并修正契约签名**（补 `session`，见 §⑥）；新增 **6 例**全绿；全量回归 **257 / 0 failed / 0 errors / 0 skipped**（基线 251 + 6）。
+
+### ② 改动文件清单 + diff 摘要
+
+| 文件 | 性质 | 改动摘要 |
+| --- | --- | --- |
+| `backend/app/modules/m002/clients/task_client.py` | 改（+79 行） | 新增 `TaskSourceImage`（frozen dataclass：`mime` / `abs_path`）+ **`provide_task_source_image(session, family_id, photo_id)`**（`PhotoRepository.get_by_id` 归属校验 → `ImageStore(settings.image_root).abs_path(...)` → 存在性校验；查无/异常 → `None` + `logger.warning`；**只读**）+ **`ensure_task_spec_image_provider_registered()`**（与 `ensure_links_migration_hook_registered` 逐字对齐：幂等短路 / 自愈 / M001 未就绪 → `False` 不抛）+ 导入期自动注册 `_register_task_spec_image_provider()` |
+| `backend/app/main.py` | 改（+6/−1） | import 增补 `ensure_task_spec_image_provider_registered` + 启动期幂等自愈调用 1 行（紧邻既有 hook 自愈，保持「导入期 + 启动期」双保险） |
+| `backend/tests/unit/test_m002_task_source_image.py` | **新增（6 例）** | 正常受控路径（存在且在受控根内）/ **跨家庭 → `None`** / 未知照片 → `None` / 文件缺失 → `None` / 注册幂等 + 自愈 / M001 未就绪 → `False` 不抛 |
+
+### ③ 用例证据原文
+
+```
+$ pytest tests/unit/test_m002_task_source_image.py -q --no-header --tb=short
+......                                                                   [100%]
+EXIT=0
+```
+
+**调试记录（如实）**：首轮 3 例失败 = `sqlite3.IntegrityError: FOREIGN KEY constraint failed`（直接插 `photos` 行但缺 `upload_batches` 行）→ 修正为**批次经真实 API** `POST /api/v1/upload-batches` 创建（照片行走真实仓储、真实 `ImageStore` 落文件）→ 6 例全绿。**未**以桩替代 FK 相关链路。
+
+### ④ 全量回归与用例数
+
+```
+$ pytest --no-header -q --tb=short --junitxml=../.pm_t018.xml
+tests=257 failures=0 errors=0 skipped=0
+PYTEST_EXIT=0
+```
+`X..X` = 既有 `BUG-003`/`BUG-004` 哨兵自然 XPASS；**257 = 基线 251 + 本任务 6**。
+
+### ⑤ 写区合规自证（双证）
+
+- **`git status --porcelain`**：`M backend/app/modules/m002/clients/task_client.py`、`M backend/app/main.py`、`?? backend/tests/unit/test_m002_task_source_image.py`（均写区内）；**未出现** `backend/app/modules/m001/**`、`backend/app/core/ai/**`、`frontend/**`、`docs/**`。
+- **mtime 审计**：写区 = `task_client.py` **09-16 10:19:09**、`main.py` **09-16 10:19:10**；禁改区 = `m001/services/task_parser.py` **09-14 15:48:34**、`core/ai/errors.py` **09-14 15:48:34** → **均早于写区 → 零写入成立**。
+- `read_lints` = 0。
+
+### ⑥ 契约逐字核对 + **实施期修正（PM 裁决）**
+
+- **修正项**：原契约签名 `provide_task_source_image(family_id, photo_id)` → **补入 `session`**（`(session, family_id, photo_id)`）。
+  依据：`backend/app/core/database.py:3-5` 明文「**不在此处持有隐式全局库连接**；所有引擎访问均来自应用装配或测试 fixture」→ provider **无法自建会话**，必须复用调用方事务；且与既有 M001↔M002 内部接口惯例（`list_groups(session, family_id, ...)`）一致。
+- **已同步修订**：`docs/modules/M002/MODULE_API.md`（内部接口表）、`docs/modules/M001/MODULE_API.md`（回调槽说明）、`docs/changes/CR-005.md`（§2.3 + 「实施期修正」记录）、`Task-018 §3.1`、`Task-019 §3.2`。属**签名完善（非破坏性；契约刚发布、尚无消费者）**。
+- 实现与契约**逐字对齐**：返回 `TaskSourceImage{mime, abs_path}`；路径仅进程内消费（**不进任何 API 响应**）。
+
+### ⑦ 遗留 + 需 PM 裁决项
+
+1. **当前注册返回 `False`（预期）**：M001 侧 `image_provider` 由 `Task-019` 创建 → 此刻导入期注册 `ImportError` → `False` + warning（**不阻断**，符合设计）；`Task-019` 完成后**自动生效**。
+2. 「幂等 / 自愈」用例以 **`sys.modules` 注入的假 M001 模块**验证回调契约（docstring 已标注报备）；建议 `Task-019` 完成后在 `Task-021` 验收中补一条**真实** M001 槽断言。
+3. 真实 Vision 端到端不在本任务（本任务只提供**受控读取能力**）→ 待 `Task-019` + `Task-021`。
+4. 需 PM：`Task-018` → 完成收口；`API-M001-022` 仍为 Draft（待 `Task-019` 实施后转 Active）。
 
 ## 6. 不在本任务范围
 

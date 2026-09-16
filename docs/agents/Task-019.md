@@ -46,7 +46,7 @@
 1. 文本源：**行为不变**（回归零影响）；
 2. 图片源（`kind == "image"` 且有 `photo_id`）：
    - **前置判据**：仅当 **Vision Provider 为真实**时才转发 —— 用 `core/ai` 公开装配结果判定（`get_ai_service()` 或 `build_providers()` 的 vision `degraded is False` **且** `reason == "real"`）；**禁止**硬编码模型名；
-   - 经 `_task_spec_image_provider(family_id, photo_id)` 取 `{mime, abs_path}` → 构造 `ImageInput(mime=…, path=…, image_id=photo_id)` → `SourceInput.image_of(...)`；
+   - 经 `_task_spec_image_provider(session, family_id, photo_id)` 取 `{mime, abs_path}` → 构造 `ImageInput(mime=…, path=…, image_id=photo_id)` → `SourceInput.image_of(...)`；**`session` 复用调用方事务**（`_to_ai_sources` 需接收 `session`，由 `default_parser` 传入）；
    - **槽未注册 / 返回 `None` / 判据不满足** → **不转发该源**（保持 `placeholder`，**不伪造**）；
    - `family_id` 来源：解析调用链已有的 `family_id` 上下文（`default_parser` 签名若需扩展，**仅允许**新增带默认值的关键字参数，并在 §5 说明 —— 兼容既有调用点）。
 

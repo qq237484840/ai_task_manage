@@ -458,3 +458,82 @@ def _register_links_migration_hook() -> None:
 
 
 _register_links_migration_hook()
+
+
+# ---------------------------------------------------------------- CR-005：布置单图片源读取
+@dataclass(frozen=True)
+class TaskSourceImage:
+    """供 M001 链路 T 解析的布置单/作业图片（`CR-005` / M002 v0.4.2）。
+
+    `abs_path` 为**受控本地路径**：仅限同机进程内读取，绝不进入任何 API 响应。
+    """
+
+    mime: str
+    abs_path: str
+
+
+def provide_task_source_image(
+    session: Session, family_id: str, photo_id: str
+) -> TaskSourceImage | None:
+    """受控提供布置单图片（`CR-005`）：M001 经回调槽消费，**复用调用方 `session`**。
+
+    - **归属校验**：非本家庭 / 照片不存在 → `None`（不越权、不抛）；
+    - **只读**：不改动照片状态与 DB，不写审计（读取方=M001 链路 T，无 API 面暴露）；
+    - 路径解析失败 / 文件缺失 → `None`（记 warning，交 M001 侧按「不转发」降级）。
+    """
+    from app.modules.m002.repository.photo_repository import PhotoRepository
+
+    try:
+        photo = PhotoRepository.get_by_id(session, family_id, photo_id)
+        if photo is None:
+            return None
+        from app.modules.m002.config import get_m002_settings
+        from app.modules.m002.services.image_store import ImageStore
+
+        abs_path = ImageStore(get_m002_settings().image_root).abs_path(photo.normalized_path)
+        if not abs_path.exists():
+            logger.warning("task source image 文件缺失（photo=%s）", photo_id)
+            return None
+        return TaskSourceImage(mime=photo.original_mime, abs_path=str(abs_path))
+    except Exception as exc:  # noqa: BLE001 - 取图失败不阻断链路 T（M001 侧按「不转发」处理）
+        logger.warning("task source image unavailable (photo=%s): %s", photo_id, exc)
+        return None
+
+
+def ensure_task_spec_image_provider_registered() -> bool:
+    """幂等注册「布置单图片源读取」回调到 M001 槽位（`CR-005`）。
+
+    由 M002 模块导入期自动调用一次；`create_app()` 启动期可**再次**调用以幂等自愈
+    （覆盖「首次导入时 M001 侧 `image_provider` 尚未就绪」的场景）。
+
+    返回语义（与 `ensure_links_migration_hook_registered` 对齐）：
+    - M001 槽位已是本函数 → `True`（短路，不重复写）；
+    - 本次注册成功 → `True`；
+    - M001 侧不可用（`ImportError`）或注册抛错 → `False`（记 warning，**不抛、不阻断**）。
+    """
+    try:
+        from app.modules.m001.services import image_provider as _ip
+        from app.modules.m001.services.image_provider import (
+            register_task_spec_image_provider,
+        )
+    except ImportError:  # M001 侧未就绪（唯一预期情形）
+        logger.warning("M001 图片源读取槽位未就绪，布置单图片回调注册跳过", exc_info=True)
+        return False
+
+    if getattr(_ip, "_task_spec_image_provider", None) is provide_task_source_image:
+        return True  # 已注册（幂等短路，不重复写）
+
+    try:
+        register_task_spec_image_provider(provide_task_source_image)
+    except Exception:  # noqa: BLE001 - 注册失败不阻断导入/启动
+        logger.warning("注册 M001 布置单图片源读取回调失败", exc_info=True)
+        return False
+    return True
+
+
+def _register_task_spec_image_provider() -> None:
+    """模块导入期自动注册一次（薄封装；保持既有「导入即注册」行为）。"""
+    ensure_task_spec_image_provider_registered()
+
+
+_register_task_spec_image_provider()

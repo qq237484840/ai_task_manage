@@ -221,7 +221,7 @@
 >
 > **`CR-005` 新增（v0.3.0，2026-09-16）—— 布置单图片源读取（回调槽；M001 定义 / M002 注册实现）**：
 > - `register_task_spec_image_provider(fn)`：M001 侧注册入口（槽 `_task_spec_image_provider`）；**与 `register_links_migration_hook` 同模式**（M001 定义槽 → M002 **导入期**注册 → `main.py` **启动期**幂等自愈）。
-> - `fn(family_id: str, photo_id: str) -> TaskSourceImage | None`，其中 `TaskSourceImage = {mime: str, abs_path: str}`（**受控本地路径：仅限同机进程内读取，不外发任何 API 响应**）。
+> - `fn(session, family_id: str, photo_id: str) -> TaskSourceImage | None`，其中 `TaskSourceImage = {mime: str, abs_path: str}`（**受控本地路径：仅限同机进程内读取，不外发任何 API 响应**）；**`session` 复用调用方事务**（`core/database.py` 不持有隐式全局库连接，禁止 provider 自建引擎/连接）。
 > - M001 调用前置：**仅当 Vision Provider 为真实（非 Mock / 非 degraded）**时才转发图片源；provider 未注册 / 返回 `None` / 归属校验失败 → **不转发该源**（保持 `placeholder`，**不伪造草稿**）。
 > - 实现方：`AGENT-M002`（`provide_task_source_image`，按 `family_id` 校验归属）。
 

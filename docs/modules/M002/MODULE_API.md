@@ -174,7 +174,7 @@
 | `PhotoQueryService` | `list_confirmed_links(family_id, group_subject_id) -> list[PhotoDTO]` | 某聚合子任务的已确认挂接照片（分析取图） | M002 内部、M001（计数） |
 | `PhotoQueryService` | `count_confirmed_links(family_id, group_subject_id) -> int` | 子任务已确认挂接照片数（上限校验 / 证据齐备判断） | M001、M002 |
 | `PhotoLinkService` | `migrate_links(family_id, task_id, old_group_key, new_group_key) -> None` | **改归属日时迁移挂接目标**（M001 在事务中回调，A8/R6） | M001（反向调用） |
-| `provide_task_source_image` | `provide_task_source_image(family_id: str, photo_id: str) -> TaskSourceImage \| None`（`TaskSourceImage = {mime: str, abs_path: str}`） | **受控提供布置单/作业图片**供 M001 链路 T 解析（`API-M001-022`）；按 `family_id` 校验归属（查无 → `None`）；**路径仅限同机进程内消费，不外发任何 API 响应**（`CR-005`，v0.4.2） | M001（反向消费：经 M001 回调槽 `register_task_spec_image_provider` 注册） |
+| `provide_task_source_image` | `provide_task_source_image(session: Session, family_id: str, photo_id: str) -> TaskSourceImage \| None`（`TaskSourceImage = {mime: str, abs_path: str}`） | **受控提供布置单/作业图片**供 M001 链路 T 解析（`API-M001-022`）；按 `family_id` 校验归属（查无 → `None`）；**复用调用方事务 `session`**（`core/database.py` 不持有隐式全局库连接）；**路径仅限同机进程内消费，不外发任何 API 响应**（`CR-005`，v0.4.2） | M001（反向消费：经 M001 回调槽 `register_task_spec_image_provider` 注册） |
 
 > 说明：
 > - `PhotoDTO` 含本地文件路径（original_path/normalized_path）——**仅限同机进程内消费**；对外一律 API-M002-004，禁止外发路径

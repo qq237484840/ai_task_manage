@@ -65,7 +65,10 @@ def create_app(settings: Settings | None = None, *, mount_frontend: bool = True)
     )
     # 跨模块回调注册的唯一通道（M001 不反向 import M002）：M002 导入期已自动注册一次，
     #   此处启动期再幂等调用一次自愈（覆盖「首次导入时 M001 聚合层尚未就绪」的场景）
-    from app.modules.m002.clients.task_client import ensure_links_migration_hook_registered
+    from app.modules.m002.clients.task_client import (
+        ensure_links_migration_hook_registered,
+        ensure_task_spec_image_provider_registered,
+    )
 
     api_prefix = "/api/v1"
     app.include_router(family.router, prefix=api_prefix)
@@ -83,6 +86,9 @@ def create_app(settings: Settings | None = None, *, mount_frontend: bool = True)
     # M001→M002 挂接迁移回调：启动期幂等自愈（「导入期 + 启动期」双保险；
     #   未就绪时仅 warning，不阻断装配）
     ensure_links_migration_hook_registered()
+    # M001 布置单图片源读取回调（CR-005 / Task-018）：启动期幂等自愈（「导入期 + 启动期」双保险；
+    #   M001 侧 image_provider 未就绪时仅 warning，不阻断装配）
+    ensure_task_spec_image_provider_registered()
 
     # ---- 统一错误体（契约 Failure Behavior）----
     @app.exception_handler(AppError)
