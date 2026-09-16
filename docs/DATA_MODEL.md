@@ -45,7 +45,7 @@
 | --- | --- |
 | DATA-001 作业任务 | 任务ID/家庭ID/学生ID/**`category`(v1 仅 school)**/**`belong_date`（4 点边界、Asia/Shanghai）**/**`week_index`**/**`window_type`(day\|weekend\|holiday)**/**`spec_status`(placeholder\|parsed\|confirmed)**/自动生成标题/状态/截止时间 —— **唯一键 `(student_id, category, belong_date)`；只承载"哪天布置了什么"，不承载判定（ADR-013）** |
 | DATA-002 用户档案 | 家庭账号(账号ID/登录凭证哈希/显示名) + **学生子账号(子账号ID/家庭ID/学生ID 唯一/登录名唯一/口令哈希/启停状态，ACR-001)** + 学生档案(档案ID/家庭ID/姓名/年级/与账号关系/关联学校 school_id→schools[必填, ADR-008]) + 会话(主体类型 family\|student + 可选学生ID，双型会话) |
-| DATA-003 上传批次与照片 | `upload_batches`(batch_id/student_id/**kind**(task_spec\|homework)) + `photos`(photo_id/batch_id/student_id/kind/seq_no/status(unassigned\|suggested\|assigned\|rejected)/**task_id(窗口级)**/quality_report_json/sha256/consumed_at)；~~subject/group_no/suggestion_json~~ Deprecated → DATA-016 |
+| DATA-003 上传批次与照片 | `upload_batches`(batch_id/student_id/**kind**(task_spec\|homework)) + `photos`(photo_id/batch_id/student_id/kind/seq_no/status(unassigned\|suggested\|assigned\|rejected)/**task_id(窗口级)**/**`belong_date`（窗口归属日冗余，v0.4.3：上传时经 M001 `resolve_window` 解析，`NULL`=解析不可用，不阻断上传）**/**`group_key`（窗口聚合键冗余，v0.4.3：日=`YYYY-MM-DD`，周末=`W:<周五>`）**/quality_report_json/sha256/consumed_at)；~~subject/group_no/suggestion_json~~ Deprecated → DATA-016 |
 | DATA-004 识别结果 | 识别ID/提交ID/题目级或整页结构(题号/题目/作答/过程)/置信度/模型信息（含"布置单识别"清单草稿类型，CR-002） |
 | DATA-005 匹配结果 | 匹配ID/提交ID/任务ID/对齐关系(题号↔题目)/判定(完成/未完成/对/部分对/错/无法判断)/依据/置信度/状态 —— **内容级逐题对齐判定（ADR-010/CR-002）** |
 | DATA-006 质量评价 | 评价ID/提交ID/六维度分+权重版本/大模型综合评判(逐题结论+依据)/综合分/置信度/规则版本 —— **AI 评判为核（q2-3/PD-023）** |

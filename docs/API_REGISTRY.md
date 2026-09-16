@@ -38,8 +38,8 @@
 | API-M001-021 | 手工改归属日 | M001 | v0.2.0 | Active | POST `/api/v1/tasks/{task_id}/belong-date` | `docs/modules/M001/MODULE_API.md` |
 | API-M001-022 | **任务重新解析（链路 T 重跑）** | M001 | v0.3.0 | **Active**（2026-09-16，`Task-019` 实施 + 8 例覆盖 + 防伪造红→绿） | POST `/api/v1/tasks/{task_id}/reparse` | `docs/modules/M001/MODULE_API.md` |
 | API-M002-001 | 创建上传批次 | M002 | v0.3.0 | Frozen | POST `/api/v1/upload-batches` | `docs/modules/M002/MODULE_API.md` |
-| API-M002-002 | 上传作业照片 | M002 | v0.3.0 | Frozen | POST `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |
-| API-M002-003 | 照片列表/待处理队列 | M002 | v0.3.0 | Frozen | GET `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |
+| API-M002-002 | 上传作业照片（v0.4.3：响应 +`belong_date`/`group_key` 可选字段，上传时解析窗口归属） | M002 | v0.4.3 | Frozen | POST `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |
+| API-M002-003 | 照片列表/待处理队列（v0.4.3：+可选过滤 `belong_date`/`group_key`） | M002 | v0.4.3 | Frozen | GET `/api/v1/photos` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-004 | 受控取图 | M002 | v0.3.0 | Frozen | GET `/api/v1/photos/{photo_id}/content` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-005 | 照片挂接复核（逐张 accept/reject/relink，v0.4.0 语义修订；原「照片归属操作」`/associate` 已移除） | M002 | v0.4.0 | Frozen | POST `/api/v1/photos/{photo_id}/links` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-006 | 撤销/清理照片 | M002 | v0.3.0 | Frozen | DELETE `/api/v1/photos/{photo_id}` | `docs/modules/M002/MODULE_API.md` |

@@ -1,6 +1,6 @@
 # M002 模块数据（权威源）—— 作业图片采集与归属
 
-- **状态**：**v0.4.0（Frozen，用户批准 2026-09-10）** —— 按 `CR-003`/`ADR-013`/`ADR-014` 修订：入口 `kind`（任务/作业）、**归属放开为 N:N（照片 ↔ 聚合子任务）**、新增 `completion_analyses`、`M003`/`M004` 前向引用清理；前版 v0.3.0 Frozen（2026-09-08）
+- **状态**：**v0.4.3（`CR-006` 子项 A，用户批准 2026-09-16；Frozen 面内非破坏性修订）** —— **v0.4.3 变更**：`photos` 新增窗口归属冗余列 **`belong_date`** / **`group_key`**（**上传时**由 M002 经 M001 契约内 `TaskQueryService.resolve_window(now)` 解析落库，**不再等挂接确认**；解析不可用 → 置 `NULL` **不阻断上传**）；**v0.4.0 为 Frozen 基线**（用户批准 2026-09-10）—— 按 `CR-003`/`ADR-013`/`ADR-014` 修订：入口 `kind`（任务/作业）、**归属放开为 N:N（照片 ↔ 聚合子任务）**、新增 `completion_analyses`、`M003`/`M004` 前向引用清理；前版 v0.3.0 Frozen（2026-09-08）
 - **Owner**：M002（DATA-003 / **DATA-016** / **DATA-017** 唯一写入口）；映射全局实体 **DATA-003 / DATA-016 / DATA-017**（`DATA_MODEL.md` 为全局登记，本文件字段级权威源）
 - **存储**：SQLite 单文件 + **本地受控图片目录**（ADR-004/ASM-010）；文件与库记录同生命周期
 - **依赖**：**M001 归属窗口 + 聚合层**（`tasks.belong_date`/`window_type`；`task_groups`；`task_group_subjects` = **★判定单元**，ADR-013）；主体两级（ADR-009/ACR-001）
@@ -38,6 +38,9 @@
 | `seq_no` | INT | NOT NULL | 批次内页序（1 起，**服务端自增**，(batch_id, seq_no) UNIQUE） |
 | `status` | TEXT | NOT NULL DEFAULT 'unassigned' | `unassigned/suggested/assigned/rejected`（N:N 语义：无 link / 有未确认建议 link / 有 ≥1 已确认 link / 家长判无效） |
 | `task_id` | TEXT(UUID) | NULL | **窗口级归属**：照片归属窗口对应的 `tasks`（FK→tasks；可反推，冗余便于过滤/计数） |
+| `task_id` | TEXT(UUID) | NULL | **窗口级归属**：照片归属窗口对应的 `tasks`（FK→tasks；可反推，冗余便于过滤/计数）；**仅在「首条挂接确认」时写入**（`set_window_task`），故 `unassigned`/`suggested` 照片此列为 `NULL`（`TD-005` 成因） |
+| **`belong_date`** | TEXT(ISO date) | **NULL**（v0.4.3 新增） | **窗口归属日冗余**（`CR-006` 子项 A）：**上传时**经 M001 契约内 `resolve_window(now)` 解析落库（4 点日界 / 周末合并语义**唯一来源 = M001 归属引擎，M002 禁自行重算**）；`NULL` = 解析不可用（M001 未就绪/异常），**不阻断上传**；用于按窗口过滤/统计/展示（`TD-005` 目标） |
+| **`group_key`** | TEXT | **NULL**（v0.4.3 新增） | **窗口聚合键冗余**：同次解析所得（日 = `YYYY-MM-DD`；周末 = `W:<周五日期>`）；仅供过滤/展示，**挂接与判定语义不变**（仍以 `photo_subject_links` 为准） |
 | `assigned_at` | TEXT(ISO) | NULL | 归属生效时间（status=assigned） |
 | `consumed_at` | TEXT(ISO) | NULL | 已消费（链路 H 分析完成/锁定）；非空后不可删/改派 |
 | `created_by_type` / `created_by_id` | TEXT | NOT NULL | 上传主体（同批次规则） |
@@ -52,7 +55,8 @@
 | ~~`group_no`~~ | — | **Deprecated** | 原「学科作业段序号」**作废**（ADR-013：学科作业段取消） |
 | ~~`suggestion_json`~~ | — | **Deprecated** | 原「AI 归属建议快照」→ 建议态/确认态改由 `photo_subject_links`（`source=ai\|manual` + `confirmed_at`）承载（B3）；注释中「**M003 建议快照**」漂移**清理**（B7：现状仅 `m001`/`m002` 模块） |
 
-约束：`UNIQUE(batch_id, seq_no)`；**归属校验（服务层）**：`photo_subject_links.group_subject_id` 须为 M001 存在的聚合学科子任务，且其归属学生 = `photos.student_id`、窗口可归属。索引：`(batch_id, seq_no)` UNIQUE、`(family_id, status, created_at)`、`(family_id, task_id)`、`(family_id, kind, created_at)`、`(student_id, created_at)`。
+约束：`UNIQUE(batch_id, seq_no)`；**归属校验（服务层）**：`photo_subject_links.group_subject_id` 须为 M001 存在的聚合学科子任务，且其归属学生 = `photos.student_id`、窗口可归属。索引：`(batch_id, seq_no)` UNIQUE、`(family_id, status, created_at)`、`(family_id, task_id)`、`(family_id, kind, created_at)`、`(student_id, created_at)`、**`(family_id, belong_date)`、`(family_id, group_key)`（v0.4.3，支撑窗口过滤）**。
+**窗口归属冗余规则（v0.4.3）**：`belong_date`/`group_key` 为**派生冗余**，写入点**唯一** = 上传流程（`PhotoRepository.create` 同事务）；**不随**挂接/改归属日回填（`task_id` 仍按既有语义在首条确认时写），如需一致请在查询期以 `task_id` 为准。
 `family_id`/`student_id`/`kind` 与批次一致：由 M002 服务层单点保证，列入单测/集成断言。
 
 ### `photo_subject_links`（作业照片挂接，映射 DATA-016 —— **N:N**）

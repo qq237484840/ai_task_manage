@@ -1,12 +1,12 @@
 # M002 模块 API（权威源）—— 作业图片采集与归属
 
-- **状态**：**v0.4.2（`CR-005` Approved，用户批准 2026-09-16）** —— **v0.4.2 = 内部服务接口 +1（`provide_task_source_image`，受控提供布置单/作业图片供 M001 链路 T 解析）；非破坏性，对外端点不变**；v0.4.1（Frozen，用户批准 2026-09-10；= `CR-004` Applied，仅 `API-M002-007` 响应体收敛，非破坏性） —— v0.4.0 按 `CR-003`/`ADR-013`/`ADR-014` 修订（入口 `kind`、N:N 挂接、逐张复核、门控、完成分析）。既有 `API-M002-001/002/003/005` 修订；新增端点 API ID **已由 PM 分配 = `API-M002-007~011`**（`API_REGISTRY.md`；**已 Active**，`Task-008` 实施 + PM 复验）；前版 v0.4.0 Frozen（2026-09-10）、v0.3.0 Frozen（2026-09-08）
+- **状态**：**v0.4.3（`CR-006` 子项 A，用户批准 2026-09-16）** —— **v0.4.3 = `photos` 窗口归属冗余列（`belong_date`/`group_key`，上传时经 M001 契约内 `resolve_window` 解析）+ `API-M002-002`（响应 +2 可选字段）/ `API-M002-003`（+2 可选过滤参数）**；**非破坏性**（新增可空列与可选字段/参数，既有语义不变）；**v0.4.2 = 内部服务接口 +1（`provide_task_source_image`，受控提供布置单/作业图片供 M001 链路 T 解析）；非破坏性，对外端点不变**；v0.4.1（Frozen，用户批准 2026-09-10；= `CR-004` Applied，仅 `API-M002-007` 响应体收敛，非破坏性） —— v0.4.0 按 `CR-003`/`ADR-013`/`ADR-014` 修订（入口 `kind`、N:N 挂接、逐张复核、门控、完成分析）。既有 `API-M002-001/002/003/005` 修订；新增端点 API ID **已由 PM 分配 = `API-M002-007~011`**（`API_REGISTRY.md`；**已 Active**，`Task-008` 实施 + PM 复验）；前版 v0.4.0 Frozen（2026-09-10）、v0.3.0 Frozen（2026-09-08）
 - **REST 前缀**：`/api/v1`；**认证**：全部接口需 `Authorization: Bearer <token>`
 - **主体**（ADR-009/ACR-001）：`family`（家长，可代传任一本家学生，带 `student_id`）；`student`（仅本人，`student_id` 忽略/强制本人）
 - **错误体统一**：`ErrorResponse { "code", "message", "request_id" }`（HTTP 映射见契约 Failure Behavior）
 - **上传内容类型**：`multipart/form-data`；其余 `application/json`；时间一律 UTC ISO-8601
 - **API ID**：既有 `API-M002-001~006` 由 PM 分配；**本变更新增端点 API ID = `API-M002-007~011`**（已由 PM 分配登记 `API_REGISTRY.md`，Draft；原「申请清单」见文末）
-- **DTO 约定**：`QualityCheckItem = {id, passed, value, threshold, severity(reject|warn)}`；`QualityReport = {ruleset_version, passed, checks[]}`；`PhotoDTO = {photo_id, student_id, batch_id, kind, seq_no, status, task_id(窗口级), links:[LinkDTO], quality, content_urls, created_at}`
+- **DTO 约定**：`QualityCheckItem = {id, passed, value, threshold, severity(reject|warn)}`；`QualityReport = {ruleset_version, passed, checks[]}`；`PhotoDTO = {photo_id, student_id, batch_id, kind, seq_no, status, task_id(窗口级), belong_date(窗口归属日，v0.4.3，可空), group_key(窗口聚合键，v0.4.3，可空), links:[LinkDTO], quality, content_urls, created_at}`
   - `LinkDTO = {link_id, group_subject_id, subject(展示用), source(ai|manual), confidence|null, confirmed_at|null, rejected_at|null}`
   - **`LinkSuggestionItem`（v0.4.1，`CR-004`）= {link_id, group_subject_id, subject|null(展示用), confidence|null, source(ai|manual), suggested_at}**；**`LinkSuggestionResult` = `API-M002-007` 响应 `{photo_id, status, suggestions:[LinkSuggestionItem]}`**
   - `GateStatusDTO = {group_key, window_type, total_photos, pending_photos, satisfied}`
@@ -47,7 +47,7 @@
   1. 校验批次归属（本家庭 + 学生主体仅本人 + **`kind` 冗余自批次**）与批次计数 < `upload.max_photos_per_batch`（超限 422 `batch_photo_limit`）
   2. 基础校验（类型 415 / 大小 413 / 像素上限 422）→ 本地规则质检（v1.0）
   3. 未通过 → **不入库**：`422 image_quality_rejected`（message 逐项原因），无任何残留
-  4. 通过 → 轻量归一 → 原始图+归一图写受控存储 → 插入 `photos` 行（`seq_no` = 批次当前最大 + 1，**服务端自增**；status=`unassigned`）
+  4. 通过 → 轻量归一 → 原始图+归一图写受控存储 → **窗口归属解析（v0.4.3）**：经 M001 契约内 `TaskQueryService.resolve_window(now)` 取 `{belong_date, week_index, window_type, group_key}` → 落 `photos.belong_date` / `photos.group_key`（**纯计算、不锁配置**；M001 未就绪或解析异常 → 置 `NULL`，**不阻断上传**；M002 **不得自行重算**归属规则）→ 插入 `photos` 行（`seq_no` = 批次当前最大 + 1，**服务端自增**；status=`unassigned`）
   5. **异步触发挂接建议**（不阻塞本响应）；建议失败 → 照片维持 `unassigned`，家长可**手工挂接**（降级 B6）
 - Response `201`：
 ```json
@@ -57,17 +57,20 @@
   "kind": "homework",
   "seq_no": 1,
   "status": "unassigned",
+  "belong_date": "2026-09-16",
+  "group_key": "2026-09-16",
   "quality": { "ruleset_version": "v1.0", "passed": true, "checks": [] },
   "content_urls": { "original": "/api/v1/photos/<photo_id>/content?kind=original", "normalized": "/api/v1/photos/<photo_id>/content?kind=normalized" }
 }
 ```
+> `belong_date`/`group_key`（v0.4.3）为**新增可选字段**：解析不可用时为 `null`；既有消费者可忽略（**向后兼容**）。
 > 「作业」入口上传时**不携带任何内容**（不选任务、不选学科、不填文本）。
 - Errors：`401`；`404` 批次不存在/越权（对外 404）；`409 concurrent_conflict`（并发争用）；`413 image_too_large`；`415 unsupported_media_type`；`422` 校验失败 / `image_quality_rejected` / `batch_photo_limit`；`500`
 - Idempotency：不幂等（每次上传产生新照片；前端去抖）；重试产生重复页，可走 DELETE 清理
 
 ### API-M002-003 照片列表/待处理队列（修订）
-- `GET /api/v1/photos?student_id=&status=&batch_id=&kind=&task_id=&group_subject_id=&page=&page_size=`（Bearer）
-- Query：family 主体可按本家学生过滤；student 主体强制本人。`status ∈ unassigned|suggested|assigned|rejected`（可组合，缺省全部）；`kind ∈ task_spec|homework`；`task_id` 过滤**窗口级归属**；`group_subject_id` 过滤已挂接该聚合子任务的照片
+- `GET /api/v1/photos?student_id=&status=&batch_id=&kind=&task_id=&belong_date=&group_key=&group_subject_id=&page=&page_size=`（Bearer）
+- Query：family 主体可按本家学生过滤；student 主体强制本人。`status ∈ unassigned|suggested|assigned|rejected`（可组合，缺省全部）；`kind ∈ task_spec|homework`；`task_id` 过滤**窗口级归属**；**`belong_date`（`YYYY-MM-DD`）/ `group_key`（v0.4.3）：按窗口归属冗余列过滤，缺省不过滤 → 向后兼容**（`unassigned`/`suggested` 照片此前无法按窗口过滤，`TD-005`）；`group_subject_id` 过滤已挂接该聚合子任务的照片
 - Response `200`：
 ```json
 {

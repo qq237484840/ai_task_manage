@@ -2,6 +2,24 @@
 
 - **模块**：M002 ｜ 变更管理遵循 `docs/CHANGELOG.md` 与 `ID_GOVERNANCE.md`
 
+## v0.4.3（2026-09-16，**Frozen 面内非破坏性修订 —— 用户批准**）—— `photos` 窗口归属冗余 + `API-M002-002`/`003` 修订（`CR-006` 子项 A）
+
+- **依据**：`CR-006`（Approved，用户批准 2026-09-16，A/B/C 三项全批）；本版**仅含子项 A**（`TD-005` 根治）；子项 B（AI 失败原因可见）/ C（重试异步化）待后续版本
+- **变更**：① `photos` 新增 **`belong_date`** / **`group_key`** 冗余列（**上传时**经 M001 契约内 `TaskQueryService.resolve_window(now)` 解析落库；解析不可用 → `NULL`，**不阻断上传**；M002 **禁自行重算**归属规则）+ 索引 `(family_id, belong_date)` / `(family_id, group_key)`；② `API-M002-002` 响应新增**可选**字段 `belong_date` / `group_key`；③ `API-M002-003` 新增**可选**查询参数 `belong_date` / `group_key`（缺省不过滤）
+- **理由**：`photos.task_id` **仅在「首条挂接确认」时写入** → `unassigned` / `suggested` 照片**无任何窗口归属**（`TD-005`）→ `REQ-011` 卡片只能用「学生级」宽口径，且无法按窗口过滤/统计/清理
+- **非破坏性**：新增**可空**列 + 新增**可选**响应字段 + 新增**可选**查询参数；既有端点语义、错误语义、Method/Path 均不变
+- **迁移**：`main.py` 走 `Base.metadata.create_all`（**不为既有表加列**）→ V1 无生产数据，采用**重建库 + 重新种子**（`backend/data/*.db` 已 gitignore）；测试库由 conftest fixture 新建，天然含新列
+- **影响面**：**M001 零改动**（`resolve_window` 为**既有**契约接口，`MODULE_API.md` 内部服务接口表已列 M002 为消费者）；前端本期零消费（零返工）
+- **实施 / 验收**：`Task-022`（`AGENT-M002`）/ `Task-023`
+- **契约版本**：v0.4.2 → **v0.4.3**
+
+## v0.4.2（2026-09-16，**Frozen 面内非破坏性修订 —— 用户批准**）—— 内部服务接口 +1（`CR-005` Applied）
+
+- **依据**：`CR-005`（Approved，用户批准 2026-09-16）
+- **变更**：内部服务接口新增 **`provide_task_source_image(session, family_id, photo_id) -> TaskSourceImage | None`**（受控提供布置单/作业图片供 M001 链路 T 解析：`family_id` 归属校验 + `ImageStore` 受控路径 + 只读；越权 / 查无 / 文件缺失 → `None`）与 `ensure_task_spec_image_provider_registered()`（幂等 + 启动期自愈）
+- **非破坏性**：仅**新增**内部接口（对外 REST 端点不变）；配套 M001 `API-M001-022`（任务重新解析）
+- **补记说明**：本条目为**回溯补登** —— `CR-005` 实施时更新了 `MODULE_API.md` 头部与内部接口表，但未落本变更记录（PM 于 `CR-006` 子项 A 修订时补登）
+
 ## v0.4.1（2026-09-10，**Frozen —— 用户批准**）—— `API-M002-007` 响应体修订（`CR-004` Applied）
 
 - **依据**：`CR-004`（Proposed → **用户批准 2026-09-10**）；**非破坏性** —— 不新增/不删除端点，不改 Method/Path/错误语义，仅收敛为**已实现且信息更完整**的响应字段集
