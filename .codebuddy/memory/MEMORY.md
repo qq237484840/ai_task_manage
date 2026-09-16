@@ -6,12 +6,12 @@
 
 中小学生 AI 作业与学习成长综合评定系统 V1。**有效模块 = M001 + M002 + 横切 `app/core/ai/`**（M003~M007 Deferred，`ADR-014`）。形态：**FastAPI + SQLite 单体**（ADR-004）+ 移动优先 H5 **Vue3+Vite+TS+Vant4**（ADR-012，FastAPI 托管 `frontend/dist`）+ **两级主体** family/student（家庭级隔离）+ **判定 = 聚合子任务(学科)级**（ADR-013）+ **真实三方 AI 默认 / Mock 降级**（ADR-011）。方法学：**文档驱动 + 多 Agent 治理**（**ID 仅 PM 分配**）。
 
-## 当前状态（截至 2026-09-14）
+## 当前状态（截至 2026-09-16）
 
 - **V1（域 A/B/C）验收通过**（2026-09-10）：构建 `EXIT=0` + 种子 `SEED_OK` + `GET /` 200 + 浏览器级 **18/18** + 全量 `pytest` **237/0/0/0**（`235 passed + 2 xpassed`）。`CHANGE-003` **Closed**（④ 判达成）；M001 v0.2.0 / M002 v0.4.1 契约 **Frozen Stable**；基线入库推送链 = `aed4db1→ce5057c→b3bc0b3→ad7455c`。
 - **缺陷台账**：`BUG-001`~`BUG-004` 均 **Verified** ｜ **`BUG-005` / `BUG-006` = `Fixed`（2026-09-14，`Task-015`/`Task-016` 修复；由 **PM 代执行** —— 本机无具备写权限的执行 subagent，不构成独立第三方复核，限制已标注任务书 §5）**：全量回归 **251/0/0/0** + 双**红→绿**（`BUG-006` 含 **API 面**：禁兜底→`placeholder`，回退→`parsed` 复现）+ 写区双证 + `read_lints=0` ｜ **`BUG-007` = `Fixed`（2026-09-14，`Task-017`；含 §3.3b 最小扩权使作业页同一超时路径闭环）**。
-- **技术债**：`TD-001`（`get_group_subject` N+1）、`TD-002`（契约未暴露 `window_task_id`/`task_status`）待排期；`TD-003` Closed；PM 裁决不立 `TD-004`。**无阻塞项**。
-- **任务队列**：`Task-006`~`Task-017` 均已完成（`Task-015`/`Task-016`/`Task-017` 于 2026-09-14 当日签发 + 收口），**无 Active**。**`REQ-011` 第一阶段（A2）已交付**（任务详情「AI 未识别的照片」只读卡 + 单张重试；`BUG-007` → `Fixed`）。下一步候选 = **`REQ-011` 第二阶段 A1（布置单图片解析，需 CR/ACR）**、`TD-005`、CR 候选（失败原因可见 / `API-M002-007` 异步化）、`TD-001`/`TD-002`，或 **V2 域 D（M005~M007，`RISK-012`）**。
+- **技术债**：`TD-001`（`get_group_subject` N+1）、`TD-002`（契约未暴露 `window_task_id`/`task_status`）、`TD-005`（未挂接照片无窗口归属）、**`TD-006`（M001 不校验图片源 `photo_id` 归属 —— 防越权仅 M002 一道；无越权读取路径，风险低；`CR-005` 验收登记 2026-09-16）** 待排期；`TD-003` Closed；PM 裁决不立 `TD-004`。**无阻塞项**。
+- **任务队列**：`Task-006`~`Task-021` 均已完成，**无 Active**。**`CR-005` 已 `Applied`（2026-09-16）**：`Task-018`（M002 受控取图）/ `Task-019`（M001 回调槽 + `API-M001-022`）/ `Task-020`（前端「重新解析」入口）/ `Task-021`（验收，8 条全通过）→ **`REQ-011` 第二阶段 A1 达成**（布置单图片 → 真实 Vision → 内容项）。下一步 = **`CR-006`（A → B → C）**、`TD-006`/`TD-005`、CR 候选（失败原因可见 / `API-M002-007` 异步化）、`TD-001`/`TD-002`，或 **V2 域 D（M005~M007，`RISK-012`）**；**⚠️ 待用户处理：轮换中转密钥**（见下「密钥事件」）。
 
 ## 真实三方 AI 联调（2026-09-14，PM 执行）
 
@@ -21,6 +21,8 @@
 - **派生缺陷（已立项）**：
   - **`BUG-005`（中）**：三方 **403「余额/配额不足」被 `core/ai/errors.py:67-68` `from_http_status` 误映射为 `auth_error`「三方鉴权失败」**，且 401/403/429/5xx 分支**丢弃响应体** → DATA-009 留痕失真、排障方向被误导（本次排障多轮才定位到「配额」而非「鉴权」）。建议：新增 `AIErrorCode.QUOTA_EXHAUSTED`（**不可重试**）+ 三方响应摘要**脱敏截断**（剔 `sk-`、≤200 字）入 `message`。
   - **`BUG-006`（高）**：`m001/services/task_parser.py:198-207` `default_parser` 在 AI 抛错/产物不合规后**无条件**回落 `mock_parse_sources`，**全程不读 `allow_mock_fallback`** → 在 real+禁兜底配置下 `POST /tasks` 仍返回 `201 / spec_status="parsed"`，而同期 DATA-009 为 `mock=0 / status=error` —— **「假成功」且 UI 无降级信号**。对照：M002 侧同配置行为正确（照片保持 `unassigned`、`links=[]`）→ 缺陷边界仅在 M001。**修复不得新增表字段/改契约**（推荐仅按配置语义返回 `None` → 保持 `placeholder`）。
+- **`CR-005` 落地（2026-09-16，`Applied`）**：布置单**图片源** → 真实 Vision 解析链路打通（M001 `image_provider` 回调槽 → M002 `provide_task_source_image` **受控取图** → `core/ai` `ImageInput`）。**防伪造硬约束**：`task_parser._vision_is_real()` 为真才转发图片源（Mock/degraded 一律**不转发** → 保 `placeholder`；`BUG-004` 教训固化为判据，红→绿已验证）。真机：图片源 `POST /tasks → 201/parsed/4 项`、DATA-009 `mock=0/ok`；**跨家庭引用 → `placeholder/0`**（M002 归属过滤兜住）。**⚠️ 单点防线**：M001 **不**校验 `photo_id` 归属（家庭 B 可建出引用家庭 A 照片的任务 → `201`）→ 已登记 **`TD-006`**。
+- **⚠️ 密钥事件（2026-09-16，教训）**：为构造验收失败分支切 `mock` 时，用于校验 `.env` 的命令**误把全部 `AT_AI_*` 行（含三方 `sk-` 密钥）打印到对话**（`.env` 已 gitignore、未入库）→ **已建议用户轮换中转密钥**。**铁律：临时脚本/命令只打印目标行，永不整行输出凭据；改 `.env` 用 python 读改写（PS `Set-Content` 会被安全策略拦截）。**
 - **测试隔离铁律（重要）**：`Settings`/`AISettings`/`M002Settings` 均 `env_file=".env"` → **部署侧 `.env` 会污染回归**（实测 8 例失败：7 例 AI + `test_quality_rejects_page_crop`）。已由 `backend/tests/conftest.py` autouse fixture **`isolate_deploy_config`** 关闭 `env_file` + 清空 `AT_AI_*` 凭据 + 清 `get_ai_settings`/`get_ai_service`/`get_m002_settings` 三缓存 → 全量 **EXIT=0、基线 237 不减**。**改 `.env` 后必须重跑全量回归**。
 
 ## 架构定稿要点（ADR-013）
@@ -42,11 +44,11 @@
 ## 关键索引
 
 - 入口 `docs/INDEX.md`；状态 `docs/PROJECT_STATUS.md`；主线 `docs/ROADMAP.md`；需求 `docs/requirements/CLARIFICATION-2026-09-10.md`；配置 `docs/CONFIGURATION.md`（`docs` 侧尚未登记 `AT_M002_QUALITY_*`）；数据 `docs/DATA_MODEL.md`（DATA-009 = 物理表 `ai_call_records`）。
-- ADR `docs/adr/ADR-001~014`（关键 = 011/012/013/014）｜模块 `MODULE_REGISTRY.md`｜API `API_REGISTRY.md`｜变更 `docs/changes/`（`CHANGE-001` Applied、`002` Executing、`003` **Closed**、`CR-004` Applied、`BUG-001`~`004` Verified、**`BUG-005`/`BUG-006` Confirmed**）｜任务书 `docs/agents/Task-00x.md`｜技术债 `docs/TECH_DEBT.md`。
+- ADR `docs/adr/ADR-001~014`（关键 = 011/012/013/014）｜模块 `MODULE_REGISTRY.md`｜API `API_REGISTRY.md`｜变更 `docs/changes/`（`CHANGE-001` Applied、`002` Executing、`003` **Closed**、`CR-004` Applied、**`CR-005` Applied（2026-09-16）**、`BUG-001`~`004` Verified、`BUG-005`/`BUG-006`/`BUG-007` **Fixed**）｜任务书 `docs/agents/Task-00x.md`｜技术债 `docs/TECH_DEBT.md`。
 
 ## 环境与实况备忘
 
-- **venv** = `backend/.venv`（Python 3.12）；**pytest 基线 = 251**（2026-09-14 起；此前 237 —— `Task-015` +9 例、`Task-016` +5 例）；端口统一 **8010**（8000 被 `wslrelay.exe` 常占）。
+- **venv** = `backend/.venv`（Python 3.12）；**pytest 基线 = 267**（2026-09-16；沿革 237 → 251（`Task-015`/`016`）→ 257（`Task-018` +6）→ 265（`Task-019` +8）→ **267**（`Task-021` +2 服务级集成））；端口统一 **8010**（8000 被 `wslrelay.exe` 常占）。
 - **一键启动脚本**（2026-09-11；双击用根目录 `start_server.bat`）：`start_server.ps1` 自动清理同端口旧 uvicorn（**只杀命令行含 `uvicorn`+`app.main` 的 python，绝不误杀其它进程**）+ 强制 venv + 设 `AT_DATABASE_URL`/`AT_FRONTEND_DIR` + 单实例 + 健康自检；日志 `at_server*.log`（已忽略）。参数 `[-Port][-Db acceptance|app][-Seed][-Reload][-Stop]`。**背景**：曾因「系统 Python + venv 双 `--reload` 抢 8010」表現为「内部服务器报错」。※ 本机 shell 对复杂 PS 命令偶发路由到 cmd 报错，执行脚本宜用 `powershell -NoProfile -ExecutionPolicy Bypass -File <abs>`（`start_server.ps1` 输出全英文以回避 PS5.1 中文乱码）。
 - **演示质检放宽**（2026-09-14）：`backend/.env` 设 `AT_M002_QUALITY_TILT_SEVERITY=warn` + `AT_M002_QUALITY_PAGE_CROP_ENABLED=false`（**仅**降级 `tilt`/`page_crop` 两条近似启发式；`blur`/亮度/遮挡照常 reject，实测模糊图仍 422）。**改动须重启**（`lru_cache`）；恢复严格 = 删/注释该两行后重启。质检实现 `m002/services/quality.py`、阈值 `m002/config.py`（`AT_M002_` 前缀）、抛错 `upload_service.py:155-160`（422 `image_quality_rejected`，message 含 `{id}(value=…)` 逐项原因，不合格不入库）。
 - **浏览器级验收**（`.e2e/`，18/18）：① `& backend/.venv/Scripts/python.exe .e2e/seed.py`（**先删库重建** `backend/data/acceptance.db`）→ ② venv uvicorn 8010（带 `AT_DATABASE_URL`/`AT_FRONTEND_DIR`）→ ③ **node 不在 PATH**，须加 `C:\Users\Administrator\.workbuddy\binaries\node\versions\22.22.2-2`（带 `-2` 后缀），再 `node .e2e/acceptance.mjs` → `total=18 pass=18`。跑一次会重写 `shots/` + `browser_evidence.json`（已入库 → 产生 `M`）。
