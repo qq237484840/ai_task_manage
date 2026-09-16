@@ -176,6 +176,26 @@ export function changeTaskBelongDate(task_id: string, belong_date: string): Prom
   return http.post(`/tasks/${task_id}/belong-date`, { belong_date });
 }
 
+/**
+ * 重新解析（`API-M001-022` / `CR-005`）：对**未确认**任务重跑链路 T。
+ *
+ * - 图片源由 M001 经 M002 受控读取 → Vision；`confirmed` → `409`；
+ * - 解析无草稿 / AI 不可用 → 沿用 `BUG-006` 语义**如实失败**（任务保持 `placeholder`，
+ *   既有内容项**不被清空**）—— 调用方须据 `spec_status` / `contents` 如实反馈；
+ * - `options.timeoutMs`：**单请求**超时覆盖（缺省沿用全局 15s）。真实 Vision 为**同步**调用
+ *   （约 15s+），主路径须显式放宽（如 60000）。
+ */
+export function reparseTask(
+  task_id: string,
+  options: { timeoutMs?: number } = {}
+): Promise<TaskDetail> {
+  return http.post(
+    `/tasks/${task_id}/reparse`,
+    undefined,
+    options.timeoutMs ? { timeout: options.timeoutMs } : undefined
+  );
+}
+
 // ---- 聚合任务（API-M001-019/020；挂接与判定的统一载体）----
 export function listTaskGroups(params: TaskGroupListParams): Promise<ListResponse<TaskGroup>> {
   const { window_type, ...rest } = params;

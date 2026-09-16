@@ -36,6 +36,19 @@
           <van-button v-if="canEdit" plain size="small" @click="router.push(`/tasks/${task.task_id}/edit`)">
             {{ task.spec_status === "confirmed" ? "编辑" : "草稿确认" }}
           </van-button>
+          <!-- 重新解析（API-M001-022 / CR-005）：未确认任务可重跑链路 T；confirmed 隐藏 -->
+          <van-button
+            v-if="canReparse"
+            plain
+            type="primary"
+            size="small"
+            :loading="reparsing"
+            :disabled="reparsing"
+            @click="reparse"
+          >
+            重新解析
+          </van-button>
+          <span v-if="reparsing" class="muted small">AI 解析中，约 15–30 秒…</span>
           <van-button plain size="small" @click="openBelongDate">改归属日</van-button>
           <van-button
             v-if="task.status === 'published' || task.status === 'in_progress'"
@@ -156,6 +169,7 @@ import {
   getLinkSuggestions,
   getTask,
   listPhotos,
+  reparseTask,
 } from "@/api";
 import { toastError } from "@/api/http";
 import type { Photo, TaskDetail } from "@/api/types";
@@ -191,8 +205,39 @@ const RETRY_TIMEOUT_MS = 60000;
 
 const canEdit = computed(() => task.value?.status === "draft" || task.value?.status === "published");
 
+// ---- 重新解析（`API-M001-022` / `CR-005`）----
+/** 未确认（`placeholder` / `parsed`）时可重跑链路 T；`confirmed` 须先取消确认（V1 无入口）→ 不显示。 */
+const canReparse = computed(() => {
+  const s = task.value?.spec_status;
+  return s === "placeholder" || s === "parsed";
+});
+const reparsing = ref(false);
+/** 单请求超时覆盖：真实 Vision 同步解析约 15s+，全局 15s 必然超时（同 `BUG-007` 模式，**不改** `http.ts`）。 */
+const REPARSE_TIMEOUT_MS = 60000;
+
 async function load(): Promise<void> {
   task.value = await getTask(props.id);
+}
+
+/** 重新解析：反馈以「解析后是否有内容项」为准 —— **无内容项不得谎报成功**。 */
+async function reparse(): Promise<void> {
+  const current = task.value;
+  if (!current || reparsing.value) return;
+  reparsing.value = true;
+  try {
+    const updated = await reparseTask(current.task_id, { timeoutMs: REPARSE_TIMEOUT_MS });
+    task.value = updated;
+    if (updated.spec_status === "parsed" && updated.contents.length > 0) {
+      showToast(`已解析出 ${updated.contents.length} 项内容，请到「草稿确认」核对`);
+    } else {
+      showToast("AI 未返回解析结果（可能暂时不可用或图片无法识别），可稍后重试或手工补录");
+    }
+  } catch (err) {
+    toastError(err);
+    await load(); // 409（已确认）等 → 刷新最新状态
+  } finally {
+    reparsing.value = false;
+  }
 }
 
 async function loadPendingPhotos(): Promise<void> {
