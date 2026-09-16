@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Protocol
 
 from sqlalchemy.orm import Session
@@ -68,10 +69,27 @@ class TaskGroupRef:
     subjects: list[GroupSubjectRef] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class WindowInfoRef:
+    """M002 侧消费视图：归属窗口解析结果（`CR-006` 子项 A）。
+
+    **唯一来源 = M001 归属引擎**（契约 `TaskQueryService.resolve_window(ts) -> WindowInfo`，
+    契约注明「纯计算，不锁配置」）；M002 **禁止自行重算** 4 点日界 / 周末合并 / 学期周等规则
+    （`Task-022 §3.2` 打回项）。
+    """
+
+    belong_date: str
+    week_index: int | None = None
+    window_type: str | None = None
+    group_key: str | None = None
+
+
 class M001Gateway(Protocol):
     """M002 → M001 聚合层消费契约（签名对齐 docs/modules/M001/MODULE_API.md）。"""
 
     def student_exists(self, session: Session, family_id: str, student_id: str) -> bool: ...
+
+    def resolve_window(self, ts: datetime) -> WindowInfoRef: ...
 
     def get_task(self, session: Session, family_id: str, task_id: str) -> Any: ...
 
@@ -183,6 +201,25 @@ class DefaultM001Gateway:
         from app.modules.m001.services.task_state import TaskStateService
 
         return TaskStateService.mark_in_progress(session, family_id, task_id)
+
+    def resolve_window(self, ts: datetime) -> WindowInfoRef:
+        """归属窗口解析（`CR-006` 子项 A）—— 按 M001 归属引擎，**纯计算**。
+
+        契约：`TaskQueryService.resolve_window(ts) -> WindowInfo`（`MODULE_API.md` 内部服务接口表，
+        消费者含 M002）；M001 未就绪 → `M001UnavailableError`（由 `TaskClient` 层转 `None`）。
+        """
+        from app.modules.m001.services.task_service import TaskQueryService
+
+        method = getattr(TaskQueryService, "resolve_window", None)
+        if method is None:  # pragma: no cover - 运行时就绪后不再触发
+            raise M001UnavailableError("M001 TaskQueryService.resolve_window 缺失，需联调")
+        raw = method(ts)
+        return WindowInfoRef(
+            belong_date=str(_attr(raw, "belong_date") or ""),
+            week_index=_attr(raw, "week_index"),
+            window_type=_attr(raw, "window_type"),
+            group_key=_attr(raw, "group_key"),
+        )
 
     # —— 聚合层（Task-007 并行实现；未就绪 → M001UnavailableError）——
     @staticmethod
@@ -353,6 +390,18 @@ class TaskClient:
     @staticmethod
     def get_group(session: Session, family_id: str, group_id: str) -> TaskGroupRef:
         return get_gateway().get_group(session, family_id, group_id)
+
+    @staticmethod
+    def resolve_window(ts: datetime) -> WindowInfoRef | None:
+        """归属窗口解析（**容错**：M001 不可用 / 异常 → `None`，**不抛**）。
+
+        `CR-006` 子项 A：上传照片时解析窗口归属；失败 → 入库置 `NULL`，**不阻断上传**。
+        """
+        try:
+            return get_gateway().resolve_window(ts)
+        except Exception as exc:  # noqa: BLE001 - 归属解析失败不得阻断上传
+            logger.warning("M002 resolve_window 不可用（%s）→ 窗口归属置空", exc)
+            return None
 
     @staticmethod
     def ensure_group(

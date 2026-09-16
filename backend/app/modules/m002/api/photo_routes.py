@@ -62,6 +62,8 @@ def list_photos(
     task_id: UUID | None = Query(default=None),
     kind: BatchKindValue | None = Query(default=None),
     group_subject_id: UUID | None = Query(default=None),
+    belong_date: str | None = Query(default=None, description="窗口归属日 YYYY-MM-DD（v0.4.3）"),
+    group_key: str | None = Query(default=None, description="窗口聚合键（v0.4.3）"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_session),
@@ -77,6 +79,8 @@ def list_photos(
         task_id=str(task_id) if task_id else None,
         kind=kind,
         group_subject_id=str(group_subject_id) if group_subject_id else None,
+        belong_date=belong_date,
+        group_key=group_key,
         page=page,
         page_size=page_size,
     )

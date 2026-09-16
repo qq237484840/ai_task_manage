@@ -63,6 +63,8 @@ class PhotoQueryService:
         task_id: str | None = None,
         kind: str | None = None,
         group_subject_id: str | None = None,
+        belong_date: str | None = None,
+        group_key: str | None = None,
         page: int = 1,
         page_size: int = 20,
     ) -> tuple[list[PhotoDTO], int]:
@@ -77,6 +79,8 @@ class PhotoQueryService:
             task_id=task_id,
             kind=kind,
             group_subject_id=group_subject_id,
+            belong_date=belong_date,  # CR-006 子项 A（v0.4.3）
+            group_key=group_key,
             offset=offset,
             limit=page_size,
         )

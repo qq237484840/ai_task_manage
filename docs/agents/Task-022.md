@@ -77,7 +77,94 @@
 
 ## 5. 执行方报告（七段式）
 
-> ① 状态 ｜ ② 改动文件清单 + diff 摘要 ｜ ③ 红→绿 / 判别力证据原文 ｜ ④ 全量回归原文 ｜ ⑤ 写区合规自证（双证）｜ ⑥ 契约一致性核对（`MODULE_API`/`MODULE_DATA` v0.4.3 逐条比对）｜ ⑦ 遗留 + 需 PM 裁决项（含迁移执行结果）
+> **执行者说明**：本任务由 **PM 代执行**（本机 IDE 无具备写权限的执行 subagent）→ 不构成独立第三方复核，限制如实标注。
+
+### ① 状态
+
+**完成**。`photos` 新增窗口归属冗余列 `belong_date` / `group_key`（**上传时**经 M001 契约内 `resolve_window` 解析）+ 索引；`API-M002-002` 响应与 `API-M002-003` 过滤参数按 v0.4.3 落地；新增用例 **6 例**全绿；**红→绿**判别力成立；全量回归 **273 / 0 / 0 / 0**；**库重建迁移已执行并真机验证**。
+
+### ② 改动文件清单 + diff 摘要
+
+| 文件 | 性质 | 改动摘要 |
+| --- | --- | --- |
+| `m002/domain/models.py` | 改 | `Photo` +2 列（`belong_date` `String(10)` / `group_key` `String(32)`，均可空）+2 索引（`ix_photos_family_belong_date` / `ix_photos_family_group_key`）；注释写明「`task_id` 仅首条确认时写 = TD-005 成因；本两列上传即落；**派生冗余**」 |
+| `m002/repository/photo_repository.py` | 改 | `create(...)` +2 关键字参数并落行；`list_photos(...)` +2 可选过滤条件（**缺省不过滤**） |
+| `m002/clients/task_client.py` | 改 | 新增 `WindowInfoRef`（M002 侧消费视图）+ 协议 `resolve_window` + `DefaultM001Gateway.resolve_window`（**按契约直调** `TaskQueryService.resolve_window`，含存在性探针）+ `TaskClient.resolve_window`（**容错**：异常 → `None` + warning，**不抛**） |
+| `m002/services/upload_service.py` | 改 | 阶段二开头解析归属（`TaskClient.resolve_window(datetime.now(UTC))`）+ `PhotoRepository.create` 传入两列；**解析失败 → `None`，上传仍 `201`** |
+| `m002/schemas.py` | 改 | `PhotoDTO` / `UploadPhotoOut` 各 +2 **可选**字段 |
+| `m002/services/dto_builders.py` | 改 | `build_photo_dto` / `build_upload_out` 各 +2 字段 |
+| `m002/services/photo_query_service.py` | 改 | `list_photos` +2 参数并透传 |
+| `m002/api/photo_routes.py` | 改 | `GET /photos` +2 Query（`belong_date` / `group_key`，含 description）并透传 |
+| `tests/integration/test_photos_window_belong.py` | **新增**（6 例） | ①上传即落归属（**真实 M001 引擎**，参数化 周三/周五/周日 → 覆盖**周末合并** + 数据面实读 + `task_id is None`）；②过滤 + **向后兼容哨兵**；③M001 不可用**不阻断**（替身，已标注）；④**单一知识源**静态断言 |
+
+**关键约束落实（PM 自查）**：**M002 未复制任何归属规则**（静态断言用例 ④ 通过）；`set_window_task` **未改**（`task_id` 语义不变，用例 ① 断言 `task_id is None`）。
+
+### ③ 红→绿 / 判别力证据原文
+
+**红**（临时把上传时的 `window = TaskClient.resolve_window(...)` 改为 `window = None`，等价修复前行为）：
+
+```
+FAILED tests/integration/test_photos_window_belong.py::test_upload_persists_window_belong_from_m001_engine[frozen0-2026-09-16-2026-09-16]
+FAILED tests/integration/test_photos_window_belong.py::test_upload_persists_window_belong_from_m001_engine[frozen1-2026-09-18-W:2026-09-18]
+FAILED tests/integration/test_photos_window_belong.py::test_upload_persists_window_belong_from_m001_engine[frozen2-2026-09-20-W:2026-09-18]
+FAILED tests/integration/test_photos_window_belong.py::test_list_photos_filters_by_belong_date_and_group_key
+tests/integration/test_photos_window_belong.py:130: AssertionError: assert [] == ['accaa96c-41...1bb6bf255e16']
+RED_EXIT=1
+```
+
+→ **过滤返回空 = 归属未落库**（正是本任务要修的行为）；「不阻断」「单一知识源」2 例仍 PASS ⇒ 判别点独立。
+
+**绿**（还原）：新增用例 **6 passed** → 全量 `GREEN_EXIT=0`。
+
+### ④ 全量回归原文
+
+```
+$ pytest --no-header -q --tb=short --junitxml=../.pm_t022.xml
+........................................................................ [ 26%]
+......................................X..X.............................. [ 52%]
+........................................................................ [ 79%]
+.........................................................                [100%]
+tests=273 failures=0 errors=0 skipped=0
+GREEN_EXIT=0
+```
+
+`X..X` = 既有 `BUG-003` / `BUG-004` 双哨兵自然 **XPASS**（未删除、未放宽）。
+
+### ⑤ 写区合规自证（双证）
+
+- **`git status --porcelain`**：`M` 8 个 M002 生产文件（均在任务书写区内）+ `?? tests/integration/test_photos_window_belong.py`（新增）；**未出现** `m001/**`、`core/ai/**`、`frontend/**`、`docs/**` 条目（红取证期间的 `upload_service.py` 临时改动**已还原**）。
+- **mtime**：`m001/**`、`core/ai/**`、`m002` 写区外文件（如 `link_service.py`、`gate_service.py`）均**早于**本次写区起点。
+- `read_lints` = 0。
+
+### ⑥ 契约一致性核对（`MODULE_API` / `MODULE_DATA` v0.4.3 逐条）
+
+| 契约条目 | 实现 | 结论 |
+| --- | --- | --- |
+| `photos` +`belong_date`/`group_key`（可空）+ 索引 `(family_id, belong_date)`/`(family_id, group_key)` | `models.py` 列 + `__table_args__` 两索引 | ✔ 一致（真机 `PRAGMA` 佐证，见 ⑦） |
+| 上传时经 M001 `resolve_window` 解析；失败 → `NULL` 不阻断；**M002 禁自算** | `upload_service.upload` + `TaskClient.resolve_window`（容错）；静态断言用例 ④ | ✔ 一致 |
+| `API-M002-002` 响应 +2 **可选**字段 | `UploadPhotoOut` + `build_upload_out` | ✔ 一致 |
+| `API-M002-003` +2 **可选**过滤参数（缺省不过滤） | `photo_routes` Query + `PhotoQueryService` + `PhotoRepository` | ✔ 一致（向后兼容哨兵用例） |
+| `PhotoDTO` +2 字段 | `PhotoDTO` + `build_photo_dto` | ✔ 一致 |
+| 派生冗余：写入点唯一 = 上传；不随挂接/改归属日回填 | 仅 `PhotoRepository.create` 写两列；`set_window_task` 未改 | ✔ 一致 |
+
+### ⑦ 遗留 + 需 PM 裁决项（含**迁移执行结果**）
+
+1. **迁移已执行（用户批准「重建可以」）**：`start_server.ps1 -Stop` → `start_server.ps1 -Seed`（**官方重建入口**：`.e2e/seed.py` 重建 `acceptance.db` + 重新种子）→ `Seed OK.` + `Health OK`。
+   **真机复核原文**：
+   ```
+   [① 迁移] photos 含 belong_date=True group_key=True
+            索引 = [..., 'ix_photos_family_belong_date', 'ix_photos_family_group_key']
+   [② 上传] status=201 belong_date=2026-09-16 group_key=2026-09-16
+   [③ 库内实读] belong_date=2026-09-16 group_key=2026-09-16 task_id=None
+   [④ 过滤] 命中日=1 未命中日=0 缺省=1（缺省应≥1 = 向后兼容）
+   ```
+   → 生产/演示库与契约一致；`task_id` 仍为 `None`（既有语义不变）。
+2. **新登记 `BUG-008`（中，`Confirmed`）** —— 迁移期间读日志发现：**DATA-009 在 SQLite 锁竞争下静默丢失**
+   （真实 AI 调用 `HTTP 200`，但 `record_call` 遇 `database is locked` → 仅 warning + 丢弃，**主链路不受影响**）。
+   根因 `core/ai/records.py:100-104`（容错正确但**无重试/无计数/无补偿**）。**本次只登记不修**（写区外），
+   详见 `docs/changes/BUG-008.md`；**建议与 `CR-006` 子项 B 同批评估**。
+3. 子项 A **未含前端消费**（`REQ-011` R1 口径升级为「本任务窗口」需另立前端任务）；子项 B / C 待排期。
+4. 时刻控制方式（冻结 `upload_service` 模块内 `datetime`）为**测试专用**；生产代码未引入时钟注入点（若后续要求可测试性更强的时钟抽象，另立技术债）。
 
 ## 6. 不在本任务范围
 

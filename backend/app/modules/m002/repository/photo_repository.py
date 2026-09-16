@@ -37,6 +37,8 @@ class PhotoRepository:
         height: int,
         sha256: str,
         quality_report_json: str,
+        belong_date: str | None = None,
+        group_key: str | None = None,
     ) -> Photo:
         row = Photo(
             photo_id=photo_id,
@@ -56,6 +58,9 @@ class PhotoRepository:
             height=height,
             sha256=sha256,
             quality_report_json=quality_report_json,
+            # `CR-006` 子项 A（v0.4.3）：窗口归属冗余（上传时解析所得；可为 None）
+            belong_date=belong_date,
+            group_key=group_key,
         )
         session.add(row)
         session.flush()
@@ -95,6 +100,8 @@ class PhotoRepository:
         task_id: str | None = None,
         kind: str | None = None,
         group_subject_id: str | None = None,
+        belong_date: str | None = None,
+        group_key: str | None = None,
         offset: int = 0,
         limit: int = 20,
     ) -> tuple[list[Photo], int]:
@@ -109,6 +116,10 @@ class PhotoRepository:
             conds.append(Photo.task_id == task_id)
         if kind:
             conds.append(Photo.kind == kind)
+        if belong_date:
+            conds.append(Photo.belong_date == belong_date)  # CR-006 子项 A（v0.4.3）
+        if group_key:
+            conds.append(Photo.group_key == group_key)  # CR-006 子项 A（v0.4.3）
         if group_subject_id:
             # 仅按“当前有效挂接”过滤（已判无效的链接不计入）
             sub = select(PhotoSubjectLink.photo_id).where(

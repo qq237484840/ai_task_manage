@@ -13,6 +13,7 @@ import json
 import logging
 import uuid
 from collections.abc import Callable
+from datetime import datetime, timezone
 from io import BytesIO
 
 from PIL import Image, UnidentifiedImageError
@@ -161,6 +162,9 @@ class UploadService:
             normalized_bytes, _ = Normalizer(s).normalize(im)
 
             # —— 阶段二：文件 + 行 两阶段写入（同生命周期，失败整体回滚清理）——
+            # 窗口归属解析（`CR-006` 子项 A / v0.4.3）：经 M001 归属引擎**纯计算**（不锁配置）；
+            # 失败 → `None`（**不阻断上传**）；归属规则**唯一来源 = M001**，此处禁止本地重算。
+            window = TaskClient.resolve_window(datetime.now(timezone.utc))
             photo_id = str(uuid.uuid4())
             seq_no = PhotoRepository.next_seq(session, batch_id)
             rel_dir = self.store.batch_rel_dir(family_id, batch_id)
@@ -191,6 +195,9 @@ class UploadService:
                     height=height,
                     sha256=sha256,
                     quality_report_json=json.dumps(report.to_dict(), ensure_ascii=False),
+                    # `CR-006` 子项 A（v0.4.3）：窗口归属冗余（解析不可用 → None，不阻断上传）
+                    belong_date=window.belong_date if window else None,
+                    group_key=window.group_key if window else None,
                 )
                 session.commit()
             except (IntegrityError, OperationalError) as exc:

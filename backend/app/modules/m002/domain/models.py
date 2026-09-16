@@ -67,6 +67,9 @@ class Photo(Base):
         Index("ix_photos_family_kind_created", "family_id", "kind", "created_at"),
         Index("ix_photos_family_task", "family_id", "task_id"),
         Index("ix_photos_student_created", "student_id", "created_at"),
+        # `CR-006` 子项 A（v0.4.3）：窗口归属冗余列索引（支撑 /photos?belong_date=/group_key= 过滤）
+        Index("ix_photos_family_belong_date", "family_id", "belong_date"),
+        Index("ix_photos_family_group_key", "family_id", "group_key"),
     )
 
     photo_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uid)
@@ -86,6 +89,12 @@ class Photo(Base):
     task_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("tasks.task_id"), nullable=True, index=True
     )
+    # —— 窗口归属冗余（`CR-006` 子项 A，v0.4.3）——
+    # `task_id` 仅在「首条挂接确认」时写（故 unassigned/suggested 照片为 NULL，TD-005 成因）；
+    # 本两列**上传即落**（经 M001 归属引擎 `resolve_window`，纯计算），使未挂接照片也具备窗口归属；
+    # 解析不可用 → NULL（**不阻断上传**）；**派生冗余**：不随挂接/改归属日回填。
+    belong_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    group_key: Mapped[str | None] = mapped_column(String(32), nullable=True)
     subject: Mapped[str | None] = mapped_column(String(32), nullable=True)  # v0.3.0 遗留，停写
     group_no: Mapped[int | None] = mapped_column(Integer, nullable=True)  # v0.3.0 遗留，停写
     suggestion_json: Mapped[str | None] = mapped_column(Text, nullable=True)  # v0.3.0 遗留，停写

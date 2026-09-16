@@ -72,6 +72,8 @@ def build_photo_dto(
         kind=photo.kind,
         status=photo.status,
         task_id=photo.task_id,
+        belong_date=photo.belong_date,  # CR-006 子项 A（v0.4.3）
+        group_key=photo.group_key,
         links=link_dtos,
         quality=_quality_report(photo),
         content_urls=_content_urls(photo.photo_id),
@@ -100,6 +102,8 @@ def build_upload_out(photo: Photo) -> UploadPhotoOut:
         seq_no=photo.seq_no,
         kind=photo.kind,
         status=photo.status,
+        belong_date=photo.belong_date,  # CR-006 子项 A（v0.4.3）
+        group_key=photo.group_key,
         quality=_quality_report(photo),
         content_urls=_content_urls(photo.photo_id),
     )

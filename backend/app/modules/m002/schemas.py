@@ -107,6 +107,9 @@ class PhotoDTO(BaseModel):
     kind: BatchKindValue
     status: PhotoStatusValue
     task_id: UUID | None = None
+    # `CR-006` 子项 A（v0.4.3）：窗口归属冗余（上传时经 M001 解析；解析不可用 → None）
+    belong_date: str | None = None
+    group_key: str | None = None
     links: list[LinkDTO] = Field(default_factory=list)
     quality: QualityReportOut
     content_urls: ContentUrlsOut
@@ -139,6 +142,9 @@ class UploadPhotoOut(BaseModel):
     seq_no: int
     kind: BatchKindValue
     status: PhotoStatusValue
+    # `CR-006` 子项 A（v0.4.3）：新增**可选**字段（向后兼容）
+    belong_date: str | None = None
+    group_key: str | None = None
     quality: QualityReportOut
     content_urls: ContentUrlsOut
 
