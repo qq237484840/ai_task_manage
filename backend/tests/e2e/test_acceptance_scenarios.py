@@ -332,7 +332,9 @@ def test_scenario5_photo_link_gate_analysis_confirm_api_level(world, real_stack)
     )
     assert sug.status_code == 200, sug.text
     body = sug.json()
-    assert set(body) == {"photo_id", "status", "suggestions"}
+    # 【键集哨兵】v0.4.3 起 = 基线 3 键 + `last_attempt`（`CR-006` 子项 B 的**新增可选字段**；
+    # 多=[] 少=[] 仍逐项从严）。哨兵作用不变：捕获**非预期**的响应形状漂移。
+    assert set(body) == {"photo_id", "status", "suggestions", "last_attempt"}
     # 【API 面证据 / BUG-003】Mock Provider 必须经**真实装配路径**回显候选学科。
     # 修复前：`suggestions == []` 且 `status == "unassigned"`；仅断言响应形状**不足以**覆盖本缺陷
     # （形状断言修复前后都通过）→ 本组断言为 `Task-013-D1` 在 API 面的唯一证据。
