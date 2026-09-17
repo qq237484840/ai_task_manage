@@ -24,11 +24,11 @@ from typing import ClassVar
 
 import pytest
 
-from app.modules.m002.clients.task_client import TaskClient
+from app.modules.m002.clients.task_client import TaskClient, set_gateway
 from app.modules.m002.domain.models import Photo
 from app.modules.m002.services import upload_service
 from tests.conftest import create_student
-from tests.m002_support import valid_jpeg
+from tests.m002_support import FakeGateway, valid_jpeg
 
 WED = datetime(2026, 9, 16, 12, 0, tzinfo=timezone.utc)  # 周三（Asia/Shanghai 20:00）→ 日窗口
 FRI = datetime(2026, 9, 18, 12, 0, tzinfo=timezone.utc)  # 周五 → 周末窗口
@@ -139,11 +139,41 @@ def test_list_photos_filters_by_belong_date_and_group_key(world, freeze_upload_n
 
 
 # ---------------------------------------------------------------- 3) 不阻断
-def test_upload_succeeds_when_m001_window_unavailable(world, factory, monkeypatch):
-    """**不阻断**：M001 归属解析不可用 → 上传仍 `201`，两列置 `NULL`，列表照常可用。
+def test_upload_succeeds_when_gateway_resolve_window_raises(world, factory):
+    """**容错分支（`TaskClient` 的 `except`）**：网关 `resolve_window` **抛异常** → 上传仍 `201`、两列 `NULL`。
 
-    替身说明（PM 铁律 ①）：`TaskClient.resolve_window` 被替换为恒 `None`（模拟 M001 未就绪/异常），
-    仅用于验证**降级路径**；本用例结论 = 「降级不阻断」，属该替身的目标语义。
+    桩说明（PM 铁律 ①）：注入 `FakeGateway` 子类（**仅** `resolve_window` 抛异常），用于验证
+    **容错分支本身**；本用例结论 = 「解析异常不得阻断上传」，属该替身的目标语义。
+    （`Task-023` 验收补强：原用例替换 `TaskClient.resolve_window`，**绕过了被测的容错逻辑**。）
+    """
+
+    class _BrokenWindow(FakeGateway):
+        def resolve_window(self, ts):  # noqa: ANN001, ARG002
+            raise RuntimeError("m001 window unavailable")
+
+    c, ha = world["client"], world["ha"]
+    stu = _student(world, "小E")
+    set_gateway(_BrokenWindow())
+    try:
+        photo = _upload(world, stu["student_id"])
+    finally:
+        set_gateway(None)
+
+    assert photo["belong_date"] is None and photo["group_key"] is None
+    with factory() as session:
+        row = session.get(Photo, photo["photo_id"])
+        assert row is not None
+        assert row.belong_date is None and row.group_key is None
+
+    assert c.get("/api/v1/photos", headers=ha).status_code == 200
+    assert c.get("/api/v1/photos?belong_date=2026-09-16", headers=ha).json()["total"] == 0
+
+
+def test_upload_succeeds_when_window_resolution_returns_none(world, factory, monkeypatch):
+    """**降级分支（调用方的 `None` 处理）**：解析返回 `None` → 上传仍 `201`、两列 `NULL`、列表照常。
+
+    替身说明（PM 铁律 ①）：`TaskClient.resolve_window` 被替换为恒 `None`（模拟 M001 未就绪），
+    验证**调用方**对 `None` 的处理（与上一用例的「异常分支」互补）。
     """
     c, ha = world["client"], world["ha"]
     monkeypatch.setattr(TaskClient, "resolve_window", staticmethod(lambda ts: None))

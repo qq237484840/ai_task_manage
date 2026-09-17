@@ -3,6 +3,50 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.25.0 —— 2026-09-17
+
+### `CR-006` 子项 A 交付并验收通过：`photos` 窗口归属冗余（`TD-005` 根治，`Task-022` / `Task-023`）
+
+**一、契约（M002 v0.4.2 → v0.4.3，非破坏性）**
+
+- `photos` 新增 **`belong_date`** / **`group_key`**（可空）+ 索引 `(family_id, belong_date)` / `(family_id, group_key)`；
+- `API-M002-002` 响应 +2 **可选**字段；`API-M002-003` +2 **可选**过滤参数（缺省不过滤 → 向后兼容）；
+- **M001 零改动** —— 复用**既有**契约接口 `TaskQueryService.resolve_window(ts) -> WindowInfo`（内部服务接口表**已列 M002 为消费者**，「纯计算、不锁配置」）；
+- ⚠️ **实施前核验纠正了 CR 原假设**：原设想「复用 `ensure_group` 得到窗口上下文」**不成立**（其 `belong_date` 是**入参**）→ 改走 `resolve_window`。
+
+**二、实现（`Task-022`）**
+
+- 数据面：`Photo` +2 列 +2 索引；`PhotoRepository.create` 落列；`list_photos` +2 可选过滤；
+- 跨模块：新增 `WindowInfoRef` + `DefaultM001Gateway.resolve_window`（按契约直调）+ `TaskClient.resolve_window`（**容错**：异常 → `None` + warning，**不抛**）；
+- 上传链路：**上传时**解析并落库（**纯计算**，不锁配置）；**解析失败 → `NULL`，上传仍 `201`（不阻断）**；
+- **单一知识源**：M002 **未复制**任何归属规则（4 点日界 / 周末合并 / 聚合键拼装），并有**静态断言用例**守护。
+
+**三、验收（`Task-023`，8 条全通过）**
+
+- **真机 13/13 PASS**：`PRAGMA` 新列/索引就位；上传 `201 / belong_date=2026-09-17 / group_key=2026-09-17` + **库内实读一致** + `task_id=None`（既有语义不变）；**响应键集 = 基线 + 新增 2 字段（无多无少）**；过滤 `命中1 / 未命中0 / 缺省1`；
+- **周末合并**：用例级（时刻可控）覆盖 —— 周五 `2026-09-18` 与周日 `2026-09-20` → 同一 `group_key = W:2026-09-18`；
+- **红→绿**：移除 `TaskClient` 容错 → 异常直穿 `main.py:112 unhandled error`（`RED_EXIT=1`）→ 证明容错分支是「不阻断」唯一保障；
+- **全量回归 274 / 0 / 0 / 0**；
+- **验收发现并补强 1 处覆盖缺口**：`Task-022` 原「不阻断」用例**替换的正是被测的容错层**（只验了调用方对 `None` 的处理）→ 拆为「网关抛异常」+「返回 `None`」两分支。
+
+**四、迁移与登记**
+
+- 迁移：`start_server.ps1 -Seed`（官方重建入口，内部 ` .e2e/seed.py` 重建 `acceptance.db` + 重新种子）—— `main.py` 的 `Base.metadata.create_all` **不为既有表加列**；V1 无生产数据 → **允许重建**（用户批准）。
+- **新登记 `BUG-008`（中，`Confirmed`）**：**DATA-009（AI 调用记录）在 SQLite 锁竞争下静默丢失** —— 真实 AI 调用 `HTTP 200`，但 `record_call` 遇 `database is locked` → 仅 warning + `return None`（`app/core/ai/records.py:100-104`，**无重试/无计数/无补偿**）；**主链路不受影响**。迁移期间实测复现；**只登记不修**，建议与 `CR-006` 子项 B 同批评估。
+- **执行方式说明**：`Task-022` / `Task-023` 均由 **PM 代执行**（本机无具备写权限的执行 subagent）→ **不构成独立第三方验收**（已如实标注各任务书 §5）。
+
+## v0.24.0 —— 2026-09-16
+
+### `CR-005` 落地收口 → `Applied`：布置单「图片源」解析通路打通（`REQ-011` 第二阶段 A1）
+
+> **补登说明**：本条为**回溯补登**（`CR-005` 收口时已更新 `PROJECT_STATUS.md` 与各模块文档，本文件当时遗漏）。
+
+- **契约**：M001 增 `API-M001-022`（`POST /tasks/{task_id}/reparse`，`Active`，v0.3.0）+ M001/M002 内部服务接口各 +1（**沿用既有唯一回调通道**，非直连）；M002 v0.4.2（`provide_task_source_image` 受控取图 + 启动期幂等自愈）。
+- **实现**：M001 `image_provider` 回调槽 + **`task_parser._vision_is_real()` 防伪造硬约束**（仅真实 Vision 才转发图片源 —— `BUG-004` 教训固化为判据）+ `task_service.reparse`（`placeholder` 写入 / `parsed` **整体替换** / 失败**不清空** / `confirmed` → `409 spec_confirmed`）；前端「重新解析」按钮（`confirmed` 隐藏、单请求 60s、反馈以内容项为准**不谎报**）。
+- **验收（`Task-021`，8 条全通过）**：真机布置单图片源 `POST /tasks → 201 / parsed / 4 项内容` + DATA-009 `task_spec_parse / qwen3.8-flash / mock=0 / status=ok`；跨家庭引用 → `placeholder / 0`（**不转发 = 不越权取图**）；**防伪造红→绿**（移除判据 → `assert 'parsed' == 'placeholder'` 失败，`RED_EXIT=1`）；全量回归 **267 / 0 / 0 / 0**；浏览器级**成功分支 7/7 + 失败分支 7/7**；前端 `TSC_EXIT=0` / `BUILD_EXIT=0`。
+- **登记**：`TD-006`（M001 不校验图片源 `photo_id` 归属 —— 防越权仅由 M002 一道承担；无越权读取路径 → 风险低）。
+- **过程失误如实记录**：构造失败分支时误将 `.env` 的 `AT_AI_*`（含三方密钥）打印到对话（`.env` 已 gitignore、未入库）→ **建议轮换密钥**（用户 2026-09-16 决定暂不轮换）。
+
 ## v0.23.0 —— 2026-09-14
 
 ### 真实三方 AI 联调打通 + `BUG-005` / `BUG-006` 登记并修复（`Task-015` / `Task-016`）
