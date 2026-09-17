@@ -3,6 +3,51 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.26.0 —— 2026-09-17
+
+### `CR-006` 子项 B 交付并验收通过：`API-M002-007` 响应 +`last_attempt`（AI 失败原因可见，`Task-024` / `Task-025`）
+
+**一、契约（M002 v0.4.3 → v0.4.4，非破坏性）**
+
+- `GET /api/v1/photos/{photo_id}/link-suggestions` 响应 +**可选字段** `last_attempt`
+  = `{code, message}`（该照片**最近一次** `photo_link_suggest` 调用的**失败**留痕），否则 `null`；
+- `code` ∈ `AIErrorCode`（继承 `BUG-005` 语义：`quota_exhausted` 等**可区分**于「鉴权失败」）；
+  `message` **脱敏**（`sk-` → `[REDACTED]`）+ **三方摘要截断 ≤200 字**；
+- **非破坏性**：不新增端点/API ID，Method/Path/错误语义与既有字段不变；前端本期零消费；
+- **版本校正**：子项 A 已占用 v0.4.3 → 子项 B = **v0.4.4**（子项 C 顺延 v0.4.5）。
+
+**二、实现（`Task-024`）**
+
+- 数据来源 = **DATA-009**（`ai_call_records`）**只读**：检索键 = `json_extract(input_ref,'$.photo_id')`
+  + `capability='photo_link_suggest'`（`input_ref`/`error` 均为 JSON `TEXT` → 前者 `json_extract` 检索、后者 `json.loads` 解析后透传）；
+- **读取失败不阻断主流程**（表缺失/JSON 损坏 → `null` + warning）；**成功 / 无记录 → `null`**（不展示过期失败）；
+- 脱敏/截断规则**不复制**（沿用 `app/core/ai/errors.py` 单一来源）；
+- ⚠️ **首版实施提交（`1afb33c`）经复核发现 5 处硬缺口并全部修复**：① 以**不存在的** `photo.upload_request_id` 检索
+  （`AttributeError` 被宽 `except` 吞 → 功能**恒 `null`**）；② `error`（JSON 字符串）当对象取 `.code.value`；
+  ③ `Any` 未导入 + 死代码；④ 承诺的 4 例用例**未创建**；⑤ 契约文档仅同步 1 处 —— 详见 `Task-024 §5`。
+
+**三、验收（`Task-025`，8 条全通过）**
+
+- **真机 11/11 PASS**（`:8011` + 独立库；两阶段：`auto` 造 M001 窗口/学科子任务 → `real` + 禁兜底验失败分支）：
+  键集 = 基线 +`last_attempt`（多=[] 少=[]）、**真实三方 503** 被如实暴露
+  （`server_error` + `三方摘要: model_not_found: No available channel for model qwen3.8-flash …`，`msg_len=168`）、
+  **响应 = 库内实读**（`db_code=server_error resp_code=server_error`，`n=6` 全 `error`）、只读查询不产生新 AI 调用；
+- **两组红→绿**（亲手）：**A** 检索键回退为错误键 → 2 例 FAIL（`RED_EXIT=1`）；**B** 使 `_last_attempt` 的 `except` 失效
+  → `no such table: ai_call_records` 直穿 → FAIL（`RED6_EXIT=1`）；
+- **全量回归 278 / 0 / 0 / 0**（基线 274 + 新增 4）；`read_lints=0`；
+- **验收补强 1 处覆盖缺口**：`create_all` 已建出 `ai_call_records` → 原「无记录」断言**触达不到 `except`**
+  → 改为**显式 `DROP TABLE`**（真实失败模式）后方具判别力；
+- **最小扩权（仅 1 行）**：`e2e` 剧本 5 的响应键集哨兵 +`last_attempt`（契约内新增可选字段，哨兵须同步）。
+
+**四、执行方式与登记**
+
+- `Task-024` / `Task-025` 均由 **PM 代执行**（本机无具备写权限的执行 subagent）→ **不构成独立第三方验收**（如实标注各任务书 §5）；
+- **新登记 `BUG-009`（高，`Confirmed`）**：**DATA-009 写失败（锁竞争）导致 Session 中毒 → `API-M002-007` 返回 500** ——
+  `app/core/ai/records.py:100-104` 的 `except` **只 warning、不 `session.rollback()`** → `m002/api/link_routes.py:88`
+  同 Session `commit()` 抛 `PendingRollbackError` → **500**（真机「后台建议线程 × `retry`」并发写触发；已用**持写锁**构造确定性复现，
+  并**基线对照**证明**非本子项引入**）。**修正 `BUG-008` 结论**：「主链路不受影响」在并发写下**不成立**。
+  **只登记不修**；建议与 `BUG-008` **合并修复**（同源、同写区 `app/core/ai/**`），优先级**置于子项 C 之前**。
+
 ## v0.25.0 —— 2026-09-17
 
 ### `CR-006` 子项 A 交付并验收通过：`photos` 窗口归属冗余（`TD-005` 根治，`Task-022` / `Task-023`）

@@ -2,6 +2,19 @@
 
 - **模块**：M002 ｜ 变更管理遵循 `docs/CHANGELOG.md` 与 `ID_GOVERNANCE.md`
 
+## v0.4.4（2026-09-17，**Frozen 面内非破坏性修订 —— 用户批准**）—— `API-M002-007` 响应 +`last_attempt`（`CR-006` 子项 B）
+
+- **依据**：`CR-006`（Approved，用户批准 2026-09-16，A/B/C 三项全批）；本版**仅含子项 B**（AI 失败原因对用户可见）；子项 C（重试异步化）待后续版本
+- **变更**：`API-M002-007`（`GET /photos/{photo_id}/link-suggestions`）响应新增**可选字段** `last_attempt`：该照片**最近一次** `photo_link_suggest` AI 调用的留痕 —— 仅当该次尝试**失败**时为 `{code, message}`，否则 `null`（成功 / 无记录 / 读取异常 → `null`）
+  - `code` ∈ `AIErrorCode`（继承 `BUG-005` 语义：`quota_exhausted` 等**可区分**于「鉴权失败」）；`message` 脱敏 + 三方摘要截断 ≤200 字（约束**沿袭写入侧** `app/core/ai/errors.py`，M002 **不复制**脱敏/截断规则）
+  - 数据来源 = DATA-009（`ai_call_records`）**只读**：检索键 = `json_extract(input_ref,'$.photo_id')` + `capability='photo_link_suggest'`；`input_ref`/`error` 均为 JSON `TEXT` → 前者以 SQLite JSON1 `json_extract` 检索、后者 `json.loads` 解析后透传
+- **理由**：AI 不可用时端点**静默降级**（契约明文不报错），前端只能猜「可能不可用」，**看不到真实原因**（`quota_exhausted` / `server_error` / 502 …）→ 无法给出可操作提示（如「账户余额不足，请联系管理员」）
+- **非破坏性**：仅**新增可选**响应字段；`retry` 语义、错误语义、Method/Path、既有字段（`photo_id`/`status`/`suggestions`）均不变；前端本期**零消费**（可忽略该字段）
+- **数据模型**：**无变更**（DATA-009 既有字段已足够：`status`/`error`/`input_ref`/`created_at`）
+- **已知边界**：`input_ref` **无独立列/索引** → 现以 `json_extract` 全表检索（V1 数据量小，未见性能问题；若后续成为瓶颈，可加**表达式索引** —— 需 `app/core/ai` 侧变更，届时走 CR）
+- **实施 / 验收**：`Task-024`（`AGENT-M002`）/ `Task-025`（验收）
+- **契约版本**：v0.4.3 → **v0.4.4**
+
 ## v0.4.3（2026-09-16，**Frozen 面内非破坏性修订 —— 用户批准**）—— `photos` 窗口归属冗余 + `API-M002-002`/`003` 修订（`CR-006` 子项 A）
 
 - **依据**：`CR-006`（Approved，用户批准 2026-09-16，A/B/C 三项全批）；本版**仅含子项 A**（`TD-005` 根治）；子项 B（AI 失败原因可见）/ C（重试异步化）待后续版本

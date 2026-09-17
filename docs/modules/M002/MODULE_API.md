@@ -1,6 +1,6 @@
 # M002 模块 API（权威源）—— 作业图片采集与归属
 
-- **状态**：**v0.4.3（`CR-006` 子项 A，用户批准 2026-09-16）** —— **v0.4.3 = `photos` 窗口归属冗余列（`belong_date`/`group_key`，上传时经 M001 契约内 `resolve_window` 解析）+ `API-M002-002`（响应 +2 可选字段）/ `API-M002-003`（+2 可选过滤参数）**；**非破坏性**（新增可空列与可选字段/参数，既有语义不变）；**v0.4.2 = 内部服务接口 +1（`provide_task_source_image`，受控提供布置单/作业图片供 M001 链路 T 解析）；非破坏性，对外端点不变**；v0.4.1（Frozen，用户批准 2026-09-10；= `CR-004` Applied，仅 `API-M002-007` 响应体收敛，非破坏性） —— v0.4.0 按 `CR-003`/`ADR-013`/`ADR-014` 修订（入口 `kind`、N:N 挂接、逐张复核、门控、完成分析）。既有 `API-M002-001/002/003/005` 修订；新增端点 API ID **已由 PM 分配 = `API-M002-007~011`**（`API_REGISTRY.md`；**已 Active**，`Task-008` 实施 + PM 复验）；前版 v0.4.0 Frozen（2026-09-10）、v0.3.0 Frozen（2026-09-08）
+- **状态**：**v0.4.4（`CR-006` 子项 B，用户批准 2026-09-16）** —— **v0.4.4 = `API-M002-007` 响应 +可选字段 `last_attempt`（消费 DATA-009 暴露 AI 失败原因）**；**非破坏性**（新增可选字段，Method/Path/错误语义与既有字段均不变）；**v0.4.3（`CR-006` 子项 A，用户批准 2026-09-16）** —— **v0.4.3 = `photos` 窗口归属冗余列（`belong_date`/`group_key`，上传时经 M001 契约内 `resolve_window` 解析）+ `API-M002-002`（响应 +2 可选字段）/ `API-M002-003`（+2 可选过滤参数）**；**非破坏性**（新增可空列与可选字段/参数，既有语义不变）；**v0.4.2 = 内部服务接口 +1（`provide_task_source_image`，受控提供布置单/作业图片供 M001 链路 T 解析）；非破坏性，对外端点不变**；v0.4.1（Frozen，用户批准 2026-09-10；= `CR-004` Applied，仅 `API-M002-007` 响应体收敛，非破坏性） —— v0.4.0 按 `CR-003`/`ADR-013`/`ADR-014` 修订（入口 `kind`、N:N 挂接、逐张复核、门控、完成分析）。既有 `API-M002-001/002/003/005` 修订；新增端点 API ID **已由 PM 分配 = `API-M002-007~011`**（`API_REGISTRY.md`；**已 Active**，`Task-008` 实施 + PM 复验）；前版 v0.4.0 Frozen（2026-09-10）、v0.3.0 Frozen（2026-09-08）
 - **REST 前缀**：`/api/v1`；**认证**：全部接口需 `Authorization: Bearer <token>`
 - **主体**（ADR-009/ACR-001）：`family`（家长，可代传任一本家学生，带 `student_id`）；`student`（仅本人，`student_id` 忽略/强制本人）
 - **错误体统一**：`ErrorResponse { "code", "message", "request_id" }`（HTTP 映射见契约 Failure Behavior）
@@ -8,7 +8,8 @@
 - **API ID**：既有 `API-M002-001~006` 由 PM 分配；**本变更新增端点 API ID = `API-M002-007~011`**（已由 PM 分配登记 `API_REGISTRY.md`，Draft；原「申请清单」见文末）
 - **DTO 约定**：`QualityCheckItem = {id, passed, value, threshold, severity(reject|warn)}`；`QualityReport = {ruleset_version, passed, checks[]}`；`PhotoDTO = {photo_id, student_id, batch_id, kind, seq_no, status, task_id(窗口级), belong_date(窗口归属日，v0.4.3，可空), group_key(窗口聚合键，v0.4.3，可空), links:[LinkDTO], quality, content_urls, created_at}`
   - `LinkDTO = {link_id, group_subject_id, subject(展示用), source(ai|manual), confidence|null, confirmed_at|null, rejected_at|null}`
-  - **`LinkSuggestionItem`（v0.4.1，`CR-004`）= {link_id, group_subject_id, subject|null(展示用), confidence|null, source(ai|manual), suggested_at}**；**`LinkSuggestionResult` = `API-M002-007` 响应 `{photo_id, status, suggestions:[LinkSuggestionItem]}`**
+  - **`LinkSuggestionItem`（v0.4.1，`CR-004`）= {link_id, group_subject_id, subject|null(展示用), confidence|null, source(ai|manual), suggested_at}**；**`LinkSuggestionResult` = `API-M002-007` 响应 `{photo_id, status, last_attempt|null, suggestions:[LinkSuggestionItem]}`**（`last_attempt` = v0.4.4 新增，`CR-006` 子项 B）
+  - **`LastAttempt`（v0.4.4，`CR-006` 子项 B）= {code, message} | null** —— 最近一次 AI 调用尝试的**失败**原因（`code` ∈ `AIErrorCode`；`message` 脱敏 + 三方摘要截断，继承 `BUG-005`）
   - `GateStatusDTO = {group_key, window_type, total_photos, pending_photos, satisfied}`
   - ~~`Suggestion = {task_id, subject, group_no, ...}`（段级）~~ **作废**（ADR-013；建议态改由 `links` 承载）
 
@@ -120,7 +121,7 @@
 
 ## CR-003 新增端点详细契约（API-M002-007~011）
 
-### API-M002-007 挂接建议查询/重试（**响应体 v0.4.3：+`last_attempt` 字段；消费 DATA-009 暴露 AI 失败原因，`CR-006` 子项 B**）
+### API-M002-007 挂接建议查询/重试（**响应体 v0.4.4：+`last_attempt` 字段；消费 DATA-009 暴露 AI 失败原因，`CR-006` 子项 B**）
 - `GET /api/v1/photos/{photo_id}/link-suggestions?retry=false`（Bearer；`retry` 缺省 `false`）
 - 语义：返回该照片**当前有效**的挂接项 —— `rejected_at IS NULL` 的 `photo_subject_links`（含 `source=ai` 未确认建议、`source=manual` 手工挂接、以及已确认项）；`retry=true` 触发**幂等**重试建议（仅处理未挂接照片；AI 不可用时静默降级、不报错）
 - `subject` 为**展示用**学科名（经 M001 契约内接口解析），解析失败时为 `null`
@@ -136,7 +137,8 @@
   ]
 }
 ```
-  - `status` = 照片状态；`last_attempt`（**新增 v0.4.3**）= 最近一次 AI 调用尝试的结果 —— `code`（见 `AIErrorCode`）、`message`（脱敏 + 截断，≤200 字）；**成功时为 `null`**；消费 `ai_call_records` 的 `error`/`status` 字段
+  - `status` = 照片状态；`last_attempt`（**新增 v0.4.4**）= 该照片**最近一次** `photo_link_suggest` 调用的留痕，**仅当该次尝试失败时为对象，否则 `null`**（成功 / 无记录 / 读取异常 → `null`，不展示过期失败）：`code` ∈ `AIErrorCode`、`message`（**继承 `BUG-005` 的脱敏 + 三方摘要截断 ≤200 字**；`message` 形如「统一错误文案 | 三方摘要: …」，故**整体长度 = 文案前缀 + 摘要**，截断约束施加于**三方摘要**而非整体）
+  - `last_attempt` 数据来源 = **DATA-009**（`ai_call_records`）：检索键 = **`json_extract(input_ref,'$.photo_id')`** + `capability='photo_link_suggest'`（`input_ref` 为 JSON `TEXT`、**无独立列/索引**，写入侧见 `app/core/ai/service.py`）；`error` 列为 JSON `TEXT`（`AIError.as_dict()`）→ 解析后透传；**读取失败不得阻断主流程**（降级 `null` + warning）
   - `suggested_at` = 该挂接项创建时间（UTC ISO-8601）；`suggestions` 为空数组表示无有效挂接项
 - Errors：`401`；`404`（照片不存在 / 越权，对外 404）；`500`
 

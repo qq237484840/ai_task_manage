@@ -1,7 +1,7 @@
 # M002 模块契约（黑盒）—— 作业图片采集与挂接
 
-- **Module ID**：M002 ｜ **版本**：**v0.4.3（Frozen 面内非破坏性修订）** ｜ **日期**：2026-09-16（**v0.4.3 = `CR-006` 子项 A**：`photos` 窗口归属冗余列 `belong_date`/`group_key`（**上传时**经 M001 契约内 `resolve_window` 解析）+ `API-M002-002`/`003` 修订；**v0.4.2 = `CR-005` Applied**：内部服务接口 +1 = `provide_task_source_image`（受控取图）；v0.4.1 = `CR-004` Applied，仅 `API-M002-007` 响应体）
-- **状态**：**契约 v0.4.0 —— Frozen（用户批准 2026-09-10）**（前版 v0.3.0 为 Frozen 基线，2026-09-08 用户批准）；本次按 `CR-003`（Approved）/`ADR-013`（Accepted）/`ADR-014`（Accepted）作**破坏性修订**，经 PM 复核 APPROVED 后由用户批准冻结；**v0.4.2（`CR-005`）与 v0.4.3（`CR-006` 子项 A）均为 Frozen 面内非破坏性修订**（两项 CR 经用户批准 2026-09-16）
+- **Module ID**：M002 ｜ **版本**：**v0.4.4（Frozen 面内非破坏性修订）** ｜ **日期**：2026-09-17（**v0.4.4 = `CR-006` 子项 B**：`API-M002-007` 响应 +**可选字段** `last_attempt`（消费 DATA-009 暴露 AI 失败原因）；**v0.4.3 = `CR-006` 子项 A**：`photos` 窗口归属冗余列 `belong_date`/`group_key`（**上传时**经 M001 契约内 `resolve_window` 解析）+ `API-M002-002`/`003` 修订；**v0.4.2 = `CR-005` Applied**：内部服务接口 +1 = `provide_task_source_image`（受控取图）；v0.4.1 = `CR-004` Applied，仅 `API-M002-007` 响应体）
+- **状态**：**契约 v0.4.0 —— Frozen（用户批准 2026-09-10）**（前版 v0.3.0 为 Frozen 基线，2026-09-08 用户批准）；本次按 `CR-003`（Approved）/`ADR-013`（Accepted）/`ADR-014`（Accepted）作**破坏性修订**，经 PM 复核 APPROVED 后由用户批准冻结；**v0.4.2（`CR-005`）、v0.4.3（`CR-006` 子项 A）与 v0.4.4（`CR-006` 子项 B）均为 Frozen 面内非破坏性修订**（两项 CR 经用户批准 2026-09-16）
 - **适用**：黑盒约定。内部实现见 `MODULE_DESIGN.md` 与 `MODULE_DATA.md`
 - **权威源**：`docs/requirements/CLARIFICATION-2026-09-10.md`（冲突时以其为准）
 - **v0.4.0 变更摘要（CR-003 §2.2 B1~B10）**：① 上传入口分「**任务**」/「**作业**」，`kind` 由入口决定且权威在 `upload_batches.kind`（B1/B2）；「作业」上传**不填任何内容**。② 归属由**段级 1:N** 放开为 **照片 ↔ 聚合学科子任务 N:N**（新增 `photo_subject_links`，DATA-016）（B3）。③ 新增 `completion_analyses`（DATA-017）+ **窗口级门控**（B4）。④ 挂接与复核链路契约化（异步建议 → 逐张复核 → 门控 → 完成分析 → 家长确认）（B5）。⑤ 降级兜底（`unassigned` + 手工挂接必须保留）（B6）。⑥ `photos.subject`/`group_no`/`suggestion_json` **Deprecated**；`task_id` 降为**窗口级归属**（B1）。⑦ 清理「M003/M004」前向引用（改链路 T / 链路 H + `app/core/ai/`，B7）。⑧ 新增端点 **API ID 已由 PM 分配 = `API-M002-007~011`**（B8，Draft）。⑨ 断言基线 112 → 扩展（B9）。
@@ -167,3 +167,5 @@ V1 闭环第二环节（REQ-002 / 链路 H）：学生（或家长代传）把�
 > **v0.4.0 已于 2026-09-10 由用户批准并冻结（Frozen）**；② 契约修订评审（`CHANGE-003` ②，Task-005）关闭，③ 实施（`Task-008`）依据本定稿启动（Contract First 前置已满足）。v0.3.0 为 Frozen 基线（2026-09-08 用户批准）。
 >
 > **v0.4.1（`CR-004` Applied，2026-09-10，用户批准）**：`API-M002-007` 响应体以**运行实现为准**修订为 `{photo_id, status, suggestions:[LinkSuggestionItem]}`（非破坏性：不改 Method/Path/错误语义；前端零返工、后端零代码改动）。本版**不涉及**数据模型 / 分层设计 / 文件面 / 测试基线 —— 四者仍以 v0.4.0 描述为准。
+>
+> **v0.4.2 / v0.4.3 / v0.4.4（Frozen 面内非破坏性修订，用户批准 2026-09-16）**：`CR-005`（内部服务接口 +1 = 受控取图）、`CR-006` 子项 A（`photos` 窗口归属冗余 + `API-M002-002`/`003`）、`CR-006` 子项 B（`API-M002-007` +可选字段 `last_attempt`）。逐版明细以 `MODULE_CHANGELOG.md` 为权威源，此处不重复。

@@ -12,6 +12,8 @@
 ## API 登记表
 
 > **2026-09-16（`CR-005` Approved）**：M001 契约 **v0.2.0 → v0.3.0** —— 新增 **`API-M001-022`（任务重新解析，`POST /api/v1/tasks/{task_id}/reparse`）**（状态 **Draft**，随实施转 Active）；M002 契约 **v0.4.1 → v0.4.2** —— **内部服务接口 +1**（`provide_task_source_image`，**不新增对外 API ID**）。均**非破坏性**。
+>
+> **2026-09-17（`CR-006` 子项 B 落地）**：M002 契约 **v0.4.3 → v0.4.4** —— `API-M002-007` 响应 +**可选字段** `last_attempt`（消费 DATA-009 暴露 AI 失败原因）。**非破坏性**（不新增端点/ID，Method/Path/错误语义不变）。
 
 | API ID | 名称 | Owner 模块 | 版本 | 状态 | 方法/路径(摘要) | 详细定义位置 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -43,7 +45,7 @@
 | API-M002-004 | 受控取图 | M002 | v0.3.0 | Frozen | GET `/api/v1/photos/{photo_id}/content` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-005 | 照片挂接复核（逐张 accept/reject/relink，v0.4.0 语义修订；原「照片归属操作」`/associate` 已移除） | M002 | v0.4.0 | Frozen | POST `/api/v1/photos/{photo_id}/links` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-006 | 撤销/清理照片 | M002 | v0.3.0 | Frozen | DELETE `/api/v1/photos/{photo_id}` | `docs/modules/M002/MODULE_API.md` |
-| API-M002-007 | 挂接建议查询/重试（v0.4.1 响应体 = `{photo_id, status, suggestions[]}`，`CR-004` Applied） | M002 | v0.4.1 | Active | GET `/api/v1/photos/{photo_id}/link-suggestions` | `docs/modules/M002/MODULE_API.md` |
+| API-M002-007 | 挂接建议查询/重试（v0.4.4 响应体 = `{photo_id, status, last_attempt\|null, suggestions[]}`；`last_attempt` = `CR-006` 子项 B 新增，V0.4.1 收敛见 `CR-004`） | M002 | v0.4.4 | Active | GET `/api/v1/photos/{photo_id}/link-suggestions` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-008 | 门控状态查询 | M002 | v0.4.0 | Active | GET `/api/v1/photo-gates` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-009 | 完成分析生成 | M002 | v0.4.0 | Active | POST `/api/v1/completion-analyses` | `docs/modules/M002/MODULE_API.md` |
 | API-M002-010 | 完成分析确认 | M002 | v0.4.0 | Active | POST `/api/v1/completion-analyses/{analysis_id}/confirmation` | `docs/modules/M002/MODULE_API.md` |
