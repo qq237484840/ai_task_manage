@@ -120,7 +120,7 @@
 
 ## CR-003 新增端点详细契约（API-M002-007~011）
 
-### API-M002-007 挂接建议查询/重试（**响应体 v0.4.1 = `CR-004` Applied，以运行实现为准**）
+### API-M002-007 挂接建议查询/重试（**响应体 v0.4.3：+`last_attempt` 字段；消费 DATA-009 暴露 AI 失败原因，`CR-006` 子项 B**）
 - `GET /api/v1/photos/{photo_id}/link-suggestions?retry=false`（Bearer；`retry` 缺省 `false`）
 - 语义：返回该照片**当前有效**的挂接项 —— `rejected_at IS NULL` 的 `photo_subject_links`（含 `source=ai` 未确认建议、`source=manual` 手工挂接、以及已确认项）；`retry=true` 触发**幂等**重试建议（仅处理未挂接照片；AI 不可用时静默降级、不报错）
 - `subject` 为**展示用**学科名（经 M001 契约内接口解析），解析失败时为 `null`
@@ -129,13 +129,15 @@
 {
   "photo_id": "uuid",
   "status": "unassigned|suggested|assigned|rejected",
+  "last_attempt": { "code": "provider_unavailable", "message": "AI 服务暂时不可用，请稍后重试" },
   "suggestions": [
     { "link_id": "uuid", "group_subject_id": "uuid", "subject": "数学",
       "confidence": 0.87, "source": "ai", "suggested_at": "2026-09-10T10:06:48.613Z" }
   ]
 }
 ```
-  - `status` = 照片状态；`suggested_at` = 该挂接项创建时间（UTC ISO-8601）；`suggestions` 为空数组表示无有效挂接项
+  - `status` = 照片状态；`last_attempt`（**新增 v0.4.3**）= 最近一次 AI 调用尝试的结果 —— `code`（见 `AIErrorCode`）、`message`（脱敏 + 截断，≤200 字）；**成功时为 `null`**；消费 `ai_call_records` 的 `error`/`status` 字段
+  - `suggested_at` = 该挂接项创建时间（UTC ISO-8601）；`suggestions` 为空数组表示无有效挂接项
 - Errors：`401`；`404`（照片不存在 / 越权，对外 404）；`500`
 
 ### API-M002-008 门控状态查询
