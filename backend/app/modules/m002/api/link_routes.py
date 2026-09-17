@@ -1,16 +1,18 @@
-"""M002 挂接建议与门控端点（API-M002-007 / API-M002-008，契约 v0.4.0）。
+"""M002 挂接建议与门控端点（API-M002-007 / API-M002-008，契约 v0.4.3）。
 
 - API-M002-007 `GET /api/v1/photos/{photo_id}/link-suggestions`（挂接建议查询 / 重试）
 - API-M002-008 `GET /api/v1/photo-gates`（窗口级门控状态查询）
 """
 from __future__ import annotations
 
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.v1.deps import current_context, get_session
+from app.core.ai.service import get_ai_service
 from app.modules.m002.clients.task_client import TaskClient
 from app.modules.m002.config import M002Settings, get_m002_settings
 from app.modules.m002.domain.errors import NotFoundError
@@ -24,6 +26,8 @@ from app.modules.m002.schemas import (
 from app.modules.m002.services.gate_service import GateService
 from app.modules.m002.services.link_service import LinkService
 from app.shared.auth import AuthContext
+
+_logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(tags=["M002 挂接建议/门控"])
 
@@ -62,7 +66,27 @@ def get_link_suggestions(
                 suggested_at=link.created_at,
             )
         )
-    return LinkSuggestionOut(photo_id=photo.photo_id, status=photo.status, suggestions=items)
+    # `CR-006` 子项 B：读取 DATA-009 暴露 AI 失败原因（按 photo.upload_request_id 过滤最近记录）
+    last_attempt: dict[str, Any] | None = None
+    try:
+        ai_svc = get_ai_service()
+        # 按 capability=photo_link_suggest 过滤，取最新一条
+        from app.core.ai.records import AICallRecord
+        recent = (
+            db.query(AICallRecord)
+            .filter(
+                AICallRecord.request_id == photo.upload_request_id,
+                AICallRecord.capability == "photo_link_suggest",
+            )
+            .order_by(AICallRecord.created_at.desc())
+            .first()
+        )
+        if recent and (recent.status == "error" or recent.error):
+            last_attempt = {"code": recent.error.code.value, "message": recent.error.message}
+            _logger.info("M002 link-suggestions: last_attempt=%s", last_attempt)
+    except Exception as exc:  # noqa: BLE001 - 读取 DATA-009 失败不影响主流程
+        _logger.warning("读取 DATA-009 失败（%s）→ last_attempt=null", exc)
+    return LinkSuggestionOut(photo_id=photo.photo_id, status=photo.status, last_attempt=last_attempt, suggestions=items)
 
 
 @router.get("/photo-gates", response_model=list[GateStatusDTO])

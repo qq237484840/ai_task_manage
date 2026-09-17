@@ -83,6 +83,8 @@ class LinkSuggestionOut(BaseModel):
 
     photo_id: UUID
     status: PhotoStatusValue
+    # `CR-006` 子项 B：最近一次 AI 调用尝试结果（成功时为 null，失败时见 code/message）
+    last_attempt: dict[str, Any] | None = None
     suggestions: list[LinkSuggestionItemOut] = Field(default_factory=list)
 
 
