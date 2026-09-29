@@ -3,6 +3,46 @@
 > 维护：Project Master。语义化版本（主.次.修订）。
 > 模块级变更进入各模块 `MODULE_CHANGELOG.md`；重大变更（CHANGE-nnn）另存 `docs/changes/`。
 
+## v0.27.0 —— 2026-09-29
+
+### `BUG-008` + `BUG-009` 合并修复：DATA-009 写入失败不污染事务 + 留痕丢失可观测（`Task-026` / `Task-027`）
+
+**一、根因（同源同写区 → 合并为一个修复任务）**
+
+- `app/core/ai/records.py` 的 `record_call` 以 `except Exception` 兜底「审计写入失败不得中断主链路」
+  （**设计意图正确**），但三处缺失：① **未 `session.rollback()`** → Session 进「待回滚」→ 调用方随后的
+  `commit`/查询抛 `PendingRollbackError` → **`API-M002-007` 500**（`BUG-009`，高）；
+  ② **无重试** → SQLite 锁竞争下留痕丢失；③ **无计数** → 丢失只留一条 warning，**不可观测**（`BUG-008`，中）。
+
+**二、修复（写区**仅** `app/core/ai/records.py`）**
+
+- **不污染事务**：新增 `_rollback_quietly()`（内部再包 `try/except`，回滚自身失败亦不得抛出），
+  **任何**失败路径（含 `_ensure_table` 失败与每次 flush 失败）都先回滚；
+- **有限重试**：仅对**瞬时**故障（`sqlalchemy.exc.OperationalError`）重试 —— 总 **2** 次尝试 + 退避 `0.05s × attempt`
+  （**pysqlite `timeout=5s` 单次已自带等待**，再多只会线性放大最坏时延）；
+- **丢失可观测**：仍失败 → 累计 **`dropped_record_count()`**（线程安全、单调递增，`__all__` 导出），
+  终态日志由 `warning` 升级为 **`error`**（含 `dropped=` 累计值 / `capability` / `request_id`）；
+- **契约零变更**：DATA-009 字段、`API-M002-007` 响应与错误语义均不变。
+
+**三、验收（`Task-027`，8 条全通过）**
+
+- **真机 7/7 PASS**（`:8011` + 独立库，两阶段）：持写锁 + `retry=true` → **`200`**（对照 `Task-025` 同构造的
+  **`RESP_STATUS=500`** 原文）；持锁期间 `records 0->0`（构造有效）、解锁后 `0->1`（留痕恢复）；
+  服务端 **5 条 `ERROR`**：`DATA-009 留痕丢失（dropped=1…5）… database is locked` —— **不再静默**；
+- **两组红→绿（亲手）**：A 把 `_rollback_quietly` 置空操作 → 4 例 FAIL（`PendingRollbackError`，含端点级 500）
+  `RED_EXIT=1`；B 关闭重试 → `assert None is not None`、`RED_RETRY_EXIT=1`；
+- **全量回归 283 / 0 / 0 / 0**（基线 278 + 新增 5：单测 4 + 集成 1）；`read_lints=0`；
+- **验收发现并修正 1 处用例判别力缺口**：重试用例首版在**关闭重试时仍通过** —— 因 **SQLite busy handler 会超出
+  设定 `timeout`**（`0.1s` 实测等到 ~`0.13s`）与释放时刻撞车 → 首试直接成功、用例从未触发重试；
+  改为引擎 `timeout=0`（遇锁立即 `SQLITE_BUSY`）后时序确定，红取证生效。
+
+**四、遗留与登记**
+
+- **WAL / `busy_timeout` 未启用**（`core/database.py`，全局行为变更）→ 真机持锁期间**仍可能丢失**留痕（仅已可观测）；
+- 持锁请求时延可达 **23.5s**（首轮 63.5s）= AI 层内部重试 × 锁等待叠加（**既有**行为，非本次引入）；
+- `dropped_record_count()` 暂未接入健康检查/端点（另立）；
+- **执行方式**：`Task-026` / `Task-027` 均由 **PM 代执行**（本机无具备写权限的执行 subagent）→ **不构成独立第三方验收**（如实标注）。
+
 ## v0.26.0 —— 2026-09-17
 
 ### `CR-006` 子项 B 交付并验收通过：`API-M002-007` 响应 +`last_attempt`（AI 失败原因可见，`Task-024` / `Task-025`）
